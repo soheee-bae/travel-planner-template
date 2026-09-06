@@ -15,6 +15,7 @@ import { SummaryStats } from "@/features/overview/components/summary-stats";
 import { usePlaces } from "@/features/places/hooks";
 import { useExpenses } from "@/features/expenses/hooks";
 import { useTrip } from "@/features/trips/hooks";
+import { JEJU_TRIP_ID } from "@/lib/jeju-trip";
 import { useState } from "react";
 import type { Accommodation, Transport } from "@/mocks/fixtures/overview";
 
@@ -31,7 +32,7 @@ export function OverviewTab({ tripId }: { tripId: string }) {
 
   return (
     <div className="mx-auto flex w-full flex-col gap-6 p-4">
-      {trip ? (
+      {trip && tripId === JEJU_TRIP_ID ? (
         <JejuHomeHero
           trip={trip}
           flight={transports?.find((item) => item.type === "비행기")}

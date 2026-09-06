@@ -20,10 +20,11 @@ test("결제자가 둘이면 더치페이 정산이 보인다", async ({ page })
   await page.getByRole("button", { name: "비용 추가" }).click();
   await page.getByLabel("항목명").fill("친구가 낸 택시");
   await page.getByLabel("금액").fill("2000");
-  await page.getByLabel("결제자").fill("친구");
+  await page.getByLabel("결제자").click();
+  await page.getByRole("option", { name: "남자친구" }).click();
   await page.getByRole("button", { name: "추가" }).click();
   await expect(page.getByRole("heading", { name: "더치페이 정산" })).toBeVisible();
-  await expect(page.getByText("친구", { exact: true })).toBeVisible();
+  await expect(page.getByText("남자친구", { exact: true })).toBeVisible();
 });
 
 test("비용을 추가하면 즉시 목록과 총액에 반영된다", async ({ page }) => {
