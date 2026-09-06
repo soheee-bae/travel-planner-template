@@ -34,6 +34,7 @@ export function NaverPlannerMap({
 
   useEffect(() => {
     let cancelled = false;
+    let resizeObserver: ResizeObserver | undefined;
     const el = containerRef.current;
     if (!el) return;
 
@@ -53,9 +54,8 @@ export function NaverPlannerMap({
             : undefined,
         });
         setReady(true);
-        const observer = new ResizeObserver(() => mapRef.current?.autoResize?.());
-        observer.observe(el);
-        (el as HTMLElement & { _ro?: ResizeObserver })._ro = observer;
+        resizeObserver = new ResizeObserver(() => mapRef.current?.autoResize?.());
+        resizeObserver.observe(el);
       })
       .catch(() => {
         if (!cancelled) onFatalError();
@@ -63,8 +63,7 @@ export function NaverPlannerMap({
 
     return () => {
       cancelled = true;
-      const observer = (el as HTMLElement & { _ro?: ResizeObserver })._ro;
-      observer?.disconnect();
+      resizeObserver?.disconnect();
       overlaysRef.current.forEach((o) => o.setMap(null));
       overlaysRef.current = [];
       mapRef.current?.destroy?.();
