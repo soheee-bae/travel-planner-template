@@ -1,3 +1,5 @@
+import { isMockData } from "@/lib/data-source";
+import * as supabaseApi from "@/features/wishlist/api.supabase";
 import type {
   CreateWishlistItemInput,
   UpdateWishlistItemInput,
@@ -13,11 +15,13 @@ async function parseJsonOrThrow<T>(res: Response): Promise<T> {
 }
 
 export async function fetchWishlist(tripId: string): Promise<WishlistItem[]> {
+  if (!isMockData()) return supabaseApi.fetchWishlist(tripId);
   const res = await fetch(`/api/trips/${tripId}/wishlist`);
   return parseJsonOrThrow<WishlistItem[]>(res);
 }
 
 export async function createWishlistItem(input: CreateWishlistItemInput): Promise<WishlistItem> {
+  if (!isMockData()) return supabaseApi.createWishlistItem(input);
   const res = await fetch(`/api/trips/${input.tripId}/wishlist`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -31,6 +35,7 @@ export async function updateWishlistItem(
   id: string,
   patch: UpdateWishlistItemInput,
 ): Promise<WishlistItem> {
+  if (!isMockData()) return supabaseApi.updateWishlistItem(tripId, id, patch);
   const res = await fetch(`/api/trips/${tripId}/wishlist/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -40,6 +45,7 @@ export async function updateWishlistItem(
 }
 
 export async function deleteWishlistItem(tripId: string, id: string): Promise<void> {
+  if (!isMockData()) return supabaseApi.deleteWishlistItem(tripId, id);
   const res = await fetch(`/api/trips/${tripId}/wishlist/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error(`삭제 실패 (${res.status})`);
 }

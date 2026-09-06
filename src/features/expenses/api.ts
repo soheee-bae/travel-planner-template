@@ -1,3 +1,5 @@
+import { isMockData } from "@/lib/data-source";
+import * as supabaseApi from "@/features/expenses/api.supabase";
 import type { CreateExpenseInput, Expense, UpdateExpenseInput } from "@/mocks/fixtures/expenses";
 
 async function parseJsonOrThrow<T>(res: Response): Promise<T> {
@@ -9,11 +11,13 @@ async function parseJsonOrThrow<T>(res: Response): Promise<T> {
 }
 
 export async function fetchExpenses(tripId: string): Promise<Expense[]> {
+  if (!isMockData()) return supabaseApi.fetchExpenses(tripId);
   const res = await fetch(`/api/trips/${tripId}/expenses`);
   return parseJsonOrThrow<Expense[]>(res);
 }
 
 export async function createExpense(input: CreateExpenseInput): Promise<Expense> {
+  if (!isMockData()) return supabaseApi.createExpense(input);
   const res = await fetch(`/api/trips/${input.tripId}/expenses`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -27,6 +31,7 @@ export async function updateExpense(
   id: string,
   patch: UpdateExpenseInput,
 ): Promise<Expense> {
+  if (!isMockData()) return supabaseApi.updateExpense(tripId, id, patch);
   const res = await fetch(`/api/trips/${tripId}/expenses/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -36,6 +41,7 @@ export async function updateExpense(
 }
 
 export async function deleteExpense(tripId: string, id: string): Promise<void> {
+  if (!isMockData()) return supabaseApi.deleteExpense(tripId, id);
   const res = await fetch(`/api/trips/${tripId}/expenses/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error(`삭제 실패 (${res.status})`);
 }

@@ -1,3 +1,5 @@
+import { isMockData } from "@/lib/data-source";
+import * as supabaseApi from "@/features/places/api.supabase";
 import type { CreatePlaceInput, Place, UpdatePlaceInput } from "@/mocks/fixtures/places";
 
 async function parseJsonOrThrow<T>(res: Response): Promise<T> {
@@ -9,11 +11,13 @@ async function parseJsonOrThrow<T>(res: Response): Promise<T> {
 }
 
 export async function fetchPlaces(tripId: string): Promise<Place[]> {
+  if (!isMockData()) return supabaseApi.fetchPlaces(tripId);
   const res = await fetch(`/api/trips/${tripId}/places`);
   return parseJsonOrThrow<Place[]>(res);
 }
 
 export async function createPlace(input: CreatePlaceInput): Promise<Place> {
+  if (!isMockData()) return supabaseApi.createPlace(input);
   const res = await fetch(`/api/trips/${input.tripId}/places`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -27,6 +31,7 @@ export async function updatePlace(
   id: string,
   patch: UpdatePlaceInput,
 ): Promise<Place> {
+  if (!isMockData()) return supabaseApi.updatePlace(tripId, id, patch);
   const res = await fetch(`/api/trips/${tripId}/places/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -36,6 +41,7 @@ export async function updatePlace(
 }
 
 export async function deletePlace(tripId: string, id: string): Promise<void> {
+  if (!isMockData()) return supabaseApi.deletePlace(tripId, id);
   const res = await fetch(`/api/trips/${tripId}/places/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error(`삭제 실패 (${res.status})`);
 }

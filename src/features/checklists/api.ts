@@ -1,3 +1,5 @@
+import { isMockData } from "@/lib/data-source";
+import * as supabaseApi from "@/features/checklists/api.supabase";
 import type {
   ChecklistCategory,
   ChecklistItem,
@@ -15,6 +17,7 @@ async function parseJsonOrThrow<T>(res: Response): Promise<T> {
 }
 
 export async function fetchChecklistCategories(tripId: string): Promise<ChecklistCategory[]> {
+  if (!isMockData()) return supabaseApi.fetchChecklistCategories(tripId);
   const res = await fetch(`/api/trips/${tripId}/checklist-categories`);
   return parseJsonOrThrow<ChecklistCategory[]>(res);
 }
@@ -22,6 +25,7 @@ export async function fetchChecklistCategories(tripId: string): Promise<Checklis
 export async function createChecklistCategory(
   input: CreateChecklistCategoryInput,
 ): Promise<ChecklistCategory> {
+  if (!isMockData()) return supabaseApi.createChecklistCategory(input);
   const res = await fetch(`/api/trips/${input.tripId}/checklist-categories`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -31,6 +35,7 @@ export async function createChecklistCategory(
 }
 
 export async function deleteChecklistCategory(tripId: string, id: string): Promise<void> {
+  if (!isMockData()) return supabaseApi.deleteChecklistCategory(tripId, id);
   const res = await fetch(`/api/trips/${tripId}/checklist-categories/${id}`, {
     method: "DELETE",
   });
@@ -38,11 +43,13 @@ export async function deleteChecklistCategory(tripId: string, id: string): Promi
 }
 
 export async function fetchChecklistItems(tripId: string): Promise<ChecklistItem[]> {
+  if (!isMockData()) return supabaseApi.fetchChecklistItems(tripId);
   const res = await fetch(`/api/trips/${tripId}/checklist-items`);
   return parseJsonOrThrow<ChecklistItem[]>(res);
 }
 
 export async function createChecklistItem(input: CreateChecklistItemInput): Promise<ChecklistItem> {
+  if (!isMockData()) return supabaseApi.createChecklistItem(input);
   const res = await fetch(`/api/trips/${input.tripId}/checklist-items`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -56,6 +63,7 @@ export async function updateChecklistItem(
   id: string,
   patch: UpdateChecklistItemInput,
 ): Promise<ChecklistItem> {
+  if (!isMockData()) return supabaseApi.updateChecklistItem(tripId, id, patch);
   const res = await fetch(`/api/trips/${tripId}/checklist-items/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -65,6 +73,7 @@ export async function updateChecklistItem(
 }
 
 export async function deleteChecklistItem(tripId: string, id: string): Promise<void> {
+  if (!isMockData()) return supabaseApi.deleteChecklistItem(tripId, id);
   const res = await fetch(`/api/trips/${tripId}/checklist-items/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error(`삭제 실패 (${res.status})`);
 }

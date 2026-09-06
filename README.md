@@ -8,10 +8,11 @@
 
 ## 현재 상태
 
-**Phase 1~10 코드 준비 완료. 이어서 P5-07(일괄 Day 배정), P7-05(장소→비용 자동
-집계, `isManual` 보호), P7-06(더치페이), P10-06(RPC)까지 넣었다.**
-Supabase 실 연결은 아직 없다 — 아래 [Phase 10 안내](#phase-10--supabase-연동-상태) 참고.
-화면은 여전히 React Query + MSW(mock)로 동작한다.
+**P10-07/08 코드 연결 완료.** `NEXT_PUBLIC_ENABLE_MSW=false`이면 CRUD가 Supabase로
+가고, 로그인(매직링크) + `proxy.ts` 가드가 동작한다. 테스트/e2e는 계속 MSW.
+
+**스키마는 아직 네 프로젝트에 push 하지 못했다.** CLI `link`에 DB 비밀번호가 필요하고
+이 환경에는 없다. 대시보드 SQL Editor에 마이그레이션을 적용해야 실데이터가 산다.
 
 - 여행 카드 리스트 → 여행 생성 폼 → 여행 디테일 6탭(개요/플래너/리스트/비용/준비/메모)
   전부 실제 콘텐츠로 채워져 있다.
@@ -51,21 +52,21 @@ Supabase 연결 없이도 모든 화면이 정상 동작한다. `.env.example`�
 - **클라이언트 코드**: 실제 프로젝트에 연결되어 있지 않다(환경변수 없으면 호출 시
   런타임 에러).
 - **`src/proxy.ts`**: 세션 갱신만 담당하고 인증 경계는 아니다.
-- 로그인 UI는 아직 없다.
+- 로그인: `/login` 매직링크, `/auth/callback`에서 세션 교환.
+- CRUD: `features/*/api.ts`가 mock/Supabase를 `isMockData()`로 분기한다.
 
-### 실제로 연결하려면
+### 프로젝트 연결 시 네가 해야 할 일
 
-1. Cursor Dashboard → Cloud Agents → Secrets에 `NEXT_PUBLIC_SUPABASE_URL`,
-   `NEXT_PUBLIC_SUPABASE_ANON_KEY`를 등록한다.
-2. `npx supabase link --project-ref <ref>` 후 `pnpm db:push`로 마이그레이션 적용.
-3. `pnpm db:types`로 `src/lib/supabase/database.generated.ts` 생성.
-4. `src/mocks/msw-provider.tsx`의 `NEXT_PUBLIC_ENABLE_MSW`를 `false`로 두면
-   프로덕션 빌드에서 MSW가 꺼지고, `features/*/api.ts`의 `fetch("/api/...")` 호출을
-   Supabase 클라이언트 호출로 바꾸면 된다 — 데이터 모델(zod 스키마)과 DB 스키마가
-   1:1로 대응하도록 이미 맞춰뒀다.
-
-**RLS**: `is_trip_owner(trip_id)` 단일 함수로 모든 테이블 정책이 소유자 확인을
-한다. Auth 로그인 UI는 아직 없다 — 이 부분도 실제 연결 시 추가 작업이 필요하다.
+1. Secrets의 `NEXT_PUBLIC_SUPABASE_URL`은 **`https://<ref>.supabase.co`만**.
+   `/rest/v1/`가 붙어 있으면 코드가 잘라내긴 하지만 Secrets도 고치는 게 맞다.
+2. `NEXT_PUBLIC_SUPABASE_ANON_KEY`는 JWT anon(`eyJ...`). publishable 키는 아직 검증 안 함.
+3. Authentication → URL Configuration
+   - Site URL: `http://localhost:3000`
+   - Redirect: `http://localhost:3000/auth/callback`
+4. 마이그레이션 적용 (둘 중 하나)
+   - `npx supabase link --project-ref rocruhhuxdvkweobsmzr` 후 `pnpm db:push`
+   - 또는 SQL Editor에 `supabase/migrations/*.sql`을 파일 순서대로 실행
+5. 메일 확인 후 `/login`에서 `amybae28@gmail.com`으로 링크 요청.
 
 ### 스코프 밖 (P10-06, P10-08~11)
 
