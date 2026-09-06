@@ -29,6 +29,7 @@ import {
   useWishlist,
 } from "@/features/wishlist/hooks";
 import { WishlistItemDialog } from "@/features/wishlist/components/wishlist-item-dialog";
+import { EndMascot } from "@/components/ui/soft-chip";
 import type { WishlistItem } from "@/mocks/fixtures/wishlist";
 
 function computeNewOrderIndex(items: WishlistItem[], newIndex: number): number {
@@ -58,7 +59,7 @@ function SortableWishlistCard({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        "flex flex-col gap-1 rounded-lg border border-border bg-card p-3",
+        "flex flex-col gap-1 rounded-3xl bg-card p-4 shadow-sm ring-1 ring-border",
         isDragging && "opacity-90 shadow-lg",
       )}
     >
@@ -132,8 +133,9 @@ export function MemoTab({ tripId, embedded }: { tripId: string; embedded?: boole
         <WishlistItemDialog
           onSubmit={(values) => createItem.mutate({ tripId, orderIndex: items.length, ...values })}
           trigger={
-            <Button size="sm" className="gap-1">
-              <Plus className="size-4" aria-hidden="true" />새 메모 추가
+            <Button className="h-10 rounded-full">
+              <Plus className="size-4" aria-hidden="true" />
+              새 메모 추가
             </Button>
           }
         />
@@ -159,6 +161,7 @@ export function MemoTab({ tripId, embedded }: { tripId: string; embedded?: boole
           </div>
         </SortableContext>
       </DndContext>
+      <EndMascot />
     </div>
   );
 }

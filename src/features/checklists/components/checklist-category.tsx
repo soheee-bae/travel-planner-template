@@ -44,6 +44,7 @@ export function ChecklistCategorySection({
       categoryId: category.id,
       title: newItemTitle.trim(),
       isChecked: false,
+      notes: "공통",
       orderIndex: items.length,
     });
     setNewItemTitle("");
@@ -119,10 +120,13 @@ export function ChecklistCategorySection({
               className={
                 item.isChecked
                   ? "flex-1 text-muted-foreground line-through"
-                  : "flex-1 text-foreground"
+                  : "flex-1 font-bold text-foreground"
               }
             >
               {item.title}
+            </span>
+            <span className="rounded-full bg-[#FFF1D6] px-2 py-0.5 text-[10px] font-bold">
+              {item.notes === "소희" ? "🌸 소희" : item.notes === "준형" ? "🎂 준형" : "🤝 공통"}
             </span>
             <IconAction
               action="delete"

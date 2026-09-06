@@ -20,6 +20,7 @@ export function PlacesTab({ trip }: { trip: Trip }) {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState<Place | null>(null);
+  const [query, setQuery] = useState("");
 
   const days = useMemo(
     () => getTripDays(trip.startDate, trip.endDate),
@@ -42,8 +43,10 @@ export function PlacesTab({ trip }: { trip: Trip }) {
 
   const filtered = useMemo(() => {
     if (!places) return [];
-    return filter === "전체" ? places : places.filter((p) => p.category === filter);
-  }, [places, filter]);
+    return (filter === "전체" ? places : places.filter((p) => p.category === filter)).filter((p) =>
+      query.trim() ? p.name.includes(query.trim()) : true,
+    );
+  }, [places, filter, query]);
 
   function toggleSelect(id: string) {
     setSelected((prev) => {
@@ -84,9 +87,19 @@ export function PlacesTab({ trip }: { trip: Trip }) {
   return (
     <div className="mx-auto flex w-full flex-col gap-3 p-4">
       <h2 className="font-heading text-xl font-bold">📍 장소 리스트</h2>
-      <div className="flex items-center justify-between">
-        <PlaceFilterBar active={filter} onChange={setFilter} counts={counts} />
+      <div className="flex gap-2">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="장소 검색"
+          aria-label="장소 검색"
+          className="h-11 flex-1 rounded-full bg-card px-4 text-sm ring-1 ring-border outline-none"
+        />
+        <Button size="sm" variant="outline" className="h-11 rounded-full" onClick={() => setSelectionMode(true)}>
+          선택
+        </Button>
       </div>
+      <PlaceFilterBar active={filter} onChange={setFilter} counts={counts} />
 
       <div className="flex items-center justify-between">
         {selectionMode ? (
@@ -112,16 +125,7 @@ export function PlacesTab({ trip }: { trip: Trip }) {
               </Button>
             </>
           ) : (
-            <>
-              <Button size="sm" variant="outline" onClick={() => setSelectionMode(true)}>
-                선택
-              </Button>
-              <AddPlaceDialog
-                tripId={tripId}
-                existingTags={places?.flatMap((p) => p.tags) ?? []}
-                existingPlaces={places ?? []}
-              />
-            </>
+            <span />
           )}
         </div>
       </div>
@@ -156,7 +160,7 @@ export function PlacesTab({ trip }: { trip: Trip }) {
         </p>
       )}
 
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+      <div className="flex flex-col gap-2">
         {filtered.map((place) => (
           <PlaceCard
             key={place.id}
@@ -173,6 +177,11 @@ export function PlacesTab({ trip }: { trip: Trip }) {
           />
         ))}
       </div>
+      <AddPlaceDialog
+        tripId={tripId}
+        existingTags={places?.flatMap((p) => p.tags) ?? []}
+        existingPlaces={places ?? []}
+      />
       {editing && (
         <AddPlaceDialog
           tripId={tripId}

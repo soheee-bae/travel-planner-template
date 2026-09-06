@@ -12,6 +12,7 @@ import {
 } from "@/features/checklists/hooks";
 import { ChecklistCategorySection } from "@/features/checklists/components/checklist-category";
 import { CHECKLIST_RECOMMENDED_CATEGORIES } from "@/mocks/fixtures/checklists";
+import { SoftChip, EndMascot } from "@/components/ui/soft-chip";
 
 export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boolean }) {
   const { data: categories, isLoading: loadingCategories } = useChecklistCategories(tripId);
@@ -19,6 +20,7 @@ export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boole
   const createCategory = useCreateChecklistCategory(tripId);
   const updateCategory = useUpdateChecklistCategory(tripId);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [assignee, setAssignee] = useState<"전체" | "공통" | "소희" | "준형">("전체");
 
   const { checkedCount, totalCount, pct } = useMemo(() => {
     const total = items?.length ?? 0;
@@ -48,6 +50,13 @@ export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boole
 
   return (
     <div className={embedded ? "flex flex-col gap-5" : "mx-auto flex w-full flex-col gap-5 p-4"}>
+      <div className="flex gap-2 overflow-x-auto">
+        {(["전체", "공통", "소희", "준형"] as const).map((name) => (
+          <SoftChip key={name} active={assignee === name} onClick={() => setAssignee(name)}>
+            {name}
+          </SoftChip>
+        ))}
+      </div>
       <div>
         <p className="text-sm font-medium text-foreground">
           ✅ 여행 준비 ({checkedCount}/{totalCount} 완료)
@@ -74,6 +83,11 @@ export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boole
             category={category}
             items={(items ?? [])
               .filter((i) => i.categoryId === category.id)
+              .filter((i) => {
+                if (assignee === "전체") return true;
+                const tag = i.notes ?? "공통";
+                return tag === assignee;
+              })
               .sort((a, b) => a.orderIndex - b.orderIndex)}
             onMoveUp={
               index > 0
@@ -144,6 +158,7 @@ export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boole
           ))}
         </div>
       </div>
+      <EndMascot />
     </div>
   );
 }

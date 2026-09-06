@@ -19,14 +19,14 @@ export function PlannerDayTabs({
   const days = getTripDays(startDate, endDate);
 
   return (
-    <div className="flex gap-2 overflow-x-auto border-b border-border px-3 py-2">
+    <div className="flex gap-2 overflow-x-auto px-4 py-2">
       {days.map((day) => (
         <button
           key={day.dayIndex}
           type="button"
           onClick={() => onChange(day.dayIndex)}
           className={cn(
-            "shrink-0 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap",
+            "shrink-0 rounded-full px-3 py-1.5 text-sm font-bold whitespace-nowrap",
             active === day.dayIndex
               ? "bg-primary text-primary-foreground"
               : "bg-muted text-muted-foreground",
@@ -39,7 +39,7 @@ export function PlannerDayTabs({
         type="button"
         onClick={() => onChange("all")}
         className={cn(
-          "shrink-0 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap",
+          "shrink-0 rounded-full px-3 py-1.5 text-sm font-bold whitespace-nowrap",
           active === "all"
             ? "bg-primary text-primary-foreground"
             : "bg-muted text-muted-foreground",

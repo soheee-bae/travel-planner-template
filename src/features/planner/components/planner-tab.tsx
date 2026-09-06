@@ -39,6 +39,7 @@ export function PlannerTab({ trip }: { trip: Trip }) {
 
   return (
     <div className="flex flex-col gap-2">
+      <h2 className="px-4 pt-4 font-heading text-xl font-bold">📅 여행 플래너</h2>
       <PlannerDayTabs
         startDate={trip.startDate}
         endDate={trip.endDate}
@@ -50,7 +51,8 @@ export function PlannerTab({ trip }: { trip: Trip }) {
       />
 
       <div className="flex flex-1 flex-col gap-2">
-        <div className="px-3">
+        <div className="mx-3 overflow-hidden rounded-3xl bg-[#D9F3F0] p-2">
+          <p className="pb-1 text-center text-xs font-bold">🗺️ 지도 보기</p>
           <PlannerMap
             places={places ?? []}
             activeDayIndex={activeDay}

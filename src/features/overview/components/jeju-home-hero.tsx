@@ -123,6 +123,8 @@ export function JejuHomeHero({
             </div>
           </div>
           <div className="relative border-t border-dashed border-border px-5 py-3">
+            <span className="absolute -left-2 top-0 size-4 -translate-y-1/2 rounded-full bg-background" />
+            <span className="absolute -right-2 top-0 size-4 -translate-y-1/2 rounded-full bg-background" />
             <div className="grid grid-cols-4 gap-2 text-center">
               <div>
                 <p className="text-[10px] text-muted-foreground">날짜</p>
@@ -171,7 +173,9 @@ export function JejuHomeHero({
               <p className="text-xs text-muted-foreground">{activeStay.memo ?? activeStay.address}</p>
             </div>
           </div>
-          <div className="border-t border-dashed border-border px-5 py-3">
+          <div className="relative border-t border-dashed border-border px-5 py-3">
+            <span className="absolute -left-2 top-0 size-4 -translate-y-1/2 rounded-full bg-background" />
+            <span className="absolute -right-2 top-0 size-4 -translate-y-1/2 rounded-full bg-background" />
             <div className="grid grid-cols-3 gap-2 text-center">
               <div>
                 <p className="text-[10px] text-muted-foreground">체크인</p>

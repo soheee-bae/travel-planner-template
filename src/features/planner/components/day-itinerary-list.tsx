@@ -40,37 +40,35 @@ function SortableItem({ place, index }: { place: Place; index: number }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: place.id,
   });
+  const hours = place.durationMin ? `${Math.floor(place.durationMin / 60)}h ${place.durationMin % 60}m` : null;
 
   return (
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        "flex items-center gap-2 rounded-lg border border-border bg-card p-3",
+        "flex items-center gap-2 rounded-3xl bg-card p-3 shadow-sm ring-1 ring-border",
         isDragging && "shadow-lg opacity-90",
       )}
     >
-      <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-        {index + 1}
-      </span>
-      <div className="flex-1">
-        <p className="text-sm font-medium text-foreground">
-          {CATEGORY_ICON[place.category]} {place.name}
-        </p>
-        {place.estimatedCost != null && (
-          <p className="text-xs text-money">
-            {place.costCurrency} {place.estimatedCost.toLocaleString()}
-          </p>
-        )}
-      </div>
       <button
         {...attributes}
         {...listeners}
         aria-label={`${place.name} 순서 변경 (드래그)`}
-        className="touch-callout-none flex size-8 shrink-0 items-center justify-center text-muted-foreground"
+        className="touch-callout-none flex flex-col items-center text-muted-foreground"
       >
+        <span className="text-[10px]">▲</span>
         <GripVertical className="size-4" />
+        <span className="text-[10px]">▼</span>
       </button>
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[#E8F4FF] text-lg">
+        {CATEGORY_ICON[place.category]}
+      </span>
+      <div className="min-w-0 flex-1">
+        {hours ? <p className="text-[11px] text-muted-foreground">{index + 1} · {hours}</p> : null}
+        <p className="truncate text-sm font-bold text-foreground">{place.name}</p>
+        {place.address ? <p className="truncate text-xs text-muted-foreground">{place.address}</p> : null}
+      </div>
     </div>
   );
 }
@@ -87,11 +85,15 @@ function TravelTimePill({
   const resolved = leg ?? estimateWalkLeg(from, to);
   if (resolved.source === "naver" && resolved.mode === "car") {
     return (
-      <p className="py-1 text-center text-xs text-muted-foreground">🚗 {resolved.durationMin}분</p>
+      <p className="mx-auto my-1 w-fit rounded-full bg-[#E2FBE9] px-2 py-0.5 text-xs font-bold text-[#2E7D57]">
+        🚗 {resolved.durationMin}분
+      </p>
     );
   }
   return (
-    <p className="py-1 text-center text-xs text-muted-foreground">🚶 ~{resolved.durationMin}분</p>
+      <p className="mx-auto my-1 w-fit rounded-full bg-[#E2FBE9] px-2 py-0.5 text-xs font-bold text-[#2E7D57]">
+        🚶 ~{resolved.durationMin}분
+      </p>
   );
 }
 

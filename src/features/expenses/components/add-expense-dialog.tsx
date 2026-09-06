@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SoftChip } from "@/components/ui/soft-chip";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -46,12 +47,14 @@ export function AddExpenseDialog({
   tripId,
   currency,
   initial,
+  hideTrigger,
   open: openProp,
   onOpenChange,
 }: {
   tripId: string;
   currency: string;
   initial?: Expense;
+  hideTrigger?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
@@ -114,7 +117,7 @@ export function AddExpenseDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {!initial && (
+      {!initial && !hideTrigger && (
         <DialogTrigger asChild>
           <Button size="sm" className="gap-1">
             <Plus className="size-4" aria-hidden="true" />
@@ -130,6 +133,20 @@ export function AddExpenseDialog({
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="exp-title">항목명</Label>
             <Input id="exp-title" placeholder="예: 우진해장국 점심" {...form.register("title")} />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>누가냈나요</Label>
+            <div className="flex flex-wrap gap-2">
+              {payers.map((p) => (
+                <SoftChip
+                  key={p}
+                  active={(form.watch("paidBy") || "나") === p}
+                  onClick={() => form.setValue("paidBy", p)}
+                >
+                  {p}
+                </SoftChip>
+              ))}
+            </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="exp-category">카테고리</Label>

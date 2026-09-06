@@ -10,10 +10,13 @@ const CATEGORY_ICON: Record<Place["category"], string> = {
   기타: "📍",
 };
 
-const PRIORITY_BADGE: Record<Place["priority"], string> = {
-  필수: "⭐ 필수",
-  가능하면: "",
-  시간되면: "",
+const CATEGORY_TINT: Record<Place["category"], string> = {
+  관광: "bg-[#E8F4FF]",
+  맛집: "bg-[#FFE8EE]",
+  카페: "bg-[#FFF1D6]",
+  쇼핑: "bg-[#F3E9FE]",
+  액티비티: "bg-[#E2FBE9]",
+  기타: "bg-muted",
 };
 
 export function PlaceCard({
@@ -35,7 +38,7 @@ export function PlaceCard({
 }) {
   return (
     <div
-      className="flex items-center gap-3 rounded-3xl border border-border bg-card p-4 shadow-sm"
+      className="flex items-center gap-3 rounded-3xl bg-card p-4 shadow-sm ring-1 ring-border"
       onClick={selectionMode ? onToggleSelect : undefined}
       onPointerDown={(e) => {
         if (selectionMode || !onLongPress) return;
@@ -50,40 +53,36 @@ export function PlaceCard({
           type="checkbox"
           checked={!!selected}
           onChange={onToggleSelect}
-          // 카드 전체가 이미 toggle을 처리한다 — 버블링으로 두 번 토글되는
-          // 것을 막는다 (클릭 한 번 = 토글 한 번).
           onClick={(e) => e.stopPropagation()}
           className="size-5 shrink-0"
           aria-label={`${place.name} 선택`}
         />
       )}
-      <div className="flex flex-1 flex-col gap-0.5">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-sm font-medium text-foreground">{place.name}</p>
-          <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-            {place.dayIndex ? `Day${place.dayIndex}` : "미정"}
+      <div
+        className={`flex size-12 shrink-0 items-center justify-center rounded-2xl text-xl ${CATEGORY_TINT[place.category]}`}
+      >
+        {CATEGORY_ICON[place.category]}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <p className="truncate text-sm font-bold text-foreground">{place.name}</p>
+          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
+            {place.category}
           </span>
         </div>
-        <div className="mt-1 flex flex-wrap gap-1">
-          <span className="rounded-md bg-accent px-2 py-0.5 text-[11px] text-accent-foreground">
-            {CATEGORY_ICON[place.category]} {place.category}
-          </span>
-          {place.tags.map((tag) => (
-            <span key={tag} className="rounded-md bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
-              {tag}
-            </span>
-          ))}
-        </div>
-        <p className="text-xs text-muted-foreground">
-          {PRIORITY_BADGE[place.priority] && `${PRIORITY_BADGE[place.priority]} · `}
-          {place.address && `📍 ${place.address} · `}
-          {place.estimatedCost != null &&
-            `${place.costCurrency ?? ""} ${place.estimatedCost.toLocaleString()}`}
-        </p>
-        {place.memo && <p className="text-xs text-muted-foreground">{place.memo}</p>}
+        {place.address ? <p className="mt-0.5 truncate text-xs text-muted-foreground">{place.address}</p> : null}
+        {place.tags.length > 0 ? (
+          <div className="mt-1 flex flex-wrap gap-1">
+            {place.tags.map((tag) => (
+              <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
       {!selectionMode && (
-        <div className="flex shrink-0 flex-col gap-1">
+        <div className="flex shrink-0 flex-col gap-0.5">
           {onEdit && <IconAction action="edit" label={`${place.name} 수정`} onClick={onEdit} />}
           {onDelete && <IconAction action="delete" label={`${place.name} 삭제`} onClick={onDelete} />}
         </div>

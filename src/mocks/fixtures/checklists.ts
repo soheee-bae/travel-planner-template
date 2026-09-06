@@ -94,6 +94,7 @@ function buildSeed(tripId: string) {
         title,
         // 일부는 체크된 상태로 시드해 프로그레스 바가 0%가 아니게 한다.
         isChecked: categoryIndex === 0 && itemIndex < 2,
+        notes: (["공통", "소희", "준형"] as const)[itemIndex % 3],
         orderIndex: itemIndex,
       });
     });

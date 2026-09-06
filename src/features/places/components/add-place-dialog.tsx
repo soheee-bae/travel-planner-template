@@ -170,9 +170,9 @@ export function AddPlaceDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       {!initial && (
         <DialogTrigger asChild>
-          <Button size="sm" className="gap-1">
+          <Button className="h-12 w-full rounded-3xl border-2 border-dashed border-primary/70 bg-primary/5 text-primary">
             <Plus className="size-4" aria-hidden="true" />
-            장소 추가
+            새 장소 추가
           </Button>
         </DialogTrigger>
       )}
