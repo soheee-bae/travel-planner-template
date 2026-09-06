@@ -7,6 +7,7 @@ import { PlaceCard } from "@/features/places/components/place-card";
 import { PlaceFilterBar, type PlaceFilter } from "@/features/places/components/place-filter-bar";
 import { AddPlaceDialog } from "@/features/places/components/add-place-dialog";
 import { getTripDays } from "@/lib/trip-days";
+import { nextOrderIndexForDay } from "@/lib/visit-order";
 import type { Trip } from "@/mocks/fixtures/trips";
 import type { Place } from "@/mocks/fixtures/places";
 
@@ -64,7 +65,15 @@ export function PlacesTab({ trip }: { trip: Trip }) {
   }
 
   function handleBulkAssign(dayIndex: number | null) {
-    selected.forEach((id) => updatePlace.mutate({ id, patch: { dayIndex } }));
+    if (dayIndex == null) {
+      selected.forEach((id) => updatePlace.mutate({ id, patch: { dayIndex: null } }));
+    } else {
+      let next = nextOrderIndexForDay(places ?? [], dayIndex);
+      selected.forEach((id) => {
+        updatePlace.mutate({ id, patch: { dayIndex, orderIndex: next } });
+        next += 1;
+      });
+    }
     exitSelectionMode();
   }
 

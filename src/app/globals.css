@@ -198,4 +198,9 @@
   .touch-callout-none {
     -webkit-touch-callout: none;
   }
+
+  /* 네이버 지도 타일이 Tailwind img max-width에 잘리지 않게 한다. */
+  .naver-map-root img {
+    max-width: none;
+  }
 }

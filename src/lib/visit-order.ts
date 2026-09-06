@@ -1,0 +1,29 @@
+import type { Place } from "@/mocks/fixtures/places";
+
+/** 그날 일정 순서(1부터). dayIndex가 아니라 리스트와 같은 방문 순번이다. */
+export function visitNumbers(places: Place[], day: number | "all"): Map<string, number> {
+  const numbers = new Map<string, number>();
+  const days =
+    day === "all"
+      ? [...new Set(places.map((p) => p.dayIndex).filter((d): d is number => d != null))].sort(
+          (a, b) => a - b,
+        )
+      : [day];
+
+  for (const d of days) {
+    const ordered = places
+      .filter((p) => p.dayIndex === d)
+      .slice()
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+    ordered.forEach((place, index) => {
+      numbers.set(place.id, index + 1);
+    });
+  }
+  return numbers;
+}
+
+export function nextOrderIndexForDay(places: Place[], dayIndex: number): number {
+  const onDay = places.filter((p) => p.dayIndex === dayIndex);
+  if (onDay.length === 0) return 0;
+  return Math.max(...onDay.map((p) => p.orderIndex)) + 1;
+}

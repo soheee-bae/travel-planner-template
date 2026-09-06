@@ -103,6 +103,35 @@ export function useUpdatePlace(tripId: string) {
   });
 }
 
+/** 하루 일정을 통째로 0..n-1로 다시 쓴다. 분수 인덱스가 0으로 겹치면 정렬이 안 된다. */
+export function useReorderDayPlaces(tripId: string) {
+  const queryClient = useQueryClient();
+  const key = placesKeys.all(tripId);
+
+  return useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      await Promise.all(
+        orderedIds.map((id, orderIndex) => updatePlace(tripId, id, { orderIndex })),
+      );
+    },
+    onMutate: async (orderedIds) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<Place[]>(key);
+      queryClient.setQueryData<Place[]>(key, (old) =>
+        (old ?? []).map((p) => {
+          const orderIndex = orderedIds.indexOf(p.id);
+          return orderIndex === -1 ? p : { ...p, orderIndex };
+        }),
+      );
+      return { previous };
+    },
+    onError: (_err, _ids, context) => {
+      if (context?.previous) queryClient.setQueryData(key, context.previous);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
+  });
+}
+
 export function useDeletePlace(tripId: string) {
   const queryClient = useQueryClient();
   const key = placesKeys.all(tripId);

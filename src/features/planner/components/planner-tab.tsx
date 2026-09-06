@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { usePlaces, useUpdatePlace } from "@/features/places/hooks";
-import { MockMap } from "@/features/planner/components/mock-map";
+import { PlannerMap } from "@/features/planner/components/planner-map";
+import { nextOrderIndexForDay } from "@/lib/visit-order";
 import {
   PlannerDayTabs,
   type PlannerDaySelection,
@@ -49,7 +50,7 @@ export function PlannerTab({ trip }: { trip: Trip }) {
       />
 
       <div className="px-3">
-        <MockMap
+        <PlannerMap
           places={places ?? []}
           activeDayIndex={activeDay}
           selectedPlaceId={selectedPlaceId}
@@ -68,7 +69,10 @@ export function PlannerTab({ trip }: { trip: Trip }) {
               onClick={() => {
                 updatePlace.mutate({
                   id: selectedPlace.id,
-                  patch: { dayIndex: day.dayIndex, orderIndex: 0 },
+                  patch: {
+                    dayIndex: day.dayIndex,
+                    orderIndex: nextOrderIndexForDay(places ?? [], day.dayIndex),
+                  },
                 });
                 setSelectedPlaceId(undefined);
               }}

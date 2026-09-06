@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { visitNumbers } from "@/lib/visit-order";
 import type { Place } from "@/mocks/fixtures/places";
 
 const CATEGORY_DOT: Record<Place["category"], string> = {
@@ -57,6 +58,7 @@ export function MockMap({
   onSelectPlace?: (placeId: string) => void;
 }) {
   const positioned = project(places);
+  const numbers = visitNumbers(places, activeDayIndex);
 
   return (
     <div
@@ -85,7 +87,7 @@ export function MockMap({
             )}
             style={{ left: `${xPct}%`, top: `${yPct}%` }}
           >
-            {place.dayIndex ?? "?"}
+            {numbers.get(place.id) ?? (isUnassigned ? "·" : "?")}
           </button>
         );
       })}

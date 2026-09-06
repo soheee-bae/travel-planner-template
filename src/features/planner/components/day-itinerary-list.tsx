@@ -4,7 +4,8 @@ import { useState } from "react";
 import {
   DndContext,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   closestCenter,
@@ -22,7 +23,7 @@ import { GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { estimateWalkLeg, legCacheKey } from "@/lib/travel-leg";
 import { useTravelLegs } from "@/features/planner/hooks";
-import { useUpdatePlace } from "@/features/places/hooks";
+import { useReorderDayPlaces } from "@/features/places/hooks";
 import type { Place } from "@/mocks/fixtures/places";
 import type { TravelLeg } from "@/lib/travel-leg";
 
@@ -74,19 +75,6 @@ function SortableItem({ place, index }: { place: Place; index: number }) {
   );
 }
 
-/**
- * DnD로 순서를 바꾸면 fractional index로 그 항목 하나만 갱신한다
- * (docs/09 D8) — 전체 리스트를 다시 쓰지 않는다.
- */
-function computeNewOrderIndex(items: Place[], newIndex: number): number {
-  const prev = items[newIndex - 1];
-  const next = items[newIndex + 1];
-  if (prev && next) return (prev.orderIndex + next.orderIndex) / 2;
-  if (prev) return prev.orderIndex + 1;
-  if (next) return next.orderIndex - 1;
-  return 0;
-}
-
 function TravelTimePill({
   from,
   to,
@@ -109,10 +97,11 @@ function TravelTimePill({
 
 export function DayItineraryList({ tripId, places }: { tripId: string; places: Place[] }) {
   const [items, setItems] = useState(places);
-  const updatePlace = useUpdatePlace(tripId);
+  const reorder = useReorderDayPlaces(tripId);
   const { data: legs } = useTravelLegs(items);
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
@@ -132,9 +121,7 @@ export function DayItineraryList({ tripId, places }: { tripId: string; places: P
     const newIndex = items.findIndex((p) => p.id === over.id);
     const reordered = arrayMove(items, oldIndex, newIndex);
     setItems(reordered);
-
-    const newOrderIndex = computeNewOrderIndex(reordered, newIndex);
-    updatePlace.mutate({ id: active.id as string, patch: { orderIndex: newOrderIndex } });
+    reorder.mutate(reordered.map((p) => p.id));
   }
 
   if (items.length === 0) {
@@ -149,6 +136,9 @@ export function DayItineraryList({ tripId, places }: { tripId: string; places: P
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={items.map((p) => p.id)} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col gap-2 py-2">
+          <p className="text-center text-[11px] text-muted-foreground">
+            오른쪽 줄을 눌러 위아래로 순서를 바꿔
+          </p>
           {items.map((place, index) => {
             const next = items[index + 1];
             const fromLat = place.lat;
