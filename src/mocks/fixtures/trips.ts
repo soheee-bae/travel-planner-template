@@ -32,13 +32,13 @@ export type UpdateTripInput = z.infer<typeof updateTripInputSchema>;
 export const initialTrips: Trip[] = [
   {
     id: "trip_jeju",
-    title: "제주도 여행",
+    title: "귤귤 커플의 제주 여행",
     destinationCountry: "KR",
     destinationCity: "제주도",
     startDate: "2026-09-15",
     endDate: "2026-09-17",
-    companions: "친구들과",
-    coverEmoji: "🇰🇷",
+    companions: "커플 · 생일 기념",
+    coverEmoji: "🍊",
     baseCurrency: "KRW",
   },
   {

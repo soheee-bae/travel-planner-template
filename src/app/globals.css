@@ -70,25 +70,25 @@
 
 :root {
   /* Notion 실측값 기반 (DESIGN.md §색상 토큰). 웜 미니멀리즘 — 쿨톤이 아니다. */
-  --background: oklch(0.9706 0.0017 67.8); /* #F6F5F4 페이지 배경 */
-  --foreground: oklch(0.2134 0 89.88); /* #191919 */
-  --card: oklch(1 0 0); /* #FFFFFF */
-  --card-foreground: oklch(0.2134 0 89.88);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2134 0 89.88);
-  --primary: oklch(0.5679 0.1824 254.27); /* #0075DE Notion 액션 블루 */
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.9523 0.0029 84.56); /* #F0EFED */
-  --secondary-foreground: oklch(0.2134 0 89.88);
-  --muted: oklch(0.9523 0.0029 84.56); /* #F0EFED */
-  --muted-foreground: oklch(0.4808 0.0082 67.63); /* #615D59 */
-  --accent: oklch(0.9577 0.0203 243.42); /* #E6F3FE accent-soft */
-  --accent-foreground: oklch(0.5679 0.1824 254.27);
-  --destructive: oklch(0.5617 0.1725 26.78); /* #C63F39 */
-  --border: oklch(0.896 0.0052 67.76); /* #DFDCD9 */
-  --input: oklch(0.896 0.0052 67.76);
-  --ring: oklch(0.5679 0.1824 254.27);
-  --radius: 0.75rem; /* rounded-lg = 12px, 카드 기본 라운딩 */
+  --background: oklch(0.985 0.012 85); /* cream #FFF8EE */
+  --foreground: oklch(0.28 0.03 50); /* #3D2B1F */
+  --card: oklch(0.995 0.006 90);
+  --card-foreground: oklch(0.28 0.03 50);
+  --popover: oklch(0.995 0.006 90);
+  --popover-foreground: oklch(0.28 0.03 50);
+  --primary: oklch(0.76 0.15 60); /* pastel tangerine */
+  --primary-foreground: oklch(0.28 0.03 50);
+  --secondary: oklch(0.93 0.04 230); /* baby blue */
+  --secondary-foreground: oklch(0.28 0.03 50);
+  --muted: oklch(0.96 0.02 80);
+  --muted-foreground: oklch(0.5 0.03 55);
+  --accent: oklch(0.92 0.05 10); /* soft pink */
+  --accent-foreground: oklch(0.4 0.08 15);
+  --destructive: oklch(0.62 0.16 20);
+  --border: oklch(0.88 0.03 70);
+  --input: oklch(0.88 0.03 70);
+  --ring: oklch(0.76 0.15 60);
+  --radius: 1.5rem;
 
   /* 카테고리 팔레트용 chart 슬롯 (5개). 나머지 2개(카페/숙소)는 별도 토큰 */
   --chart-1: oklch(0.6159 0.2154 300.94); /* #9D5AEF 관광 */
@@ -128,7 +128,7 @@
   --category-stay-fg: oklch(0.5198 0.0936 223.13); /* #0E7490 */
 
   /* 셸 바깥(아주 넓은 모니터)에 보이는 배경. */
-  --shell-outer: oklch(0.9082 0.0092 78.28); /* #E4E0DA */
+  --shell-outer: oklch(0.93 0.03 75);
 }
 
 /*

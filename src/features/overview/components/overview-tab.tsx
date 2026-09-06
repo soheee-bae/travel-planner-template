@@ -10,6 +10,7 @@ import { AccommodationCard } from "@/features/overview/components/accommodation-
 import { TransportCard } from "@/features/overview/components/transport-card";
 import { AddAccommodationDialog } from "@/features/overview/components/add-accommodation-dialog";
 import { AddTransportDialog } from "@/features/overview/components/add-transport-dialog";
+import { JejuHomeHero } from "@/features/overview/components/jeju-home-hero";
 import { SummaryStats } from "@/features/overview/components/summary-stats";
 import { usePlaces } from "@/features/places/hooks";
 import { useExpenses } from "@/features/expenses/hooks";
@@ -29,8 +30,13 @@ export function OverviewTab({ tripId }: { tripId: string }) {
   const [editingTr, setEditingTr] = useState<Transport | null>(null);
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:p-6">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div className="mx-auto flex w-full flex-col gap-6 p-4">
+      {trip ? (
+        <JejuHomeHero
+          trip={trip}
+          flight={transports?.find((item) => item.type === "비행기")}
+        />
+      ) : null}
       <section className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">🏨 숙소</h2>
@@ -72,7 +78,6 @@ export function OverviewTab({ tripId }: { tripId: string }) {
           />
         ))}
       </section>
-      </div>
 
       <SummaryStats
         accommodations={accommodations ?? []}

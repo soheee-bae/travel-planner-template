@@ -42,6 +42,17 @@ export type UpdateTransportInput = z.infer<typeof updateTransportInputSchema>;
 
 export const initialAccommodations: Accommodation[] = [
   {
+    id: "acc_jeju_1",
+    tripId: "trip_jeju",
+    name: "월정리 바다 스테이",
+    checkinDate: "2026-09-15",
+    checkoutDate: "2026-09-17",
+    checkinTime: "15:00",
+    checkoutTime: "11:00",
+    address: "제주시 구좌읍 월정리",
+    cost: 280000,
+  },
+  {
     id: "acc_nagoya_1",
     tripId: "trip_nagoya",
     name: "호텔 악텔 나고야 니시키",
@@ -55,6 +66,28 @@ export const initialAccommodations: Accommodation[] = [
 ];
 
 export const initialTransports: Transport[] = [
+  {
+    id: "tr_jeju_1",
+    tripId: "trip_jeju",
+    type: "비행기",
+    departureFrom: "김포",
+    arrivalTo: "제주",
+    departureAt: "2026-09-15T08:20",
+    arrivalAt: "2026-09-15T09:25",
+    bookingRef: "LJ301",
+    cost: 98000,
+  },
+  {
+    id: "tr_jeju_2",
+    tripId: "trip_jeju",
+    type: "비행기",
+    departureFrom: "제주",
+    arrivalTo: "김포",
+    departureAt: "2026-09-17T19:10",
+    arrivalAt: "2026-09-17T20:20",
+    bookingRef: "LJ308",
+    cost: 98000,
+  },
   {
     id: "tr_nagoya_1",
     tripId: "trip_nagoya",
