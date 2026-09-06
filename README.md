@@ -18,7 +18,7 @@
 
 ```bash
 pnpm install
-pnpm dev              # http://localhost:3000 — MSW mock 데이터로 바로 동작
+pnpm dev              # 0.0.0.0:3000 — IPv4로 열어야 Cursor 미리보기/로컬 브라우저가 붙는다
 pnpm test             # 단위 테스트 (Vitest)
 pnpm test:e2e         # e2e 테스트 (Playwright, 모바일 프로파일)
 pnpm build && pnpm start
