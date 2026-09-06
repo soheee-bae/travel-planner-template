@@ -1,9 +1,6 @@
 import type { PostgrestError } from "@supabase/supabase-js";
 
-export function throwIfError<T>(result: {
-  data: T;
-  error: PostgrestError | null;
-}): NonNullable<T> {
+export function throwIfError<T>(result: { data: T; error: PostgrestError | null }): NonNullable<T> {
   if (result.error) {
     throw new Error(result.error.message);
   }

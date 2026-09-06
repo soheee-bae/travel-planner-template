@@ -8,14 +8,11 @@
 
 ## 현재 상태
 
-**P10-07/08 코드 연결 완료.** `NEXT_PUBLIC_ENABLE_MSW=false`이면 CRUD가 Supabase로
-가고, 로그인(매직링크) + `proxy.ts` 가드가 동작한다. 테스트/e2e는 계속 MSW.
-
-**스키마는 아직 네 프로젝트에 push 하지 못했다.** CLI `link`에 DB 비밀번호가 필요하고
-이 환경에는 없다. 대시보드 SQL Editor에 마이그레이션을 적용해야 실데이터가 산다.
+**로그인은 현재 범위에서 뺀다.** 화면은 React Query + MSW로만 동작한다.
+Supabase 스키마/클라이언트 코드는 남겨 두었지만 Auth·강제 로그인은 없다.
 
 - 여행 카드 리스트 → 여행 생성 폼 → 여행 디테일 6탭(개요/플래너/리스트/비용/준비/메모)
-  전부 실제 콘텐츠로 채워져 있다.
+  전부 mock 시드로 채워져 있다.
 
 ## 시작하기
 
@@ -52,21 +49,11 @@ Supabase 연결 없이도 모든 화면이 정상 동작한다. `.env.example`�
 - **클라이언트 코드**: 실제 프로젝트에 연결되어 있지 않다(환경변수 없으면 호출 시
   런타임 에러).
 - **`src/proxy.ts`**: 세션 갱신만 담당하고 인증 경계는 아니다.
-- 로그인: `/login` 매직링크, `/auth/callback`에서 세션 교환.
-- CRUD: `features/*/api.ts`가 mock/Supabase를 `isMockData()`로 분기한다.
+- CRUD는 MSW. `isMockData()`가 기본 true라 로그인 없이 시드 여행이 보인다.
 
-### 프로젝트 연결 시 네가 해야 할 일
+### Auth를 다시 넣을 때
 
-1. Secrets의 `NEXT_PUBLIC_SUPABASE_URL`은 **`https://<ref>.supabase.co`만**.
-   `/rest/v1/`가 붙어 있으면 코드가 잘라내긴 하지만 Secrets도 고치는 게 맞다.
-2. `NEXT_PUBLIC_SUPABASE_ANON_KEY`는 JWT anon(`eyJ...`). publishable 키는 아직 검증 안 함.
-3. Authentication → URL Configuration
-   - Site URL: `http://localhost:3000`
-   - Redirect: `http://localhost:3000/auth/callback`
-4. 마이그레이션 적용 (둘 중 하나)
-   - `npx supabase link --project-ref rocruhhuxdvkweobsmzr` 후 `pnpm db:push`
-   - 또는 SQL Editor에 `supabase/migrations/*.sql`을 파일 순서대로 실행
-5. 메일 확인 후 `/login`에서 `amybae28@gmail.com`으로 링크 요청.
+마이그레이션 + 매직링크 + `ENABLE_MSW=false`. 지금은 하지 않는다.
 
 ### 스코프 밖 (P10-06, P10-08~11)
 

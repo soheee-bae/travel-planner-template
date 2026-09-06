@@ -6,7 +6,6 @@ import { Fab } from "@/components/ui/fab";
 import { useTrips } from "@/features/trips/hooks";
 import { TripCard } from "@/features/trips/components/trip-card";
 import { TripListSkeleton } from "@/features/trips/components/trip-list-skeleton";
-import { AccountBar } from "@/features/auth/account-bar";
 
 export function TripsLanding() {
   const { data: trips, isLoading, isError } = useTrips();
@@ -15,7 +14,6 @@ export function TripsLanding() {
     <>
       <main className="flex flex-1 flex-col gap-4 overflow-y-auto p-6 pb-24">
         <h1 className="font-serif text-2xl font-semibold text-foreground">✈️ 나의 여행</h1>
-        <AccountBar />
 
         {isLoading && <TripListSkeleton />}
 

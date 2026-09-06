@@ -1,12 +1,8 @@
 /**
- * mock(MSW) vs Supabase 전환.
- * - 단위 테스트는 항상 mock
- * - e2e는 NEXT_PUBLIC_ENABLE_MSW=true 로 빌드한다
- * - 로컬/프리뷰에서 실 DB를 쓰려면 ENABLE_MSW=false + URL/키
+ * 기본은 MSW mock. 로그인 없는 현재 범위에서는 실 DB를 쓰지 않는다.
+ * 나중에 Auth를 다시 켤 때만 NEXT_PUBLIC_ENABLE_MSW=false.
  */
 export function isMockData(): boolean {
   if (process.env.NODE_ENV === "test") return true;
-  if (process.env.NEXT_PUBLIC_ENABLE_MSW === "true") return true;
-  if (process.env.NEXT_PUBLIC_ENABLE_MSW === "false") return false;
-  return !process.env.NEXT_PUBLIC_SUPABASE_URL;
+  return process.env.NEXT_PUBLIC_ENABLE_MSW !== "false";
 }
