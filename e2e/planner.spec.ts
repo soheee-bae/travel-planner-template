@@ -13,7 +13,7 @@ test("Day2로 전환하면 순서대로 장소가 보이고 이동시간 pill이
   const list = page.locator("text=코메다 커피 사카에 니시키 3초메점");
   await expect(list).toBeVisible();
   await expect(page.getByText("지브리 파크")).toBeVisible();
-  await expect(page.getByText(/🚶 ~\d+분/)).toBeVisible();
+  await expect(page.getByText(/🚶 ~\d+분|🚗 \d+분/)).toBeVisible();
 });
 
 test("전체 보기에서 자동 배치 버튼이 보이고, 미배정 장소를 지도에서 눌러 Day에 배정할 수 있다", async ({

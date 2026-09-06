@@ -20,9 +20,11 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { estimateWalkMinutes } from "@/lib/geo";
+import { estimateWalkLeg, legCacheKey } from "@/lib/travel-leg";
+import { useTravelLegs } from "@/features/planner/hooks";
 import { useUpdatePlace } from "@/features/places/hooks";
 import type { Place } from "@/mocks/fixtures/places";
+import type { TravelLeg } from "@/lib/travel-leg";
 
 const CATEGORY_ICON: Record<Place["category"], string> = {
   관광: "🏛️",
@@ -85,9 +87,30 @@ function computeNewOrderIndex(items: Place[], newIndex: number): number {
   return 0;
 }
 
+function TravelTimePill({
+  from,
+  to,
+  leg,
+}: {
+  from: { lat: number; lng: number };
+  to: { lat: number; lng: number };
+  leg?: TravelLeg;
+}) {
+  const resolved = leg ?? estimateWalkLeg(from, to);
+  if (resolved.source === "naver" && resolved.mode === "car") {
+    return (
+      <p className="py-1 text-center text-xs text-muted-foreground">🚗 {resolved.durationMin}분</p>
+    );
+  }
+  return (
+    <p className="py-1 text-center text-xs text-muted-foreground">🚶 ~{resolved.durationMin}분</p>
+  );
+}
+
 export function DayItineraryList({ tripId, places }: { tripId: string; places: Place[] }) {
   const [items, setItems] = useState(places);
   const updatePlace = useUpdatePlace(tripId);
+  const { data: legs } = useTravelLegs(items);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -128,25 +151,22 @@ export function DayItineraryList({ tripId, places }: { tripId: string; places: P
         <div className="flex flex-col gap-2 py-2">
           {items.map((place, index) => {
             const next = items[index + 1];
-            const canEstimateWalk =
-              next &&
-              place.lat != null &&
-              place.lng != null &&
-              next.lat != null &&
-              next.lng != null;
+            const fromLat = place.lat;
+            const fromLng = place.lng;
+            const toLat = next?.lat;
+            const toLng = next?.lng;
+            const canShowLeg =
+              fromLat != null && fromLng != null && toLat != null && toLng != null;
 
             return (
               <div key={place.id}>
                 <SortableItem place={place} index={index} />
-                {canEstimateWalk && (
-                  <p className="py-1 text-center text-xs text-muted-foreground">
-                    🚶 ~
-                    {estimateWalkMinutes(
-                      { lat: place.lat!, lng: place.lng! },
-                      { lat: next.lat!, lng: next.lng! },
-                    )}
-                    분
-                  </p>
+                {canShowLeg && (
+                  <TravelTimePill
+                    from={{ lat: fromLat, lng: fromLng }}
+                    to={{ lat: toLat, lng: toLng }}
+                    leg={legs?.[legCacheKey({ lat: fromLat, lng: fromLng }, { lat: toLat, lng: toLng })]}
+                  />
                 )}
               </div>
             );
