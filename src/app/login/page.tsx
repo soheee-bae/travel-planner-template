@@ -7,7 +7,7 @@ export default async function LoginPage({
 }) {
   const { next } = await searchParams;
   return (
-    <div className="flex flex-1 flex-col justify-center gap-6 p-6">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 p-6">
       <div>
         <h1 className="font-serif text-2xl font-semibold">여행 플래너</h1>
         <p className="mt-2 text-sm text-muted-foreground">

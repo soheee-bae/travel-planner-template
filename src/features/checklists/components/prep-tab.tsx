@@ -47,7 +47,7 @@ export function PrepTab({ tripId }: { tripId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-5 p-4">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 p-4 md:p-6">
       <div>
         <p className="text-sm font-medium text-foreground">
           ✅ 여행 준비 ({checkedCount}/{totalCount} 완료)

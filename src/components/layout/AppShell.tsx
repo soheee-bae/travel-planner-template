@@ -3,16 +3,15 @@ import { cn } from "@/lib/utils";
 import { Splash } from "@/components/splash";
 
 /**
- * 모바일 퍼스트 앱 프레임. 모바일에서는 전체 폭을 그대로 쓰고,
- * 태블릿/데스크톱에서는 max-w-md(448px)로 중앙 정렬해 모바일 앱처럼 보이게 한다.
- * body의 --shell-outer 배경이 프레임 바깥(데스크톱 레터박스 영역)에 드러난다.
+ * 모바일은 전체 폭, 태블릿/데스크톱은 최대 1152px로 넓히고 가운데 둔다.
+ * 예전 max-w-md(448px) 잠금은 데스크톱에서 웹처럼 쓰기 어려워서 풀었다.
  */
 export function AppShell({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div
       className={cn(
-        "relative mx-auto flex min-h-dvh w-full max-w-md flex-col bg-background",
-        "md:border-x md:border-border",
+        "relative mx-auto flex min-h-dvh w-full max-w-6xl flex-col bg-background",
+        "md:min-h-dvh md:border-x md:border-border",
         className,
       )}
     >

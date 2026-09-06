@@ -131,7 +131,7 @@ export function MemoTab({ tripId }: { tripId: string }) {
   if (isError) return <p className="p-6 text-sm text-destructive">메모를 불러오지 못했습니다.</p>;
 
   return (
-    <div className="flex flex-col gap-3 p-4">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 p-4 md:p-6">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-foreground">📝 위시리스트 & 메모</p>
         <WishlistItemDialog

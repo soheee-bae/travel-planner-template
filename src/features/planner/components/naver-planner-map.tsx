@@ -53,6 +53,9 @@ export function NaverPlannerMap({
             : undefined,
         });
         setReady(true);
+        const observer = new ResizeObserver(() => mapRef.current?.autoResize?.());
+        observer.observe(el);
+        (el as HTMLElement & { _ro?: ResizeObserver })._ro = observer;
       })
       .catch(() => {
         if (!cancelled) onFatalError();
@@ -60,6 +63,8 @@ export function NaverPlannerMap({
 
     return () => {
       cancelled = true;
+      const observer = (el as HTMLElement & { _ro?: ResizeObserver })._ro;
+      observer?.disconnect();
       overlaysRef.current.forEach((o) => o.setMap(null));
       overlaysRef.current = [];
       mapRef.current?.destroy?.();
@@ -133,7 +138,9 @@ export function NaverPlannerMap({
   return (
     <div
       ref={containerRef}
-      className={cn("naver-map-root h-64 w-full overflow-hidden rounded-lg border border-border")}
+      className={cn(
+        "naver-map-root h-64 w-full overflow-hidden rounded-lg border border-border md:h-full md:min-h-[28rem]",
+      )}
       role="img"
       aria-label="일정 지도"
     />

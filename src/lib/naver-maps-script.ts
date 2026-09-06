@@ -10,6 +10,7 @@ export interface NaverMapsApi {
     opts: Record<string, unknown>,
   ) => {
     fitBounds: (bounds: unknown) => void;
+    autoResize?: () => void;
     destroy?: () => void;
   };
   LatLng: new (lat: number, lng: number) => unknown;

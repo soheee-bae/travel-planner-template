@@ -58,7 +58,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
     return <p className="p-6 text-sm text-destructive">비용 정보를 불러오지 못했습니다.</p>;
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4 md:p-6">
       <div className="rounded-lg border border-border bg-money-surface p-4">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-foreground">💰 총 비용</span>

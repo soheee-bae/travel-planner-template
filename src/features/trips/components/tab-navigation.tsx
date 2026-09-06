@@ -13,9 +13,7 @@ const TAB_LABELS: Record<TripTab, string> = {
 };
 
 /**
- * 448px 프레임에 6탭을 맞춘다. 라벨을 짧게 잡아도(§docs/09 D6) 여유가 크지
- * 않으므로 가로 스크롤을 안전장치로 둔다 — 탭이 늘거나 라벨이 길어져도
- * 레이아웃이 깨지지 않는다.
+ * 좁은 화면에서는 가로 스크롤, 넓은 화면에서는 탭이 나란히 늘어난다.
  */
 export function TabNavigation({
   active,

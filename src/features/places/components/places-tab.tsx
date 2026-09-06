@@ -82,7 +82,7 @@ export function PlacesTab({ trip }: { trip: Trip }) {
     return <p className="p-6 text-sm text-destructive">장소 목록을 불러오지 못했습니다.</p>;
 
   return (
-    <div className="flex flex-col gap-3 p-4">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 p-4 md:p-6">
       <div className="flex items-center justify-between">
         <PlaceFilterBar active={filter} onChange={setFilter} counts={counts} />
       </div>
@@ -155,7 +155,7 @@ export function PlacesTab({ trip }: { trip: Trip }) {
         </p>
       )}
 
-      <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
         {filtered.map((place) => (
           <PlaceCard
             key={place.id}

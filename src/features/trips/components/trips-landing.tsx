@@ -24,7 +24,7 @@ export function TripsLanding() {
 
   return (
     <>
-      <main className="flex flex-1 flex-col gap-4 overflow-y-auto p-6 pb-24">
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 overflow-y-auto p-6 pb-24 md:px-8">
         <h1 className="font-serif text-2xl font-semibold text-foreground">✈️ 나의 여행</h1>
 
         <div className="flex gap-2">
@@ -55,7 +55,13 @@ export function TripsLanding() {
           </div>
         )}
 
-        {!isLoading && !isError && visible.map((trip) => <TripCard key={trip.id} trip={trip} />)}
+        {!isLoading && !isError && (
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {visible.map((trip) => (
+              <TripCard key={trip.id} trip={trip} />
+            ))}
+          </div>
+        )}
       </main>
 
       <Fab href="/trips/new" label="여행 추가">

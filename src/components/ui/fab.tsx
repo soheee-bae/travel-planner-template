@@ -18,7 +18,7 @@ export function Fab({
       href={href}
       aria-label={label}
       className={cn(
-        "absolute right-4 bottom-18 z-30 flex size-14 items-center justify-center rounded-full",
+        "absolute right-4 bottom-18 z-30 flex size-14 items-center justify-center rounded-full md:right-8",
         "bg-primary text-primary-foreground shadow-lg",
         "active:scale-95 transition-transform",
         className,

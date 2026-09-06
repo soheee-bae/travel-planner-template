@@ -7,7 +7,7 @@ import { isMockData } from "@/lib/data-source";
 export default function MePage() {
   return (
     <>
-      <main className="flex flex-1 flex-col gap-4 overflow-y-auto p-6 pb-24">
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 overflow-y-auto p-6 pb-24">
         <h1 className="font-serif text-2xl font-semibold text-foreground">마이페이지</h1>
         {isMockData() ? (
           <p className="text-sm text-muted-foreground">

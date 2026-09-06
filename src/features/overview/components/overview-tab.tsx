@@ -29,7 +29,8 @@ export function OverviewTab({ tripId }: { tripId: string }) {
   const [editingTr, setEditingTr] = useState<Transport | null>(null);
 
   return (
-    <div className="flex flex-col gap-6 p-4">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:p-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <section className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">🏨 숙소</h2>
@@ -71,6 +72,7 @@ export function OverviewTab({ tripId }: { tripId: string }) {
           />
         ))}
       </section>
+      </div>
 
       <SummaryStats
         accommodations={accommodations ?? []}

@@ -13,11 +13,13 @@ import { PrepTab } from "@/features/checklists/components/prep-tab";
 import { MemoTab } from "@/features/wishlist/components/memo-tab";
 import { useMotionSafeDuration } from "@/hooks/use-motion-safe";
 import { TRIP_TABS } from "@/features/trips/hooks/use-trip-tab";
+import { useIsDesktop } from "@/hooks/use-media-query";
 
 export function TripDetailView({ tripId }: { tripId: string }) {
   const { data: trip, isLoading, isError } = useTrip(tripId);
   const { tab, setTab } = useTripTab();
   const crossfade = useMotionSafeDuration("enter");
+  const isDesktop = useIsDesktop();
 
   if (isLoading) {
     return <p className="p-6 text-sm text-muted-foreground">불러오는 중…</p>;
@@ -41,7 +43,7 @@ export function TripDetailView({ tripId }: { tripId: string }) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -16 }}
             transition={{ duration: crossfade }}
-            drag="x"
+            drag={isDesktop ? false : "x"}
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.12}
             onPointerDown={(e) => {
@@ -50,6 +52,7 @@ export function TripDetailView({ tripId }: { tripId: string }) {
               }
             }}
             onDragEnd={(_e, info) => {
+              if (isDesktop) return;
               const idx = TRIP_TABS.indexOf(tab);
               if (info.offset.x < -60 && idx < TRIP_TABS.length - 1) setTab(TRIP_TABS[idx + 1]);
               if (info.offset.x > 60 && idx > 0) setTab(TRIP_TABS[idx - 1]);

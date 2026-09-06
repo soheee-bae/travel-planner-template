@@ -3,18 +3,26 @@
 import { useState, type ReactNode } from "react";
 import { motion } from "motion/react";
 import { sheetSpring } from "@/lib/motion";
+import { useIsDesktop } from "@/hooks/use-media-query";
 
 const HEIGHT_PEEK = 220;
 const HEIGHT_FULL = 480;
 const DRAG_CLOSE_THRESHOLD = 60;
 
 /**
- * 지도 아래 붙는 일정 시트. 핸들 영역에서만 드래그를 받는다 — 본문 리스트는
- * 스크롤과 DnD 카드 드래그가 이미 그 영역의 제스처를 쓰고 있어서, 시트를
- * 여닫는 제스처와 겹치면 안 된다(docs/09 D5 제스처 중재 원칙).
+ * 모바일: 지도 아래 피크/풀 시트. 데스크톱: 높이 고정 없이 옆 컬럼 리스트.
  */
 export function DaySheet({ children }: { children: ReactNode }) {
+  const isDesktop = useIsDesktop();
   const [expanded, setExpanded] = useState(false);
+
+  if (isDesktop) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3">{children}</div>
+      </div>
+    );
+  }
 
   return (
     <motion.div

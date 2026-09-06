@@ -38,7 +38,7 @@ export function PlannerTab({ trip }: { trip: Trip }) {
     return <p className="p-6 text-sm text-destructive">장소 목록을 불러오지 못했습니다.</p>;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 md:min-h-[calc(100dvh-10rem)] md:px-2">
       <PlannerDayTabs
         startDate={trip.startDate}
         endDate={trip.endDate}
@@ -49,56 +49,62 @@ export function PlannerTab({ trip }: { trip: Trip }) {
         }}
       />
 
-      <div className="px-3">
-        <PlannerMap
-          places={places ?? []}
-          activeDayIndex={activeDay}
-          selectedPlaceId={selectedPlaceId}
-          onSelectPlace={setSelectedPlaceId}
-        />
+      <div className="flex flex-1 flex-col gap-2 md:min-h-0 md:flex-row md:items-stretch md:px-3">
+        <div className="px-3 md:flex md:min-h-[28rem] md:flex-1 md:px-0">
+          <div className="h-full w-full">
+            <PlannerMap
+              places={places ?? []}
+              activeDayIndex={activeDay}
+              selectedPlaceId={selectedPlaceId}
+              onSelectPlace={setSelectedPlaceId}
+            />
+          </div>
+        </div>
+
+        <div className="flex min-h-0 flex-1 flex-col gap-2 md:max-w-md">
+          {showAssignBar && (
+            <div className="mx-3 flex flex-wrap items-center gap-2 rounded-md border border-dashed border-border p-2 text-sm md:mx-0">
+              <span className="text-foreground">{selectedPlace.name}을</span>
+              {days.map((day) => (
+                <Button
+                  key={day.dayIndex}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    updatePlace.mutate({
+                      id: selectedPlace.id,
+                      patch: {
+                        dayIndex: day.dayIndex,
+                        orderIndex: nextOrderIndexForDay(places ?? [], day.dayIndex),
+                      },
+                    });
+                    setSelectedPlaceId(undefined);
+                  }}
+                >
+                  Day{day.dayIndex}에 추가
+                </Button>
+              ))}
+            </div>
+          )}
+
+          {activeDay === "all" && (
+            <div className="mx-3 md:mx-0">
+              <AutoPlaceDialog
+                tripId={trip.id}
+                startDate={trip.startDate}
+                endDate={trip.endDate}
+                places={places ?? []}
+              />
+            </div>
+          )}
+
+          {activeDay !== "all" && (
+            <DaySheet>
+              <DayItineraryList tripId={trip.id} places={dayItems} />
+            </DaySheet>
+          )}
+        </div>
       </div>
-
-      {showAssignBar && (
-        <div className="mx-3 flex flex-wrap items-center gap-2 rounded-md border border-dashed border-border p-2 text-sm">
-          <span className="text-foreground">{selectedPlace.name}을</span>
-          {days.map((day) => (
-            <Button
-              key={day.dayIndex}
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                updatePlace.mutate({
-                  id: selectedPlace.id,
-                  patch: {
-                    dayIndex: day.dayIndex,
-                    orderIndex: nextOrderIndexForDay(places ?? [], day.dayIndex),
-                  },
-                });
-                setSelectedPlaceId(undefined);
-              }}
-            >
-              Day{day.dayIndex}에 추가
-            </Button>
-          ))}
-        </div>
-      )}
-
-      {activeDay === "all" && (
-        <div className="mx-3">
-          <AutoPlaceDialog
-            tripId={trip.id}
-            startDate={trip.startDate}
-            endDate={trip.endDate}
-            places={places ?? []}
-          />
-        </div>
-      )}
-
-      {activeDay !== "all" && (
-        <DaySheet>
-          <DayItineraryList tripId={trip.id} places={dayItems} />
-        </DaySheet>
-      )}
     </div>
   );
 }
