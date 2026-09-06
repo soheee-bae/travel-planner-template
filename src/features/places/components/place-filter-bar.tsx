@@ -23,10 +23,10 @@ export function PlaceFilterBar({
           aria-selected={active === filter}
           onClick={() => onChange(filter)}
           className={cn(
-            "shrink-0 rounded-md border px-3 py-1.5 text-sm whitespace-nowrap",
+            "shrink-0 rounded-full px-3 py-1.5 text-sm font-semibold whitespace-nowrap",
             active === filter
-              ? "border-primary bg-accent text-accent-foreground"
-              : "border-border text-muted-foreground",
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground",
           )}
         >
           {filter} {counts[filter] > 0 && `(${counts[filter]})`}

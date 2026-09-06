@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 export const TRIP_TABS = ["overview", "planner", "places", "budget", "prep", "memo"] as const;
+export const NAV_SWIPE_TABS = ["overview", "planner", "places", "budget", "prep"] as const;
 export type TripTab = (typeof TRIP_TABS)[number];
 
 const DEFAULT_TAB: TripTab = "overview";

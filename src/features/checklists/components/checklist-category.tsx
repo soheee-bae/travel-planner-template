@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { IconAction } from "@/components/ui/icon-action";
 import { Input } from "@/components/ui/input";
 import {
   useCreateChecklistItem,
@@ -93,21 +94,18 @@ export function ChecklistCategorySection({
         >
           이름
         </Button>
-        <Button
-          size="sm"
-          variant="ghost"
+        <IconAction
+          action="delete"
+          label={`${category.name} 카테고리 삭제`}
           onClick={() => deleteCategory.mutate(category.id)}
-          aria-label={`${category.name} 카테고리 삭제`}
-        >
-          <Trash2 className="size-4" aria-hidden="true" />
-        </Button>
+        />
       </div>
 
       <div className="flex flex-col gap-1">
         {items.map((item) => (
           <label
             key={item.id}
-            className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted"
+            className="flex items-center gap-2 rounded-2xl bg-card px-3 py-2.5 text-sm shadow-sm ring-1 ring-border"
           >
             <input
               type="checkbox"
@@ -126,14 +124,11 @@ export function ChecklistCategorySection({
             >
               {item.title}
             </span>
-            <button
-              type="button"
+            <IconAction
+              action="delete"
+              label={`${item.title} 삭제`}
               onClick={() => deleteItem.mutate(item.id)}
-              aria-label={`${item.title} 삭제`}
-              className="text-muted-foreground"
-            >
-              ×
-            </button>
+            />
           </label>
         ))}
       </div>

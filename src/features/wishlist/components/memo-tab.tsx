@@ -20,6 +20,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { IconAction } from "@/components/ui/icon-action";
 import { cn } from "@/lib/utils";
 import {
   useCreateWishlistItem,
@@ -69,15 +70,9 @@ function SortableWishlistCard({
           <WishlistItemDialog
             initial={item}
             onSubmit={onEdit}
-            trigger={
-              <Button size="sm" variant="ghost">
-                편집
-              </Button>
-            }
+            trigger={<IconAction action="edit" label={`${item.title} 편집`} />}
           />
-          <Button size="sm" variant="ghost" onClick={onDelete} aria-label={`${item.title} 삭제`}>
-            삭제
-          </Button>
+          <IconAction action="delete" label={`${item.title} 삭제`} onClick={onDelete} />
           <button
             {...attributes}
             {...listeners}
@@ -95,7 +90,7 @@ function SortableWishlistCard({
   );
 }
 
-export function MemoTab({ tripId }: { tripId: string }) {
+export function MemoTab({ tripId, embedded }: { tripId: string; embedded?: boolean }) {
   const { data, isLoading, isError } = useWishlist(tripId);
   const [items, setItems] = useState<WishlistItem[]>([]);
   const createItem = useCreateWishlistItem(tripId);
@@ -131,7 +126,7 @@ export function MemoTab({ tripId }: { tripId: string }) {
   if (isError) return <p className="p-6 text-sm text-destructive">메모를 불러오지 못했습니다.</p>;
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 p-4 md:p-6">
+    <div className={embedded ? "flex flex-col gap-3" : "mx-auto flex w-full flex-col gap-3 p-4"}>
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-foreground">📝 위시리스트 & 메모</p>
         <WishlistItemDialog

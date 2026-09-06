@@ -60,15 +60,15 @@ export function AddExpenseDialog({
   const setOpen = onOpenChange ?? setUncontrolledOpen;
   const createExpense = useCreateExpense(tripId);
   const updateExpense = useUpdateExpense(tripId);
-  const [payers, setPayers] = useState<string[]>(["나", "남자친구"]);
+  const [payers, setPayers] = useState<string[]>(["나", "준형", "같이"]);
 
   useEffect(() => {
     void listTripMembers(tripId)
       .then((members) => {
         const emails = members.map((m) => (m.isOwner ? "나" : m.email.split("@")[0]));
-        setPayers(Array.from(new Set(["나", "남자친구", ...emails])));
+        setPayers(Array.from(new Set(["나", "준형", "같이", ...emails])));
       })
-      .catch(() => setPayers(["나", "남자친구"]));
+      .catch(() => setPayers(["나", "준형", "같이"]));
   }, [tripId]);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

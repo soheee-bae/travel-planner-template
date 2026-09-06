@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { IconAction } from "@/components/ui/icon-action";
 import type { Expense } from "@/mocks/fixtures/expenses";
 
 export function ExpenseCard({
@@ -11,7 +11,7 @@ export function ExpenseCard({
   onEdit: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-card p-3">
+    <div className="flex items-center justify-between gap-2 rounded-3xl border border-border bg-card p-4 shadow-sm">
       <div className="flex flex-col gap-0.5">
         <p className="text-sm font-medium text-foreground">{expense.title}</p>
         <p className="text-xs text-muted-foreground">
@@ -23,12 +23,8 @@ export function ExpenseCard({
         <span className="text-sm font-semibold text-money">
           {expense.currency} {expense.amount.toLocaleString()}
         </span>
-        <Button size="sm" variant="ghost" onClick={onEdit} aria-label={`${expense.title} 수정`}>
-          수정
-        </Button>
-        <Button size="sm" variant="ghost" onClick={onDelete} aria-label={`${expense.title} 삭제`}>
-          삭제
-        </Button>
+        <IconAction action="edit" label={`${expense.title} 수정`} onClick={onEdit} />
+        <IconAction action="delete" label={`${expense.title} 삭제`} onClick={onDelete} />
       </div>
     </div>
   );

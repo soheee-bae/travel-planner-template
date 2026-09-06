@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   useAccommodations,
   useDeleteAccommodation,
@@ -11,12 +12,12 @@ import { TransportCard } from "@/features/overview/components/transport-card";
 import { AddAccommodationDialog } from "@/features/overview/components/add-accommodation-dialog";
 import { AddTransportDialog } from "@/features/overview/components/add-transport-dialog";
 import { JejuHomeHero } from "@/features/overview/components/jeju-home-hero";
+import { TimeCapsuleDialog } from "@/features/overview/components/time-capsule-dialog";
 import { SummaryStats } from "@/features/overview/components/summary-stats";
 import { usePlaces } from "@/features/places/hooks";
 import { useExpenses } from "@/features/expenses/hooks";
 import { useTrip } from "@/features/trips/hooks";
 import { JEJU_TRIP_ID } from "@/lib/jeju-trip";
-import { useState } from "react";
 import type { Accommodation, Transport } from "@/mocks/fixtures/overview";
 
 export function OverviewTab({ tripId }: { tripId: string }) {
@@ -29,15 +30,29 @@ export function OverviewTab({ tripId }: { tripId: string }) {
   const { data: expenses } = useExpenses(tripId);
   const [editingAcc, setEditingAcc] = useState<Accommodation | null>(null);
   const [editingTr, setEditingTr] = useState<Transport | null>(null);
+  const [capsuleOpen, setCapsuleOpen] = useState(false);
+
+  if (trip && tripId === JEJU_TRIP_ID) {
+    const flights = (transports ?? []).filter((item) => item.type === "비행기");
+    const rental = (transports ?? []).find((item) => item.type === "렌터카");
+    return (
+      <div className="relative mx-auto flex w-full flex-col p-4">
+        <JejuHomeHero trip={trip} flights={flights} stays={accommodations ?? []} rental={rental} />
+        <button
+          type="button"
+          aria-label="타임캡슐 열기"
+          onClick={() => setCapsuleOpen(true)}
+          className="fixed right-5 bottom-20 z-20 flex size-14 items-center justify-center rounded-full bg-[#FFB4C8] text-2xl shadow-md"
+        >
+          🎁
+        </button>
+        <TimeCapsuleDialog open={capsuleOpen} onOpenChange={setCapsuleOpen} />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex w-full flex-col gap-6 p-4">
-      {trip && tripId === JEJU_TRIP_ID ? (
-        <JejuHomeHero
-          trip={trip}
-          flight={transports?.find((item) => item.type === "비행기")}
-        />
-      ) : null}
       <section className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">🏨 숙소</h2>

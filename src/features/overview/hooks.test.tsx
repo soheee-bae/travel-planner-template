@@ -60,7 +60,7 @@ describe("accommodations", () => {
     const { result } = renderHook(() => useAccommodations("trip_jeju"), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data?.every((a) => a.tripId === "trip_jeju")).toBe(true);
-    expect(result.current.data?.some((a) => a.name.includes("월정리"))).toBe(true);
+    expect(result.current.data?.some((a) => a.name.includes("파라다이스"))).toBe(true);
   });
 });
 

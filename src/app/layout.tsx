@@ -22,7 +22,7 @@ const jua = Jua({
 });
 
 export const metadata: Metadata = {
-  title: "귤귤 커플의 제주 여행",
+  title: "소희 & 준형의 제주",
   description: "남자친구 생일 기념 제주 여행 플래너",
 };
 

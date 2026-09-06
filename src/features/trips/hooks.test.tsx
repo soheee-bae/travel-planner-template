@@ -36,7 +36,7 @@ describe("useTrip", () => {
   it("id로 단건 조회한다", async () => {
     const { result } = renderHook(() => useTrip("trip_jeju"), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.title).toBe("귤귤 커플의 제주 여행");
+    expect(result.current.data?.title).toBe("소희 & 준형의 제주");
   });
 
   it("존재하지 않는 id는 에러가 된다", async () => {

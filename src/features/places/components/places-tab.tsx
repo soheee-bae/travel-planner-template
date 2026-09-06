@@ -82,7 +82,8 @@ export function PlacesTab({ trip }: { trip: Trip }) {
     return <p className="p-6 text-sm text-destructive">장소 목록을 불러오지 못했습니다.</p>;
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 p-4 md:p-6">
+    <div className="mx-auto flex w-full flex-col gap-3 p-4">
+      <h2 className="font-heading text-xl font-bold">📍 장소 리스트</h2>
       <div className="flex items-center justify-between">
         <PlaceFilterBar active={filter} onChange={setFilter} counts={counts} />
       </div>

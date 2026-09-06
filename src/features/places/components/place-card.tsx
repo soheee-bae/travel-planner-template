@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { IconAction } from "@/components/ui/icon-action";
 import type { Place } from "@/mocks/fixtures/places";
 
 const CATEGORY_ICON: Record<Place["category"], string> = {
@@ -35,7 +35,7 @@ export function PlaceCard({
 }) {
   return (
     <div
-      className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"
+      className="flex items-center gap-3 rounded-3xl border border-border bg-card p-4 shadow-sm"
       onClick={selectionMode ? onToggleSelect : undefined}
       onPointerDown={(e) => {
         if (selectionMode || !onLongPress) return;
@@ -84,16 +84,8 @@ export function PlaceCard({
       </div>
       {!selectionMode && (
         <div className="flex shrink-0 flex-col gap-1">
-          {onEdit && (
-            <Button size="sm" variant="ghost" onClick={onEdit} aria-label={`${place.name} 수정`}>
-              수정
-            </Button>
-          )}
-          {onDelete && (
-            <Button size="sm" variant="ghost" onClick={onDelete} aria-label={`${place.name} 삭제`}>
-              삭제
-            </Button>
-          )}
+          {onEdit && <IconAction action="edit" label={`${place.name} 수정`} onClick={onEdit} />}
+          {onDelete && <IconAction action="delete" label={`${place.name} 삭제`} onClick={onDelete} />}
         </div>
       )}
     </div>

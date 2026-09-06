@@ -13,7 +13,7 @@ import {
 import { ChecklistCategorySection } from "@/features/checklists/components/checklist-category";
 import { CHECKLIST_RECOMMENDED_CATEGORIES } from "@/mocks/fixtures/checklists";
 
-export function PrepTab({ tripId }: { tripId: string }) {
+export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boolean }) {
   const { data: categories, isLoading: loadingCategories } = useChecklistCategories(tripId);
   const { data: items, isLoading: loadingItems } = useChecklistItems(tripId);
   const createCategory = useCreateChecklistCategory(tripId);
@@ -47,7 +47,7 @@ export function PrepTab({ tripId }: { tripId: string }) {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 p-4 md:p-6">
+    <div className={embedded ? "flex flex-col gap-5" : "mx-auto flex w-full flex-col gap-5 p-4"}>
       <div>
         <p className="text-sm font-medium text-foreground">
           ✅ 여행 준비 ({checkedCount}/{totalCount} 완료)
