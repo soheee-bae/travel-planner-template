@@ -8,8 +8,8 @@
 
 ## 현재 상태
 
-**로그인은 현재 범위에서 뺀다.** 화면은 React Query + MSW로만 동작한다.
-Supabase 스키마/클라이언트 코드는 남겨 두었지만 Auth·강제 로그인은 없다.
+**로그인(매직링크)은 유지한다.** `ENABLE_MSW=false`이면 `/login` 후 Supabase CRUD.
+테스트/e2e는 MSW. 스키마는 아직 실 프로젝트에 없다 (`public.trips` 없음).
 
 - 여행 카드 리스트 → 여행 생성 폼 → 여행 디테일 6탭(개요/플래너/리스트/비용/준비/메모)
   전부 mock 시드로 채워져 있다.
@@ -48,12 +48,17 @@ Supabase 연결 없이도 모든 화면이 정상 동작한다. `.env.example`�
   더미 사용자를 `auth.users`에 직접 삽입한다.
 - **클라이언트 코드**: 실제 프로젝트에 연결되어 있지 않다(환경변수 없으면 호출 시
   런타임 에러).
-- **`src/proxy.ts`**: 세션 갱신만 담당하고 인증 경계는 아니다.
-- CRUD는 MSW. `isMockData()`가 기본 true라 로그인 없이 시드 여행이 보인다.
+- **`src/proxy.ts`**: mock이 꺼져 있으면 미로그인 → `/login`.
+- 로그인: `/login` 매직링크, `/auth/callback`에서 세션 교환.
+- CRUD: `isMockData()`가 false일 때 Supabase.
 
-### Auth를 다시 넣을 때
+### 네가 해야 할 일
 
-마이그레이션 + 매직링크 + `ENABLE_MSW=false`. 지금은 하지 않는다.
+1. Secrets URL은 `https://<ref>.supabase.co`만 (`/rest/v1/` 제거)
+2. 키는 JWT anon (`eyJ...`)
+3. Auth Site URL `http://localhost:3000`, Redirect `http://localhost:3000/auth/callback`
+4. `npx supabase link --project-ref rocruhhuxdvkweobsmzr` 후 `pnpm db:push`
+5. `/login`에서 메일 링크로 접속
 
 ### 스코프 밖 (P10-06, P10-08~11)
 
