@@ -5,6 +5,7 @@ import type {
   ChecklistItem,
   CreateChecklistCategoryInput,
   CreateChecklistItemInput,
+  UpdateChecklistCategoryInput,
   UpdateChecklistItemInput,
 } from "@/mocks/fixtures/checklists";
 
@@ -30,6 +31,20 @@ export async function createChecklistCategory(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
+  });
+  return parseJsonOrThrow<ChecklistCategory>(res);
+}
+
+export async function updateChecklistCategory(
+  tripId: string,
+  id: string,
+  patch: UpdateChecklistCategoryInput,
+): Promise<ChecklistCategory> {
+  if (!isMockData()) return supabaseApi.updateChecklistCategory(tripId, id, patch);
+  const res = await fetch(`/api/trips/${tripId}/checklist-categories/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
   });
   return parseJsonOrThrow<ChecklistCategory>(res);
 }

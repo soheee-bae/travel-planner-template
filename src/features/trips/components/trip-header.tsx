@@ -1,10 +1,18 @@
+"use client";
+
+import { useState } from "react";
 import { ViewTransition } from "react";
 import Link from "next/link";
-import { ChevronLeft, Pencil } from "lucide-react";
+import { ChevronLeft, Pencil, Users } from "lucide-react";
 import { formatDateRange, formatDuration } from "@/lib/date";
 import type { Trip } from "@/mocks/fixtures/trips";
+import { EditTripDialog } from "@/features/trips/components/edit-trip-dialog";
+import { ShareTripDialog } from "@/features/trips/components/share-trip-dialog";
 
 export function TripHeader({ trip }: { trip: Trip }) {
+  const [editOpen, setEditOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-card px-4 py-3">
       <div className="flex items-center justify-between">
@@ -20,18 +28,31 @@ export function TripHeader({ trip }: { trip: Trip }) {
             {trip.coverEmoji} {trip.title}
           </h1>
         </ViewTransition>
-        <button
-          type="button"
-          aria-label="여행 편집"
-          className="flex size-9 items-center justify-center rounded-full text-muted-foreground"
-        >
-          <Pencil className="size-4" />
-        </button>
+        <div className="flex items-center">
+          <button
+            type="button"
+            aria-label="여행 공유"
+            onClick={() => setShareOpen(true)}
+            className="flex size-9 items-center justify-center rounded-full text-muted-foreground"
+          >
+            <Users className="size-4" />
+          </button>
+          <button
+            type="button"
+            aria-label="여행 편집"
+            onClick={() => setEditOpen(true)}
+            className="flex size-9 items-center justify-center rounded-full text-muted-foreground"
+          >
+            <Pencil className="size-4" />
+          </button>
+        </div>
       </div>
       <p className="mt-1 text-center text-xs text-muted-foreground">
         {formatDuration(trip.startDate, trip.endDate)} ·{" "}
         {formatDateRange(trip.startDate, trip.endDate)} · {trip.companions}
       </p>
+      <EditTripDialog trip={trip} open={editOpen} onOpenChange={setEditOpen} />
+      <ShareTripDialog tripId={trip.id} open={shareOpen} onOpenChange={setShareOpen} />
     </header>
   );
 }

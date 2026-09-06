@@ -75,6 +75,26 @@ export async function createChecklistCategory(
   return toCategory(throwIfError(result));
 }
 
+export async function updateChecklistCategory(
+  tripId: string,
+  id: string,
+  patch: import("@/mocks/fixtures/checklists").UpdateChecklistCategoryInput,
+): Promise<ChecklistCategory> {
+  const supabase = createClient();
+  const row: Record<string, unknown> = {};
+  if (patch.name !== undefined) row.name = patch.name;
+  if (patch.icon !== undefined) row.icon = patch.icon;
+  if (patch.orderIndex !== undefined) row.order_index = patch.orderIndex;
+  const result = await supabase
+    .from("checklist_categories")
+    .update(row)
+    .eq("trip_id", tripId)
+    .eq("id", id)
+    .select("*")
+    .single();
+  return toCategory(throwIfError(result));
+}
+
 export async function deleteChecklistCategory(tripId: string, id: string): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase

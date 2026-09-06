@@ -1,6 +1,6 @@
 import { isMockData } from "@/lib/data-source";
 import * as supabaseApi from "@/features/trips/api.supabase";
-import type { CreateTripInput, Trip } from "@/mocks/fixtures/trips";
+import type { CreateTripInput, Trip, UpdateTripInput } from "@/mocks/fixtures/trips";
 
 async function parseJsonOrThrow<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -28,6 +28,16 @@ export async function createTrip(input: CreateTripInput): Promise<Trip> {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
+  });
+  return parseJsonOrThrow<Trip>(res);
+}
+
+export async function updateTrip(id: string, patch: UpdateTripInput): Promise<Trip> {
+  if (!isMockData()) return supabaseApi.updateTrip(id, patch);
+  const res = await fetch(`/api/trips/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
   });
   return parseJsonOrThrow<Trip>(res);
 }

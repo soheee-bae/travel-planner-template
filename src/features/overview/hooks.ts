@@ -4,6 +4,8 @@ import {
   createTransport,
   deleteAccommodation,
   deleteTransport,
+  updateAccommodation,
+  updateTransport,
 } from "@/features/overview/api";
 import {
   accommodationsQueryOptions,
@@ -16,6 +18,8 @@ import type {
   CreateAccommodationInput,
   CreateTransportInput,
   Transport,
+  UpdateAccommodationInput,
+  UpdateTransportInput,
 } from "@/mocks/fixtures/overview";
 
 export function useAccommodations(tripId: string) {
@@ -36,6 +40,27 @@ export function useCreateAccommodation(tripId: string) {
       return { previous };
     },
     onError: (_err, _input, context) => {
+      if (context?.previous) queryClient.setQueryData(key, context.previous);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
+  });
+}
+
+export function useUpdateAccommodation(tripId: string) {
+  const queryClient = useQueryClient();
+  const key = overviewKeys.accommodations(tripId);
+  return useMutation({
+    mutationFn: ({ id, patch }: { id: string; patch: UpdateAccommodationInput }) =>
+      updateAccommodation(tripId, id, patch),
+    onMutate: async ({ id, patch }) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<Accommodation[]>(key);
+      queryClient.setQueryData<Accommodation[]>(key, (old) =>
+        (old ?? []).map((a) => (a.id === id ? { ...a, ...patch } : a)),
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
       if (context?.previous) queryClient.setQueryData(key, context.previous);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
@@ -81,6 +106,27 @@ export function useCreateTransport(tripId: string) {
       return { previous };
     },
     onError: (_err, _input, context) => {
+      if (context?.previous) queryClient.setQueryData(key, context.previous);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
+  });
+}
+
+export function useUpdateTransport(tripId: string) {
+  const queryClient = useQueryClient();
+  const key = overviewKeys.transports(tripId);
+  return useMutation({
+    mutationFn: ({ id, patch }: { id: string; patch: UpdateTransportInput }) =>
+      updateTransport(tripId, id, patch),
+    onMutate: async ({ id, patch }) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<Transport[]>(key);
+      queryClient.setQueryData<Transport[]>(key, (old) =>
+        (old ?? []).map((t) => (t.id === id ? { ...t, ...patch } : t)),
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
       if (context?.previous) queryClient.setQueryData(key, context.previous);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: key }),

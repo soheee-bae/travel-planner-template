@@ -8,6 +8,7 @@ import {
   useCreateChecklistItem,
   useDeleteChecklistCategory,
   useDeleteChecklistItem,
+  useUpdateChecklistCategory,
   useUpdateChecklistItem,
 } from "@/features/checklists/hooks";
 import type { ChecklistCategory, ChecklistItem } from "@/mocks/fixtures/checklists";
@@ -16,13 +17,20 @@ export function ChecklistCategorySection({
   tripId,
   category,
   items,
+  onMoveUp,
+  onMoveDown,
 }: {
   tripId: string;
   category: ChecklistCategory;
   items: ChecklistItem[];
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
 }) {
   const [newItemTitle, setNewItemTitle] = useState("");
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState(category.name);
   const createItem = useCreateChecklistItem(tripId);
+  const updateCategory = useUpdateChecklistCategory(tripId);
   const updateItem = useUpdateChecklistItem(tripId);
   const deleteItem = useDeleteChecklistItem(tripId);
   const deleteCategory = useDeleteChecklistCategory(tripId);
@@ -43,9 +51,48 @@ export function ChecklistCategorySection({
   return (
     <section className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-foreground">
-          {category.icon} {category.name}
-        </h2>
+        {editingName ? (
+          <form
+            className="flex flex-1 items-center gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              updateCategory.mutate({ id: category.id, patch: { name: nameDraft.trim() } });
+              setEditingName(false);
+            }}
+          >
+            <Input
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              aria-label="카테고리 이름"
+              className="h-8"
+            />
+            <Button type="submit" size="sm">
+              저장
+            </Button>
+          </form>
+        ) : (
+          <h2 className="text-sm font-semibold text-foreground">
+            {category.icon} {category.name}
+          </h2>
+        )}
+        {onMoveUp && (
+          <Button size="sm" variant="ghost" onClick={onMoveUp} aria-label="위로">
+            ↑
+          </Button>
+        )}
+        {onMoveDown && (
+          <Button size="sm" variant="ghost" onClick={onMoveDown} aria-label="아래로">
+            ↓
+          </Button>
+        )}
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => setEditingName(true)}
+          aria-label={`${category.name} 이름 변경`}
+        >
+          이름
+        </Button>
         <Button
           size="sm"
           variant="ghost"

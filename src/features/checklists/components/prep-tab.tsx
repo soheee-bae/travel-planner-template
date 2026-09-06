@@ -8,6 +8,7 @@ import {
   useChecklistCategories,
   useChecklistItems,
   useCreateChecklistCategory,
+  useUpdateChecklistCategory,
 } from "@/features/checklists/hooks";
 import { ChecklistCategorySection } from "@/features/checklists/components/checklist-category";
 import { CHECKLIST_RECOMMENDED_CATEGORIES } from "@/mocks/fixtures/checklists";
@@ -16,6 +17,7 @@ export function PrepTab({ tripId }: { tripId: string }) {
   const { data: categories, isLoading: loadingCategories } = useChecklistCategories(tripId);
   const { data: items, isLoading: loadingItems } = useChecklistItems(tripId);
   const createCategory = useCreateChecklistCategory(tripId);
+  const updateCategory = useUpdateChecklistCategory(tripId);
   const [newCategoryName, setNewCategoryName] = useState("");
 
   const { checkedCount, totalCount, pct } = useMemo(() => {
@@ -63,8 +65,9 @@ export function PrepTab({ tripId }: { tripId: string }) {
       </div>
 
       {categories
-        ?.sort((a, b) => a.orderIndex - b.orderIndex)
-        .map((category) => (
+        ?.slice()
+        .sort((a, b) => a.orderIndex - b.orderIndex)
+        .map((category, index, list) => (
           <ChecklistCategorySection
             key={category.id}
             tripId={tripId}
@@ -72,6 +75,36 @@ export function PrepTab({ tripId }: { tripId: string }) {
             items={(items ?? [])
               .filter((i) => i.categoryId === category.id)
               .sort((a, b) => a.orderIndex - b.orderIndex)}
+            onMoveUp={
+              index > 0
+                ? () => {
+                    const prev = list[index - 1];
+                    updateCategory.mutate({
+                      id: category.id,
+                      patch: { orderIndex: prev.orderIndex },
+                    });
+                    updateCategory.mutate({
+                      id: prev.id,
+                      patch: { orderIndex: category.orderIndex },
+                    });
+                  }
+                : undefined
+            }
+            onMoveDown={
+              index < list.length - 1
+                ? () => {
+                    const next = list[index + 1];
+                    updateCategory.mutate({
+                      id: category.id,
+                      patch: { orderIndex: next.orderIndex },
+                    });
+                    updateCategory.mutate({
+                      id: next.id,
+                      patch: { orderIndex: category.orderIndex },
+                    });
+                  }
+                : undefined
+            }
           />
         ))}
 

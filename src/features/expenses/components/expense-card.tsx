@@ -1,7 +1,15 @@
 import { Button } from "@/components/ui/button";
 import type { Expense } from "@/mocks/fixtures/expenses";
 
-export function ExpenseCard({ expense, onDelete }: { expense: Expense; onDelete: () => void }) {
+export function ExpenseCard({
+  expense,
+  onDelete,
+  onEdit,
+}: {
+  expense: Expense;
+  onDelete: () => void;
+  onEdit: () => void;
+}) {
   return (
     <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-card p-3">
       <div className="flex flex-col gap-0.5">
@@ -15,6 +23,9 @@ export function ExpenseCard({ expense, onDelete }: { expense: Expense; onDelete:
         <span className="text-sm font-semibold text-money">
           {expense.currency} {expense.amount.toLocaleString()}
         </span>
+        <Button size="sm" variant="ghost" onClick={onEdit} aria-label={`${expense.title} 수정`}>
+          수정
+        </Button>
         <Button size="sm" variant="ghost" onClick={onDelete} aria-label={`${expense.title} 삭제`}>
           삭제
         </Button>

@@ -11,12 +11,20 @@ import { TransportCard } from "@/features/overview/components/transport-card";
 import { AddAccommodationDialog } from "@/features/overview/components/add-accommodation-dialog";
 import { AddTransportDialog } from "@/features/overview/components/add-transport-dialog";
 import { SummaryStats } from "@/features/overview/components/summary-stats";
+import { usePlaces } from "@/features/places/hooks";
+import { useExpenses } from "@/features/expenses/hooks";
+import { useState } from "react";
+import type { Accommodation, Transport } from "@/mocks/fixtures/overview";
 
 export function OverviewTab({ tripId }: { tripId: string }) {
   const { data: accommodations, isLoading: loadingAcc } = useAccommodations(tripId);
   const { data: transports, isLoading: loadingTr } = useTransports(tripId);
   const deleteAccommodation = useDeleteAccommodation(tripId);
   const deleteTransport = useDeleteTransport(tripId);
+  const { data: places } = usePlaces(tripId);
+  const { data: expenses } = useExpenses(tripId);
+  const [editingAcc, setEditingAcc] = useState<Accommodation | null>(null);
+  const [editingTr, setEditingTr] = useState<Transport | null>(null);
 
   return (
     <div className="flex flex-col gap-6 p-4">
@@ -33,6 +41,7 @@ export function OverviewTab({ tripId }: { tripId: string }) {
           <AccommodationCard
             key={acc.id}
             accommodation={acc}
+            onEdit={() => setEditingAcc(acc)}
             onDelete={() => deleteAccommodation.mutate(acc.id)}
           />
         ))}
@@ -51,12 +60,38 @@ export function OverviewTab({ tripId }: { tripId: string }) {
           <TransportCard
             key={tr.id}
             transport={tr}
+            onEdit={() => setEditingTr(tr)}
             onDelete={() => deleteTransport.mutate(tr.id)}
           />
         ))}
       </section>
 
-      <SummaryStats accommodations={accommodations ?? []} transports={transports ?? []} />
+      <SummaryStats
+        accommodations={accommodations ?? []}
+        transports={transports ?? []}
+        places={places ?? []}
+        expenses={expenses ?? []}
+      />
+      {editingAcc && (
+        <AddAccommodationDialog
+          tripId={tripId}
+          initial={editingAcc}
+          open
+          onOpenChange={(next) => {
+            if (!next) setEditingAcc(null);
+          }}
+        />
+      )}
+      {editingTr && (
+        <AddTransportDialog
+          tripId={tripId}
+          initial={editingTr}
+          open
+          onOpenChange={(next) => {
+            if (!next) setEditingTr(null);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createTrip, deleteTrip } from "@/features/trips/api";
+import { createTrip, deleteTrip, updateTrip } from "@/features/trips/api";
+import { seedChecklistPresets } from "@/lib/checklist-seed";
 import { tripQueryOptions, tripsKeys, tripsQueryOptions } from "@/features/trips/queries";
 import { randomUUID } from "@/lib/id";
-import type { CreateTripInput, Trip } from "@/mocks/fixtures/trips";
+import type { CreateTripInput, Trip, UpdateTripInput } from "@/mocks/fixtures/trips";
 
 export function useTrips() {
   return useQuery(tripsQueryOptions());
@@ -36,8 +37,46 @@ export function useCreateTrip() {
         queryClient.setQueryData(tripsKeys.all, context.previous);
       }
     },
+    onSuccess: async (trip) => {
+      try {
+        await seedChecklistPresets(trip.id);
+      } catch {
+        // 시드 실패해도 여행은 만들어진 상태
+      }
+    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: tripsKeys.all });
+    },
+  });
+}
+
+export function useUpdateTrip(tripId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (patch: UpdateTripInput) => updateTrip(tripId, patch),
+    onMutate: async (patch) => {
+      await queryClient.cancelQueries({ queryKey: tripsKeys.all });
+      await queryClient.cancelQueries({ queryKey: tripsKeys.detail(tripId) });
+      const previousList = queryClient.getQueryData<Trip[]>(tripsKeys.all);
+      const previousDetail = queryClient.getQueryData<Trip>(tripsKeys.detail(tripId));
+      queryClient.setQueryData<Trip[]>(tripsKeys.all, (old) =>
+        (old ?? []).map((t) => (t.id === tripId ? { ...t, ...patch } : t)),
+      );
+      if (previousDetail) {
+        queryClient.setQueryData<Trip>(tripsKeys.detail(tripId), { ...previousDetail, ...patch });
+      }
+      return { previousList, previousDetail };
+    },
+    onError: (_err, _patch, context) => {
+      if (context?.previousList) queryClient.setQueryData(tripsKeys.all, context.previousList);
+      if (context?.previousDetail) {
+        queryClient.setQueryData(tripsKeys.detail(tripId), context.previousDetail);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: tripsKeys.all });
+      queryClient.invalidateQueries({ queryKey: tripsKeys.detail(tripId) });
     },
   });
 }

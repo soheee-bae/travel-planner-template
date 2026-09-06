@@ -16,6 +16,10 @@ export const accommodationSchema = z.object({
 export type Accommodation = z.infer<typeof accommodationSchema>;
 export const createAccommodationInputSchema = accommodationSchema.omit({ id: true });
 export type CreateAccommodationInput = z.infer<typeof createAccommodationInputSchema>;
+export const updateAccommodationInputSchema = accommodationSchema
+  .omit({ id: true, tripId: true })
+  .partial();
+export type UpdateAccommodationInput = z.infer<typeof updateAccommodationInputSchema>;
 
 export const TRANSPORT_TYPES = ["비행기", "KTX", "버스", "렌터카", "페리"] as const;
 export const transportSchema = z.object({
@@ -33,6 +37,8 @@ export const transportSchema = z.object({
 export type Transport = z.infer<typeof transportSchema>;
 export const createTransportInputSchema = transportSchema.omit({ id: true });
 export type CreateTransportInput = z.infer<typeof createTransportInputSchema>;
+export const updateTransportInputSchema = transportSchema.omit({ id: true, tripId: true }).partial();
+export type UpdateTransportInput = z.infer<typeof updateTransportInputSchema>;
 
 export const initialAccommodations: Accommodation[] = [
   {

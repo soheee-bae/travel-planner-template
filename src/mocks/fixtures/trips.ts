@@ -17,6 +17,9 @@ export type Trip = z.infer<typeof tripSchema>;
 export const createTripInputSchema = tripSchema.omit({ id: true });
 export type CreateTripInput = z.infer<typeof createTripInputSchema>;
 
+export const updateTripInputSchema = createTripInputSchema.partial();
+export type UpdateTripInput = z.infer<typeof updateTripInputSchema>;
+
 export const initialTrips: Trip[] = [
   {
     id: "trip_jeju",

@@ -5,9 +5,11 @@ import type { Accommodation } from "@/mocks/fixtures/overview";
 export function AccommodationCard({
   accommodation,
   onDelete,
+  onEdit,
 }: {
   accommodation: Accommodation;
   onDelete: () => void;
+  onEdit: () => void;
 }) {
   return (
     <div className="rounded-lg border border-border bg-card p-3">
@@ -23,14 +25,19 @@ export function AccommodationCard({
             <p className="text-xs text-money">₩{accommodation.cost.toLocaleString()}</p>
           )}
         </div>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onDelete}
-          aria-label={`${accommodation.name} 삭제`}
-        >
-          삭제
-        </Button>
+        <div className="flex shrink-0 gap-1">
+          <Button size="sm" variant="ghost" onClick={onEdit} aria-label={`${accommodation.name} 수정`}>
+            수정
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onDelete}
+            aria-label={`${accommodation.name} 삭제`}
+          >
+            삭제
+          </Button>
+        </div>
       </div>
     </div>
   );

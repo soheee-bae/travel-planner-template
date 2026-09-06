@@ -12,6 +12,7 @@ import { BudgetTab } from "@/features/expenses/components/budget-tab";
 import { PrepTab } from "@/features/checklists/components/prep-tab";
 import { MemoTab } from "@/features/wishlist/components/memo-tab";
 import { useMotionSafeDuration } from "@/hooks/use-motion-safe";
+import { TRIP_TABS } from "@/features/trips/hooks/use-trip-tab";
 
 export function TripDetailView({ tripId }: { tripId: string }) {
   const { data: trip, isLoading, isError } = useTrip(tripId);
@@ -36,9 +37,23 @@ export function TripDetailView({ tripId }: { tripId: string }) {
             id={`trip-tabpanel-${tab}`}
             role="tabpanel"
             aria-labelledby={`trip-tab-${tab}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
             transition={{ duration: crossfade }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.12}
+            onPointerDown={(e) => {
+              if (e.clientX - e.currentTarget.getBoundingClientRect().left < 24) {
+                e.stopPropagation();
+              }
+            }}
+            onDragEnd={(_e, info) => {
+              const idx = TRIP_TABS.indexOf(tab);
+              if (info.offset.x < -60 && idx < TRIP_TABS.length - 1) setTab(TRIP_TABS[idx + 1]);
+              if (info.offset.x > 60 && idx > 0) setTab(TRIP_TABS[idx - 1]);
+            }}
           >
             {tab === "overview" && <OverviewTab tripId={tripId} />}
             {tab === "places" && <PlacesTab trip={trip} />}

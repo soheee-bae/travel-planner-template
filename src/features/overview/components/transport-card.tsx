@@ -16,9 +16,11 @@ function formatTime(iso: string) {
 export function TransportCard({
   transport,
   onDelete,
+  onEdit,
 }: {
   transport: Transport;
   onDelete: () => void;
+  onEdit: () => void;
 }) {
   return (
     <div className="rounded-lg border border-border bg-card p-3">
@@ -37,14 +39,24 @@ export function TransportCard({
             <p className="text-xs text-money">₩{transport.cost.toLocaleString()}</p>
           )}
         </div>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onDelete}
-          aria-label={`${transport.departureFrom}→${transport.arrivalTo} 삭제`}
-        >
-          삭제
-        </Button>
+        <div className="flex shrink-0 gap-1">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onEdit}
+            aria-label={`${transport.departureFrom}→${transport.arrivalTo} 수정`}
+          >
+            수정
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onDelete}
+            aria-label={`${transport.departureFrom}→${transport.arrivalTo} 삭제`}
+          >
+            삭제
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -5,6 +5,8 @@ import type {
   CreateAccommodationInput,
   CreateTransportInput,
   Transport,
+  UpdateAccommodationInput,
+  UpdateTransportInput,
 } from "@/mocks/fixtures/overview";
 
 async function parseJsonOrThrow<T>(res: Response): Promise<T> {
@@ -31,6 +33,20 @@ export async function createAccommodation(input: CreateAccommodationInput): Prom
   return parseJsonOrThrow<Accommodation>(res);
 }
 
+export async function updateAccommodation(
+  tripId: string,
+  id: string,
+  patch: UpdateAccommodationInput,
+): Promise<Accommodation> {
+  if (!isMockData()) return supabaseApi.updateAccommodation(tripId, id, patch);
+  const res = await fetch(`/api/trips/${tripId}/accommodations/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  return parseJsonOrThrow<Accommodation>(res);
+}
+
 export async function deleteAccommodation(tripId: string, id: string): Promise<void> {
   if (!isMockData()) return supabaseApi.deleteAccommodation(tripId, id);
   const res = await fetch(`/api/trips/${tripId}/accommodations/${id}`, { method: "DELETE" });
@@ -49,6 +65,20 @@ export async function createTransport(input: CreateTransportInput): Promise<Tran
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
+  });
+  return parseJsonOrThrow<Transport>(res);
+}
+
+export async function updateTransport(
+  tripId: string,
+  id: string,
+  patch: UpdateTransportInput,
+): Promise<Transport> {
+  if (!isMockData()) return supabaseApi.updateTransport(tripId, id, patch);
+  const res = await fetch(`/api/trips/${tripId}/transports/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
   });
   return parseJsonOrThrow<Transport>(res);
 }

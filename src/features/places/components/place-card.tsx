@@ -22,17 +22,28 @@ export function PlaceCard({
   selectionMode,
   onToggleSelect,
   onDelete,
+  onEdit,
+  onLongPress,
 }: {
   place: Place;
   selected?: boolean;
   selectionMode?: boolean;
   onToggleSelect?: () => void;
   onDelete?: () => void;
+  onEdit?: () => void;
+  onLongPress?: () => void;
 }) {
   return (
     <div
       className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"
       onClick={selectionMode ? onToggleSelect : undefined}
+      onPointerDown={(e) => {
+        if (selectionMode || !onLongPress) return;
+        const timer = window.setTimeout(() => onLongPress(), 400);
+        const clear = () => window.clearTimeout(timer);
+        e.currentTarget.addEventListener("pointerup", clear, { once: true });
+        e.currentTarget.addEventListener("pointerleave", clear, { once: true });
+      }}
     >
       {selectionMode && (
         <input
@@ -63,10 +74,19 @@ export function PlaceCard({
         </p>
         {place.memo && <p className="text-xs text-muted-foreground">{place.memo}</p>}
       </div>
-      {!selectionMode && onDelete && (
-        <Button size="sm" variant="ghost" onClick={onDelete} aria-label={`${place.name} 삭제`}>
-          삭제
-        </Button>
+      {!selectionMode && (
+        <div className="flex shrink-0 flex-col gap-1">
+          {onEdit && (
+            <Button size="sm" variant="ghost" onClick={onEdit} aria-label={`${place.name} 수정`}>
+              수정
+            </Button>
+          )}
+          {onDelete && (
+            <Button size="sm" variant="ghost" onClick={onDelete} aria-label={`${place.name} 삭제`}>
+              삭제
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );

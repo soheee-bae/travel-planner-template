@@ -4,6 +4,7 @@ import {
   createChecklistItem,
   deleteChecklistCategory,
   deleteChecklistItem,
+  updateChecklistCategory,
   updateChecklistItem,
 } from "@/features/checklists/api";
 import {
@@ -17,6 +18,7 @@ import type {
   ChecklistItem,
   CreateChecklistCategoryInput,
   CreateChecklistItemInput,
+  UpdateChecklistCategoryInput,
   UpdateChecklistItemInput,
 } from "@/mocks/fixtures/checklists";
 
@@ -42,6 +44,27 @@ export function useCreateChecklistCategory(tripId: string) {
       return { previous };
     },
     onError: (_err, _input, context) => {
+      if (context?.previous) queryClient.setQueryData(key, context.previous);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
+  });
+}
+
+export function useUpdateChecklistCategory(tripId: string) {
+  const queryClient = useQueryClient();
+  const key = checklistKeys.categories(tripId);
+  return useMutation({
+    mutationFn: ({ id, patch }: { id: string; patch: UpdateChecklistCategoryInput }) =>
+      updateChecklistCategory(tripId, id, patch),
+    onMutate: async ({ id, patch }) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<ChecklistCategory[]>(key);
+      queryClient.setQueryData<ChecklistCategory[]>(key, (old) =>
+        (old ?? []).map((c) => (c.id === id ? { ...c, ...patch } : c)),
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
       if (context?.previous) queryClient.setQueryData(key, context.previous);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: key }),

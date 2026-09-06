@@ -10,6 +10,10 @@ export const checklistCategorySchema = z.object({
 export type ChecklistCategory = z.infer<typeof checklistCategorySchema>;
 export const createChecklistCategoryInputSchema = checklistCategorySchema.omit({ id: true });
 export type CreateChecklistCategoryInput = z.infer<typeof createChecklistCategoryInputSchema>;
+export const updateChecklistCategoryInputSchema = checklistCategorySchema
+  .omit({ id: true, tripId: true })
+  .partial();
+export type UpdateChecklistCategoryInput = z.infer<typeof updateChecklistCategoryInputSchema>;
 
 export const checklistItemSchema = z.object({
   id: z.string(),

@@ -8,6 +8,7 @@ import { PlaceFilterBar, type PlaceFilter } from "@/features/places/components/p
 import { AddPlaceDialog } from "@/features/places/components/add-place-dialog";
 import { getTripDays } from "@/lib/trip-days";
 import type { Trip } from "@/mocks/fixtures/trips";
+import type { Place } from "@/mocks/fixtures/places";
 
 export function PlacesTab({ trip }: { trip: Trip }) {
   const tripId = trip.id;
@@ -17,6 +18,7 @@ export function PlacesTab({ trip }: { trip: Trip }) {
   const [filter, setFilter] = useState<PlaceFilter>("전체");
   const [selectionMode, setSelectionMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [editing, setEditing] = useState<Place | null>(null);
 
   const days = useMemo(
     () => getTripDays(trip.startDate, trip.endDate),
@@ -104,7 +106,7 @@ export function PlacesTab({ trip }: { trip: Trip }) {
               <Button size="sm" variant="outline" onClick={() => setSelectionMode(true)}>
                 선택
               </Button>
-              <AddPlaceDialog tripId={tripId} />
+              <AddPlaceDialog tripId={tripId} existingTags={places?.flatMap((p) => p.tags) ?? []} />
             </>
           )}
         </div>
@@ -149,9 +151,25 @@ export function PlacesTab({ trip }: { trip: Trip }) {
             selected={selected.has(place.id)}
             onToggleSelect={() => toggleSelect(place.id)}
             onDelete={() => deletePlace.mutate(place.id)}
+            onEdit={() => setEditing(place)}
+            onLongPress={() => {
+              setSelectionMode(true);
+              toggleSelect(place.id);
+            }}
           />
         ))}
       </div>
+      {editing && (
+        <AddPlaceDialog
+          tripId={tripId}
+          initial={editing}
+          existingTags={places?.flatMap((p) => p.tags) ?? []}
+          open
+          onOpenChange={(next) => {
+            if (!next) setEditing(null);
+          }}
+        />
+      )}
     </div>
   );
 }

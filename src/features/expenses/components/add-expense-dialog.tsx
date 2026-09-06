@@ -21,12 +21,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useCreateExpense } from "@/features/expenses/hooks";
+import { useCreateExpense, useUpdateExpense } from "@/features/expenses/hooks";
 import {
   createExpenseInputSchema,
   EXPENSE_CATEGORIES,
   PAYMENT_METHODS,
   type CreateExpenseInput,
+  type Expense,
 } from "@/mocks/fixtures/expenses";
 import { z } from "zod";
 
@@ -38,23 +39,55 @@ const formSchema = createExpenseInputSchema.omit({
 });
 type FormValues = z.infer<typeof formSchema>;
 
-export function AddExpenseDialog({ tripId, currency }: { tripId: string; currency: string }) {
-  const [open, setOpen] = useState(false);
+export function AddExpenseDialog({
+  tripId,
+  currency,
+  initial,
+  open: openProp,
+  onOpenChange,
+}: {
+  tripId: string;
+  currency: string;
+  initial?: Expense;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = openProp ?? uncontrolledOpen;
+  const setOpen = onOpenChange ?? setUncontrolledOpen;
   const createExpense = useCreateExpense(tripId);
+  const updateExpense = useUpdateExpense(tripId);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      category: "식비",
-      amount: 0,
-      currency,
-      date: "",
-      paymentMethod: "카드",
-      paidBy: "",
-    },
+    defaultValues: initial
+      ? {
+          title: initial.title,
+          category: initial.category,
+          amount: initial.amount,
+          currency: initial.currency,
+          date: initial.date,
+          paymentMethod: initial.paymentMethod,
+          paidBy: initial.paidBy,
+        }
+      : {
+          title: "",
+          category: "식비",
+          amount: 0,
+          currency,
+          date: "",
+          paymentMethod: "카드",
+          paidBy: "",
+        },
   });
 
   function onSubmit(values: FormValues) {
+    if (initial) {
+      updateExpense.mutate(
+        { id: initial.id, patch: { ...values, isManual: true } },
+        { onSuccess: () => setOpen(false) },
+      );
+      return;
+    }
     const input: CreateExpenseInput = {
       tripId,
       dayIndex: null,
@@ -68,15 +101,17 @@ export function AddExpenseDialog({ tripId, currency }: { tripId: string; currenc
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" className="gap-1">
-          <Plus className="size-4" aria-hidden="true" />
-          비용 추가
-        </Button>
-      </DialogTrigger>
+      {!initial && (
+        <DialogTrigger asChild>
+          <Button size="sm" className="gap-1">
+            <Plus className="size-4" aria-hidden="true" />
+            비용 추가
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>비용 추가</DialogTitle>
+          <DialogTitle>{initial ? "비용 수정" : "비용 추가"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
@@ -142,8 +177,12 @@ export function AddExpenseDialog({ tripId, currency }: { tripId: string; currenc
               <Input id="exp-paidby" placeholder="나" {...form.register("paidBy")} />
             </div>
           </div>
-          <Button type="submit" className="h-10" disabled={createExpense.isPending}>
-            추가
+          <Button
+            type="submit"
+            className="h-10"
+            disabled={createExpense.isPending || updateExpense.isPending}
+          >
+            {initial ? "저장" : "추가"}
           </Button>
         </form>
       </DialogContent>

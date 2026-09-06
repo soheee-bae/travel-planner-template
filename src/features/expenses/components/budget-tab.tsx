@@ -15,6 +15,7 @@ import { ExpenseCard } from "@/features/expenses/components/expense-card";
 import { AddExpenseDialog } from "@/features/expenses/components/add-expense-dialog";
 import { cn } from "@/lib/utils";
 import type { Trip } from "@/mocks/fixtures/trips";
+import type { Expense } from "@/mocks/fixtures/expenses";
 
 type GroupMode = "day" | "category" | "method" | "payer";
 const GROUP_LABELS: Record<GroupMode, string> = {
@@ -28,6 +29,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
   const { data: expenses, isLoading, isError } = useExpenses(trip.id);
   const deleteExpense = useDeleteExpense(trip.id);
   const [group, setGroup] = useState<GroupMode>("day");
+  const [editing, setEditing] = useState<Expense | null>(null);
 
   const homeCurrency = "KRW";
   const { data: fx } = useFxRate(trip.baseCurrency, homeCurrency);
@@ -143,9 +145,21 @@ export function BudgetTab({ trip }: { trip: Trip }) {
             key={expense.id}
             expense={expense}
             onDelete={() => deleteExpense.mutate(expense.id)}
+            onEdit={() => setEditing(expense)}
           />
         ))}
       </div>
+      {editing && (
+        <AddExpenseDialog
+          tripId={trip.id}
+          currency={trip.baseCurrency}
+          initial={editing}
+          open
+          onOpenChange={(next) => {
+            if (!next) setEditing(null);
+          }}
+        />
+      )}
     </div>
   );
 }

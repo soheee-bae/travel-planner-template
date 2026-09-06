@@ -15,24 +15,54 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useCreateAccommodation } from "@/features/overview/hooks";
+import { useCreateAccommodation, useUpdateAccommodation } from "@/features/overview/hooks";
 import {
   createAccommodationInputSchema,
+  type Accommodation,
   type CreateAccommodationInput,
 } from "@/mocks/fixtures/overview";
 
 const formSchema = createAccommodationInputSchema.omit({ tripId: true });
 type FormValues = z.infer<typeof formSchema>;
 
-export function AddAccommodationDialog({ tripId }: { tripId: string }) {
-  const [open, setOpen] = useState(false);
+export function AddAccommodationDialog({
+  tripId,
+  initial,
+  open: openProp,
+  onOpenChange,
+}: {
+  tripId: string;
+  initial?: Accommodation;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = openProp ?? uncontrolledOpen;
+  const setOpen = onOpenChange ?? setUncontrolledOpen;
   const createAccommodation = useCreateAccommodation(tripId);
+  const updateAccommodation = useUpdateAccommodation(tripId);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: "", checkinDate: "", checkoutDate: "" },
+    defaultValues: initial
+      ? {
+          name: initial.name,
+          checkinDate: initial.checkinDate,
+          checkoutDate: initial.checkoutDate,
+          checkinTime: initial.checkinTime,
+          checkoutTime: initial.checkoutTime,
+          cost: initial.cost,
+        }
+      : { name: "", checkinDate: "", checkoutDate: "" },
   });
 
   function onSubmit(values: FormValues) {
+    if (initial) {
+      updateAccommodation.mutate(
+        { id: initial.id, patch: values },
+        { onSuccess: () => setOpen(false) },
+      );
+      return;
+    }
     const input: CreateAccommodationInput = { tripId, ...values };
     createAccommodation.mutate(input, { onSuccess: () => setOpen(false) });
     form.reset();
@@ -40,15 +70,17 @@ export function AddAccommodationDialog({ tripId }: { tripId: string }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1">
-          <Plus className="size-4" aria-hidden="true" />
-          숙소 추가
-        </Button>
-      </DialogTrigger>
+      {!initial && (
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm" className="gap-1">
+            <Plus className="size-4" aria-hidden="true" />
+            숙소 추가
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>숙소 추가</DialogTitle>
+          <DialogTitle>{initial ? "숙소 수정" : "숙소 추가"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
@@ -86,8 +118,12 @@ export function AddAccommodationDialog({ tripId }: { tripId: string }) {
               })}
             />
           </div>
-          <Button type="submit" className="h-10" disabled={createAccommodation.isPending}>
-            추가
+          <Button
+            type="submit"
+            className="h-10"
+            disabled={createAccommodation.isPending || updateAccommodation.isPending}
+          >
+            {initial ? "저장" : "추가"}
           </Button>
         </form>
       </DialogContent>

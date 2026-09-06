@@ -22,31 +22,59 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useCreateTransport } from "@/features/overview/hooks";
+import { useCreateTransport, useUpdateTransport } from "@/features/overview/hooks";
 import {
   createTransportInputSchema,
   TRANSPORT_TYPES,
   type CreateTransportInput,
+  type Transport,
 } from "@/mocks/fixtures/overview";
 
 const formSchema = createTransportInputSchema.omit({ tripId: true });
 type FormValues = z.infer<typeof formSchema>;
 
-export function AddTransportDialog({ tripId }: { tripId: string }) {
-  const [open, setOpen] = useState(false);
+export function AddTransportDialog({
+  tripId,
+  initial,
+  open: openProp,
+  onOpenChange,
+}: {
+  tripId: string;
+  initial?: Transport;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = openProp ?? uncontrolledOpen;
+  const setOpen = onOpenChange ?? setUncontrolledOpen;
   const createTransport = useCreateTransport(tripId);
+  const updateTransport = useUpdateTransport(tripId);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      type: "비행기",
-      departureFrom: "",
-      arrivalTo: "",
-      departureAt: "",
-      arrivalAt: "",
-    },
+    defaultValues: initial
+      ? {
+          type: initial.type,
+          departureFrom: initial.departureFrom,
+          arrivalTo: initial.arrivalTo,
+          departureAt: initial.departureAt,
+          arrivalAt: initial.arrivalAt,
+          bookingRef: initial.bookingRef,
+          cost: initial.cost,
+        }
+      : {
+          type: "비행기",
+          departureFrom: "",
+          arrivalTo: "",
+          departureAt: "",
+          arrivalAt: "",
+        },
   });
 
   function onSubmit(values: FormValues) {
+    if (initial) {
+      updateTransport.mutate({ id: initial.id, patch: values }, { onSuccess: () => setOpen(false) });
+      return;
+    }
     const input: CreateTransportInput = { tripId, ...values };
     createTransport.mutate(input, { onSuccess: () => setOpen(false) });
     form.reset();
@@ -54,15 +82,17 @@ export function AddTransportDialog({ tripId }: { tripId: string }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1">
-          <Plus className="size-4" aria-hidden="true" />
-          교통편 추가
-        </Button>
-      </DialogTrigger>
+      {!initial && (
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm" className="gap-1">
+            <Plus className="size-4" aria-hidden="true" />
+            교통편 추가
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>교통편 추가</DialogTitle>
+          <DialogTitle>{initial ? "교통편 수정" : "교통편 추가"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
@@ -120,8 +150,12 @@ export function AddTransportDialog({ tripId }: { tripId: string }) {
               />
             </div>
           </div>
-          <Button type="submit" className="h-10" disabled={createTransport.isPending}>
-            추가
+          <Button
+            type="submit"
+            className="h-10"
+            disabled={createTransport.isPending || updateTransport.isPending}
+          >
+            {initial ? "저장" : "추가"}
           </Button>
         </form>
       </DialogContent>

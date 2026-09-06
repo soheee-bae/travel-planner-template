@@ -3,6 +3,7 @@ import { randomUUID } from "@/lib/id";
 import {
   createChecklistCategoryInputSchema,
   createChecklistItemInputSchema,
+  updateChecklistCategoryInputSchema,
   initialChecklistCategories,
   initialChecklistItems,
   updateChecklistItemInputSchema,
@@ -30,6 +31,20 @@ export const checklistsHandlers = [
     const created: ChecklistCategory = { id: randomUUID(), ...parsed.data };
     categories = [...categories, created];
     return HttpResponse.json(created, { status: 201 });
+  }),
+
+  http.patch("/api/trips/:tripId/checklist-categories/:id", async ({ params, request }) => {
+    const body = await request.json();
+    const parsed = updateChecklistCategoryInputSchema.safeParse(body);
+    if (!parsed.success) {
+      return HttpResponse.json({ message: "잘못된 입력입니다." }, { status: 400 });
+    }
+    const index = categories.findIndex((c) => c.id === params.id && c.tripId === params.tripId);
+    if (index === -1) {
+      return HttpResponse.json({ message: "카테고리를 찾을 수 없습니다." }, { status: 404 });
+    }
+    categories[index] = { ...categories[index], ...parsed.data };
+    return HttpResponse.json(categories[index]);
   }),
 
   http.delete("/api/trips/:tripId/checklist-categories/:id", async ({ params }) => {

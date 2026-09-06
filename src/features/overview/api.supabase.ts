@@ -92,6 +92,32 @@ export async function createAccommodation(input: CreateAccommodationInput): Prom
   return toAccommodation(throwIfError(result));
 }
 
+export async function updateAccommodation(
+  tripId: string,
+  id: string,
+  patch: import("@/mocks/fixtures/overview").UpdateAccommodationInput,
+): Promise<Accommodation> {
+  const supabase = createClient();
+  const result = await supabase
+    .from("accommodations")
+    .update({
+      ...(patch.name !== undefined ? { name: patch.name } : {}),
+      ...(patch.checkinDate !== undefined ? { checkin_date: patch.checkinDate } : {}),
+      ...(patch.checkoutDate !== undefined ? { checkout_date: patch.checkoutDate } : {}),
+      ...(patch.checkinTime !== undefined ? { checkin_time: patch.checkinTime ?? null } : {}),
+      ...(patch.checkoutTime !== undefined ? { checkout_time: patch.checkoutTime ?? null } : {}),
+      ...(patch.address !== undefined ? { address: patch.address ?? null } : {}),
+      ...(patch.bookingRef !== undefined ? { booking_ref: patch.bookingRef ?? null } : {}),
+      ...(patch.cost !== undefined ? { cost: patch.cost ?? null } : {}),
+      ...(patch.memo !== undefined ? { memo: patch.memo ?? null } : {}),
+    })
+    .eq("trip_id", tripId)
+    .eq("id", id)
+    .select("*")
+    .single();
+  return toAccommodation(throwIfError(result));
+}
+
 export async function deleteAccommodation(tripId: string, id: string): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase
@@ -123,6 +149,31 @@ export async function createTransport(input: CreateTransportInput): Promise<Tran
       cost: input.cost ?? null,
       memo: input.memo ?? null,
     })
+    .select("*")
+    .single();
+  return toTransport(throwIfError(result));
+}
+
+export async function updateTransport(
+  tripId: string,
+  id: string,
+  patch: import("@/mocks/fixtures/overview").UpdateTransportInput,
+): Promise<Transport> {
+  const supabase = createClient();
+  const result = await supabase
+    .from("transports")
+    .update({
+      ...(patch.type !== undefined ? { type: patch.type } : {}),
+      ...(patch.departureFrom !== undefined ? { departure_from: patch.departureFrom } : {}),
+      ...(patch.arrivalTo !== undefined ? { arrival_to: patch.arrivalTo } : {}),
+      ...(patch.departureAt !== undefined ? { departure_at: patch.departureAt } : {}),
+      ...(patch.arrivalAt !== undefined ? { arrival_at: patch.arrivalAt } : {}),
+      ...(patch.bookingRef !== undefined ? { booking_ref: patch.bookingRef ?? null } : {}),
+      ...(patch.cost !== undefined ? { cost: patch.cost ?? null } : {}),
+      ...(patch.memo !== undefined ? { memo: patch.memo ?? null } : {}),
+    })
+    .eq("trip_id", tripId)
+    .eq("id", id)
     .select("*")
     .single();
   return toTransport(throwIfError(result));

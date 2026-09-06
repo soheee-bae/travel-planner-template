@@ -23,12 +23,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useCreatePlace } from "@/features/places/hooks";
+import { useCreatePlace, useUpdatePlace } from "@/features/places/hooks";
 import {
   createPlaceInputSchema,
   PLACE_CATEGORIES,
   PLACE_PRIORITIES,
   type CreatePlaceInput,
+  type Place,
 } from "@/mocks/fixtures/places";
 
 const formSchema = createPlaceInputSchema
@@ -80,29 +81,73 @@ function useAutofillCoordinates(form: ReturnType<typeof useForm<FormValues>>) {
   return { linkInput, setLinkInput, status, lat, lng, fetchFromLink, fetchFromAddress };
 }
 
-export function AddPlaceDialog({ tripId }: { tripId: string }) {
-  const [open, setOpen] = useState(false);
+export function AddPlaceDialog({
+  tripId,
+  initial,
+  existingTags = [],
+  open: openProp,
+  onOpenChange,
+}: {
+  tripId: string;
+  initial?: Place;
+  existingTags?: string[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = openProp ?? uncontrolledOpen;
+  const setOpen = onOpenChange ?? setUncontrolledOpen;
   const createPlace = useCreatePlace(tripId);
+  const updatePlace = useUpdatePlace(tripId);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: "", category: "관광", priority: "가능하면" },
+    defaultValues: initial
+      ? {
+          name: initial.name,
+          category: initial.category,
+          priority: initial.priority,
+          address: initial.address,
+          estimatedCost: initial.estimatedCost,
+          durationMin: initial.durationMin,
+          memo: initial.memo,
+          linkUrl: initial.linkUrl,
+          photoUrl: initial.photoUrl,
+          tagsInput: initial.tags.join(", "),
+        }
+      : { name: "", category: "관광", priority: "가능하면" },
   });
   const autofill = useAutofillCoordinates(form);
+  const [pinLat, setPinLat] = useState<number | undefined>(initial?.lat);
+  const [pinLng, setPinLng] = useState<number | undefined>(initial?.lng);
+  const tagSuggestions = Array.from(new Set(existingTags)).slice(0, 12);
 
   function onSubmit(values: FormValues) {
     const { tagsInput, ...rest } = values;
+    const tags = tagsInput
+      ? tagsInput
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : [];
+    const lat = autofill.lat ?? pinLat;
+    const lng = autofill.lng ?? pinLng;
+    if (initial) {
+      updatePlace.mutate(
+        {
+          id: initial.id,
+          patch: { ...rest, tags, lat, lng },
+        },
+        { onSuccess: () => setOpen(false) },
+      );
+      return;
+    }
     const input: CreatePlaceInput = {
       tripId,
       dayIndex: null,
       orderIndex: 0,
-      tags: tagsInput
-        ? tagsInput
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean)
-        : [],
-      lat: autofill.lat,
-      lng: autofill.lng,
+      tags,
+      lat,
+      lng,
       ...rest,
     };
     createPlace.mutate(input, { onSuccess: () => setOpen(false) });
@@ -111,15 +156,17 @@ export function AddPlaceDialog({ tripId }: { tripId: string }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" className="gap-1">
-          <Plus className="size-4" aria-hidden="true" />
-          장소 추가
-        </Button>
-      </DialogTrigger>
+      {!initial && (
+        <DialogTrigger asChild>
+          <Button size="sm" className="gap-1">
+            <Plus className="size-4" aria-hidden="true" />
+            장소 추가
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>장소 추가</DialogTitle>
+          <DialogTitle>{initial ? "장소 수정" : "장소 추가"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
@@ -169,9 +216,29 @@ export function AddPlaceDialog({ tripId }: { tripId: string }) {
               </p>
             )}
             {autofill.status === "error" && (
-              <p className="text-xs text-destructive">
-                좌표를 찾지 못했습니다. 주소로 다시 시도해 보세요.
-              </p>
+              <div className="flex flex-col gap-2">
+                <p className="text-xs text-destructive">
+                  좌표를 찾지 못했습니다. 위경도를 직접 찍거나 입력해 주세요.
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="number"
+                    step="0.0001"
+                    placeholder="위도"
+                    aria-label="위도"
+                    value={pinLat ?? ""}
+                    onChange={(e) => setPinLat(e.target.value === "" ? undefined : Number(e.target.value))}
+                  />
+                  <Input
+                    type="number"
+                    step="0.0001"
+                    placeholder="경도"
+                    aria-label="경도"
+                    value={pinLng ?? ""}
+                    onChange={(e) => setPinLng(e.target.value === "" ? undefined : Number(e.target.value))}
+                  />
+                </div>
+              </div>
             )}
           </div>
 
@@ -262,6 +329,30 @@ export function AddPlaceDialog({ tripId }: { tripId: string }) {
                   placeholder="#바다뷰, #디저트"
                   {...form.register("tagsInput")}
                 />
+                {tagSuggestions.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {tagSuggestions.map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        className="rounded-md bg-muted px-2 py-0.5 text-xs"
+                        onClick={() => {
+                          const current = form.getValues("tagsInput") ?? "";
+                          const next = current
+                            ? `${current}, ${tag}`
+                            : tag;
+                          form.setValue("tagsInput", next);
+                        }}
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="place-photo">사진 URL</Label>
+                  <Input id="place-photo" {...form.register("photoUrl")} />
+                </div>
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="place-memo">메모</Label>
@@ -278,8 +369,12 @@ export function AddPlaceDialog({ tripId }: { tripId: string }) {
             </div>
           </details>
 
-          <Button type="submit" className="h-10" disabled={createPlace.isPending}>
-            추가
+          <Button
+            type="submit"
+            className="h-10"
+            disabled={createPlace.isPending || updatePlace.isPending}
+          >
+            {initial ? "저장" : "추가"}
           </Button>
         </form>
       </DialogContent>

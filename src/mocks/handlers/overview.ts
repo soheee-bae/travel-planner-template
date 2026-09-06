@@ -3,6 +3,8 @@ import { randomUUID } from "@/lib/id";
 import {
   createAccommodationInputSchema,
   createTransportInputSchema,
+  updateAccommodationInputSchema,
+  updateTransportInputSchema,
   initialAccommodations,
   initialTransports,
   type Accommodation,
@@ -34,6 +36,22 @@ export const overviewHandlers = [
     return HttpResponse.json(created, { status: 201 });
   }),
 
+  http.patch("/api/trips/:tripId/accommodations/:id", async ({ params, request }) => {
+    const body = await request.json();
+    const parsed = updateAccommodationInputSchema.safeParse(body);
+    if (!parsed.success) {
+      return HttpResponse.json({ message: "잘못된 입력입니다." }, { status: 400 });
+    }
+    const index = accommodations.findIndex(
+      (a) => a.id === params.id && a.tripId === params.tripId,
+    );
+    if (index === -1) {
+      return HttpResponse.json({ message: "숙소를 찾을 수 없습니다." }, { status: 404 });
+    }
+    accommodations[index] = { ...accommodations[index], ...parsed.data };
+    return HttpResponse.json(accommodations[index]);
+  }),
+
   http.delete("/api/trips/:tripId/accommodations/:id", async ({ params }) => {
     accommodations = accommodations.filter((a) => a.id !== params.id);
     return new HttpResponse(null, { status: 204 });
@@ -58,6 +76,20 @@ export const overviewHandlers = [
     const created: Transport = { id: randomUUID(), ...parsed.data };
     transports = [created, ...transports];
     return HttpResponse.json(created, { status: 201 });
+  }),
+
+  http.patch("/api/trips/:tripId/transports/:id", async ({ params, request }) => {
+    const body = await request.json();
+    const parsed = updateTransportInputSchema.safeParse(body);
+    if (!parsed.success) {
+      return HttpResponse.json({ message: "잘못된 입력입니다." }, { status: 400 });
+    }
+    const index = transports.findIndex((t) => t.id === params.id && t.tripId === params.tripId);
+    if (index === -1) {
+      return HttpResponse.json({ message: "교통편을 찾을 수 없습니다." }, { status: 404 });
+    }
+    transports[index] = { ...transports[index], ...parsed.data };
+    return HttpResponse.json(transports[index]);
   }),
 
   http.delete("/api/trips/:tripId/transports/:id", async ({ params }) => {

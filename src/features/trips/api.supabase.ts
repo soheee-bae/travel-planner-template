@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import { throwIfError, throwIfWriteError } from "@/lib/supabase/throw";
-import type { CreateTripInput, Trip } from "@/mocks/fixtures/trips";
+import type { CreateTripInput, Trip, UpdateTripInput } from "@/mocks/fixtures/trips";
 
 interface TripRow {
   id: string;
@@ -68,6 +68,21 @@ export async function createTrip(input: CreateTripInput): Promise<Trip> {
     })
     .select(TRIP_COLUMNS)
     .single();
+  return toTrip(throwIfError(result));
+}
+
+export async function updateTrip(id: string, patch: UpdateTripInput): Promise<Trip> {
+  const supabase = createClient();
+  const row: Record<string, unknown> = {};
+  if (patch.title !== undefined) row.title = patch.title;
+  if (patch.destinationCountry !== undefined) row.destination_country = patch.destinationCountry;
+  if (patch.destinationCity !== undefined) row.destination_city = patch.destinationCity;
+  if (patch.startDate !== undefined) row.start_date = patch.startDate;
+  if (patch.endDate !== undefined) row.end_date = patch.endDate;
+  if (patch.companions !== undefined) row.companions = patch.companions;
+  if (patch.coverEmoji !== undefined) row.cover_emoji = patch.coverEmoji;
+  if (patch.baseCurrency !== undefined) row.base_currency = patch.baseCurrency;
+  const result = await supabase.from("trips").update(row).eq("id", id).select(TRIP_COLUMNS).single();
   return toTrip(throwIfError(result));
 }
 

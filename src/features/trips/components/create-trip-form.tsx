@@ -19,6 +19,7 @@ import { createTripInputSchema, type CreateTripInput } from "@/mocks/fixtures/tr
 import { endDateFromNights } from "@/lib/trip-days";
 import { calcNights } from "@/lib/date";
 import { cn } from "@/lib/utils";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 
 const COUNTRIES = [
   { code: "KR", label: "🇰🇷 한국" },
@@ -112,23 +113,17 @@ export function CreateTripForm() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="startDate">날짜</Label>
-        <div className="flex items-center gap-2">
-          <Input
-            id="startDate"
-            type="date"
-            className="flex-1"
-            {...form.register("startDate", {
-              onChange: (e) => {
-                if (nights > 0) {
-                  form.setValue("endDate", endDateFromNights(e.target.value, nights));
-                }
-              },
-            })}
-          />
-          <span className="text-sm text-muted-foreground">~</span>
-          <Input id="endDate" type="date" className="flex-1" {...form.register("endDate")} />
-        </div>
+        <Label>날짜</Label>
+        <DateRangePicker
+          startDate={startDate}
+          endDate={endDate}
+          onChange={(start, end) => {
+            form.setValue("startDate", start, { shouldValidate: true });
+            form.setValue("endDate", end, { shouldValidate: true });
+          }}
+        />
+        <Input id="startDate" type="date" className="sr-only" {...form.register("startDate")} />
+        <Input id="endDate" type="date" className="sr-only" {...form.register("endDate")} />
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>몇 박?</span>
           <Input
