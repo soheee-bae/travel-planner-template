@@ -115,7 +115,11 @@ export function PlacesTab({ trip }: { trip: Trip }) {
               <Button size="sm" variant="outline" onClick={() => setSelectionMode(true)}>
                 선택
               </Button>
-              <AddPlaceDialog tripId={tripId} existingTags={places?.flatMap((p) => p.tags) ?? []} />
+              <AddPlaceDialog
+                tripId={tripId}
+                existingTags={places?.flatMap((p) => p.tags) ?? []}
+                existingPlaces={places ?? []}
+              />
             </>
           )}
         </div>
@@ -173,6 +177,7 @@ export function PlacesTab({ trip }: { trip: Trip }) {
           tripId={tripId}
           initial={editing}
           existingTags={places?.flatMap((p) => p.tags) ?? []}
+          existingPlaces={places ?? []}
           open
           onOpenChange={(next) => {
             if (!next) setEditing(null);

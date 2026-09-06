@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
-export function LoginForm() {
+export function LoginForm({ nextPath }: { nextPath?: string }) {
   const [email, setEmail] = useState("amybae28@gmail.com");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "working" | "sent" | "error">("idle");
@@ -23,7 +23,8 @@ export function LoginForm() {
         password,
       });
       if (error) throw error;
-      window.location.assign("/trips");
+      const next = nextPath && nextPath.startsWith("/") ? nextPath : "/trips";
+      window.location.assign(next);
     } catch (err) {
       setStatus("error");
       setMessage(err instanceof Error ? err.message : "로그인에 실패했어.");

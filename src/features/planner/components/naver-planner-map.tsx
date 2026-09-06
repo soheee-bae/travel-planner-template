@@ -44,6 +44,13 @@ export function NaverPlannerMap({
         mapRef.current = new maps.Map(el, {
           center: new maps.LatLng(33.4996, 126.5312),
           zoom: 11,
+          scaleControl: false,
+          mapDataControl: false,
+          zoomControl: false,
+          logoControl: true,
+          logoControlOptions: maps.Position
+            ? { position: maps.Position.TOP_LEFT }
+            : undefined,
         });
         setReady(true);
       })
@@ -126,7 +133,7 @@ export function NaverPlannerMap({
   return (
     <div
       ref={containerRef}
-      className={cn("naver-map-root h-56 w-full overflow-hidden rounded-lg border border-border")}
+      className={cn("naver-map-root h-64 w-full overflow-hidden rounded-lg border border-border")}
       role="img"
       aria-label="일정 지도"
     />

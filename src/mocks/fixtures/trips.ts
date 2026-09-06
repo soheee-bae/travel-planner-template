@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const tripSchema = z.object({
   id: z.string(),
-  title: z.string().min(1).max(120),
+  title: z.string().trim().min(2).max(30),
   destinationCountry: z.string(),
   destinationCity: z.string(),
   startDate: z.string(), // ISO date (yyyy-mm-dd)
@@ -10,14 +10,23 @@ export const tripSchema = z.object({
   companions: z.string(),
   coverEmoji: z.string(),
   baseCurrency: z.enum(["KRW", "JPY", "USD", "EUR"]),
+  ownerId: z.string().optional(),
+  role: z.enum(["owner", "editor"]).optional(),
 });
 
 export type Trip = z.infer<typeof tripSchema>;
 
-export const createTripInputSchema = tripSchema.omit({ id: true });
+export const createTripInputSchema = tripSchema
+  .omit({ id: true, ownerId: true, role: true })
+  .refine((value) => !value.startDate || !value.endDate || value.endDate >= value.startDate, {
+    message: "종료일은 시작일 이후여야 합니다.",
+    path: ["endDate"],
+  });
 export type CreateTripInput = z.infer<typeof createTripInputSchema>;
 
-export const updateTripInputSchema = createTripInputSchema.partial();
+export const updateTripInputSchema = tripSchema
+  .omit({ id: true, ownerId: true, role: true })
+  .partial();
 export type UpdateTripInput = z.infer<typeof updateTripInputSchema>;
 
 export const initialTrips: Trip[] = [

@@ -1,6 +1,11 @@
 import { LoginForm } from "@/features/auth/login-form";
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
   return (
     <div className="flex flex-1 flex-col justify-center gap-6 p-6">
       <div>
@@ -10,7 +15,7 @@ export default function LoginPage() {
           들어가고, 링크는 한도가 풀리면 쓰면 돼.
         </p>
       </div>
-      <LoginForm />
+      <LoginForm nextPath={next} />
     </div>
   );
 }

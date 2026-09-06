@@ -85,12 +85,14 @@ export function AddPlaceDialog({
   tripId,
   initial,
   existingTags = [],
+  existingPlaces = [],
   open: openProp,
   onOpenChange,
 }: {
   tripId: string;
   initial?: Place;
   existingTags?: string[];
+  existingPlaces?: Place[];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
@@ -131,6 +133,16 @@ export function AddPlaceDialog({
       : [];
     const lat = autofill.lat ?? pinLat;
     const lng = autofill.lng ?? pinLng;
+    const duplicate = existingPlaces.some(
+      (p) =>
+        p.id !== initial?.id &&
+        p.name.trim() === rest.name.trim() &&
+        p.dayIndex != null &&
+        p.dayIndex === (initial?.dayIndex ?? null),
+    );
+    if (duplicate && !window.confirm("같은 날 같은 이름 장소가 있어. 그래도 저장할까?")) {
+      return;
+    }
     if (initial) {
       updatePlace.mutate(
         {

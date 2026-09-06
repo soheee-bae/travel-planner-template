@@ -4,6 +4,7 @@ import type { CreateTripInput, Trip, UpdateTripInput } from "@/mocks/fixtures/tr
 
 interface TripRow {
   id: string;
+  owner_id: string;
   title: string;
   destination_country: string;
   destination_city: string;
@@ -14,7 +15,13 @@ interface TripRow {
   base_currency: Trip["baseCurrency"];
 }
 
-function toTrip(row: TripRow): Trip {
+async function currentUserId(): Promise<string | null> {
+  const supabase = createClient();
+  const { data } = await supabase.auth.getUser();
+  return data.user?.id ?? null;
+}
+
+function toTrip(row: TripRow, userId: string | null): Trip {
   return {
     id: row.id,
     title: row.title,
@@ -25,24 +32,28 @@ function toTrip(row: TripRow): Trip {
     companions: row.companions,
     coverEmoji: row.cover_emoji,
     baseCurrency: row.base_currency,
+    ownerId: row.owner_id,
+    role: userId && row.owner_id === userId ? "owner" : "editor",
   };
 }
 
 const TRIP_COLUMNS =
-  "id, title, destination_country, destination_city, start_date, end_date, companions, cover_emoji, base_currency";
+  "id, owner_id, title, destination_country, destination_city, start_date, end_date, companions, cover_emoji, base_currency";
 
 export async function fetchTrips(): Promise<Trip[]> {
   const supabase = createClient();
+  const userId = await currentUserId();
   const result = await supabase.from("trips").select(TRIP_COLUMNS).order("start_date", {
     ascending: false,
   });
-  return throwIfError(result).map(toTrip);
+  return throwIfError(result).map((row) => toTrip(row, userId));
 }
 
 export async function fetchTrip(id: string): Promise<Trip> {
   const supabase = createClient();
+  const userId = await currentUserId();
   const result = await supabase.from("trips").select(TRIP_COLUMNS).eq("id", id).single();
-  return toTrip(throwIfError(result));
+  return toTrip(throwIfError(result), userId);
 }
 
 export async function createTrip(input: CreateTripInput): Promise<Trip> {
@@ -68,7 +79,7 @@ export async function createTrip(input: CreateTripInput): Promise<Trip> {
     })
     .select(TRIP_COLUMNS)
     .single();
-  return toTrip(throwIfError(result));
+  return toTrip(throwIfError(result), user.id);
 }
 
 export async function updateTrip(id: string, patch: UpdateTripInput): Promise<Trip> {
@@ -83,7 +94,7 @@ export async function updateTrip(id: string, patch: UpdateTripInput): Promise<Tr
   if (patch.coverEmoji !== undefined) row.cover_emoji = patch.coverEmoji;
   if (patch.baseCurrency !== undefined) row.base_currency = patch.baseCurrency;
   const result = await supabase.from("trips").update(row).eq("id", id).select(TRIP_COLUMNS).single();
-  return toTrip(throwIfError(result));
+  return toTrip(throwIfError(result), await currentUserId());
 }
 
 export async function deleteTrip(id: string): Promise<void> {

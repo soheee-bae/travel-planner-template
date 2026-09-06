@@ -139,6 +139,14 @@ export function DayItineraryList({ tripId, places }: { tripId: string; places: P
           <p className="text-center text-[11px] text-muted-foreground">
             오른쪽 줄을 눌러 위아래로 순서를 바꿔
           </p>
+          {legs && Object.keys(legs).length > 0 && (
+            <p className="text-center text-xs text-muted-foreground">
+              이동 합계{" "}
+              {Math.round(Object.values(legs).reduce((sum, leg) => sum + leg.distanceM, 0) / 100) /
+                10}
+              km · {Object.values(legs).reduce((sum, leg) => sum + leg.durationMin, 0)}분
+            </p>
+          )}
           {items.map((place, index) => {
             const next = items[index + 1];
             const fromLat = place.lat;

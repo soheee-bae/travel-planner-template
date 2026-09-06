@@ -59,12 +59,20 @@ export function PlaceCard({
       )}
       <div className="flex flex-1 flex-col gap-0.5">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm font-medium text-foreground">
-            {CATEGORY_ICON[place.category]} {place.name}
-          </p>
+          <p className="text-sm font-medium text-foreground">{place.name}</p>
           <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
             {place.dayIndex ? `Day${place.dayIndex}` : "미정"}
           </span>
+        </div>
+        <div className="mt-1 flex flex-wrap gap-1">
+          <span className="rounded-md bg-accent px-2 py-0.5 text-[11px] text-accent-foreground">
+            {CATEGORY_ICON[place.category]} {place.category}
+          </span>
+          {place.tags.map((tag) => (
+            <span key={tag} className="rounded-md bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+              {tag}
+            </span>
+          ))}
         </div>
         <p className="text-xs text-muted-foreground">
           {PRIORITY_BADGE[place.priority] && `${PRIORITY_BADGE[place.priority]} · `}

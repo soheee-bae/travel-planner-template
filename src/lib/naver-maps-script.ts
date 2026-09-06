@@ -4,9 +4,10 @@ export interface NaverLatLng {
 }
 
 export interface NaverMapsApi {
+  Position?: { TOP_LEFT: unknown; LEFT_TOP: unknown };
   Map: new (
     el: HTMLElement,
-    opts: { center: unknown; zoom: number },
+    opts: Record<string, unknown>,
   ) => {
     fitBounds: (bounds: unknown) => void;
     destroy?: () => void;

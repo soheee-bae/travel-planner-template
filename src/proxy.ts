@@ -45,7 +45,7 @@ export async function proxy(request: NextRequest) {
   if (!user && !isPublicPath(pathname)) {
     const login = request.nextUrl.clone();
     login.pathname = "/login";
-    login.search = "";
+    login.search = `?next=${encodeURIComponent(pathname + request.nextUrl.search)}`;
     return NextResponse.redirect(login);
   }
 

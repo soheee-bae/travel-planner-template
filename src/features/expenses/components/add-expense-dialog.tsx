@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Plus } from "lucide-react";
@@ -22,6 +23,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useCreateExpense, useUpdateExpense } from "@/features/expenses/hooks";
+import { MoneyInput } from "@/components/ui/money-input";
+import { listTripMembers } from "@/features/trips/members-api";
 import {
   createExpenseInputSchema,
   EXPENSE_CATEGORIES,
@@ -57,6 +60,16 @@ export function AddExpenseDialog({
   const setOpen = onOpenChange ?? setUncontrolledOpen;
   const createExpense = useCreateExpense(tripId);
   const updateExpense = useUpdateExpense(tripId);
+  const [payers, setPayers] = useState<string[]>(["나"]);
+
+  useEffect(() => {
+    void listTripMembers(tripId)
+      .then((members) => {
+        const emails = members.map((m) => (m.isOwner ? "나" : m.email.split("@")[0]));
+        setPayers(Array.from(new Set(["나", ...emails])));
+      })
+      .catch(() => setPayers(["나"]));
+  }, [tripId]);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initial
@@ -76,7 +89,7 @@ export function AddExpenseDialog({
           currency,
           date: "",
           paymentMethod: "카드",
-          paidBy: "",
+          paidBy: "나",
         },
   });
 
@@ -139,11 +152,12 @@ export function AddExpenseDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="exp-amount">금액</Label>
-              <Input
-                id="exp-amount"
-                type="number"
-                min={0}
-                {...form.register("amount", { setValueAs: (v) => (v === "" ? 0 : Number(v)) })}
+              <Controller
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <MoneyInput id="exp-amount" value={field.value} onChange={(v) => field.onChange(v ?? 0)} />
+                )}
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -174,7 +188,21 @@ export function AddExpenseDialog({
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="exp-paidby">결제자</Label>
-              <Input id="exp-paidby" placeholder="나" {...form.register("paidBy")} />
+              <Select
+                defaultValue={form.getValues("paidBy") || "나"}
+                onValueChange={(v) => form.setValue("paidBy", v)}
+              >
+                <SelectTrigger id="exp-paidby" className="w-full">
+                  <SelectValue placeholder="결제자" />
+                </SelectTrigger>
+                <SelectContent>
+                  {payers.map((p) => (
+                    <SelectItem key={p} value={p}>
+                      {p}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <Button

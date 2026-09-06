@@ -13,10 +13,12 @@ import { AddTransportDialog } from "@/features/overview/components/add-transport
 import { SummaryStats } from "@/features/overview/components/summary-stats";
 import { usePlaces } from "@/features/places/hooks";
 import { useExpenses } from "@/features/expenses/hooks";
+import { useTrip } from "@/features/trips/hooks";
 import { useState } from "react";
 import type { Accommodation, Transport } from "@/mocks/fixtures/overview";
 
 export function OverviewTab({ tripId }: { tripId: string }) {
+  const { data: trip } = useTrip(tripId);
   const { data: accommodations, isLoading: loadingAcc } = useAccommodations(tripId);
   const { data: transports, isLoading: loadingTr } = useTransports(tripId);
   const deleteAccommodation = useDeleteAccommodation(tripId);
@@ -31,7 +33,11 @@ export function OverviewTab({ tripId }: { tripId: string }) {
       <section className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">🏨 숙소</h2>
-          <AddAccommodationDialog tripId={tripId} />
+          <AddAccommodationDialog
+            tripId={tripId}
+            tripStartDate={trip?.startDate}
+            tripEndDate={trip?.endDate}
+          />
         </div>
         {loadingAcc && <p className="text-sm text-muted-foreground">불러오는 중…</p>}
         {!loadingAcc && accommodations?.length === 0 && (
@@ -75,6 +81,8 @@ export function OverviewTab({ tripId }: { tripId: string }) {
       {editingAcc && (
         <AddAccommodationDialog
           tripId={tripId}
+          tripStartDate={trip?.startDate}
+          tripEndDate={trip?.endDate}
           initial={editingAcc}
           open
           onOpenChange={(next) => {

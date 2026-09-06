@@ -62,7 +62,7 @@ export function MockMap({
 
   return (
     <div
-      className="relative h-56 w-full overflow-hidden rounded-lg border border-border bg-[linear-gradient(0deg,transparent_24%,var(--border)_25%,var(--border)_26%,transparent_27%,transparent_74%,var(--border)_75%,var(--border)_76%,transparent_77%,transparent),linear-gradient(90deg,transparent_24%,var(--border)_25%,var(--border)_26%,transparent_27%,transparent_74%,var(--border)_75%,var(--border)_76%,transparent_77%,transparent)] bg-muted"
+      className="relative h-64 w-full overflow-hidden rounded-lg border border-border bg-[linear-gradient(0deg,transparent_24%,var(--border)_25%,var(--border)_26%,transparent_27%,transparent_74%,var(--border)_75%,var(--border)_76%,transparent_77%,transparent),linear-gradient(90deg,transparent_24%,var(--border)_25%,var(--border)_26%,transparent_27%,transparent_74%,var(--border)_75%,var(--border)_76%,transparent_77%,transparent)] bg-muted"
       style={{ backgroundSize: "25% 25%" }}
       role="img"
       aria-label="일정 지도 (mock, 실제 지도 API 연동 전)"

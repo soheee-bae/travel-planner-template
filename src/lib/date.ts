@@ -13,11 +13,27 @@ export function formatDuration(startDate: string, endDate: string): string {
   return `${nights}박 ${nights + 1}일`;
 }
 
-/** "9/15~9/17" 형태. */
+/** "9월 15일~9월 17일" 형태. */
 export function formatDateRange(startDate: string, endDate: string): string {
   const fmt = (iso: string) => {
     const [, m, d] = iso.split("-");
-    return `${Number(m)}/${Number(d)}`;
+    return `${Number(m)}월 ${Number(d)}일`;
   };
   return `${fmt(startDate)}~${fmt(endDate)}`;
+}
+
+export function formatIsoDot(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  return `${y}.${m}.${d}`;
+}
+
+/** 오늘 기준 D-day. 여행 당일은 D-Day, 지난 여행은 종료 후 경과일. */
+export function formatDday(startDate: string, endDate: string, todayIso?: string): string {
+  const today = todayIso ?? new Date().toISOString().slice(0, 10);
+  if (today < startDate) {
+    const days = calcNights(today, startDate);
+    return `D-${days}`;
+  }
+  if (today <= endDate) return "여행 중";
+  return "지난 여행";
 }

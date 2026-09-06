@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calcNights, formatDateRange, formatDuration } from "@/lib/date";
+import { calcNights, formatDateRange, formatDday, formatDuration } from "@/lib/date";
 
 describe("calcNights", () => {
   it("2박 3일을 2로 계산한다", () => {
@@ -22,7 +22,13 @@ describe("formatDuration", () => {
 });
 
 describe("formatDateRange", () => {
-  it("9/15~9/17 형태로 표기한다", () => {
-    expect(formatDateRange("2026-09-15", "2026-09-17")).toBe("9/15~9/17");
+  it("9월 15일~9월 17일 형태로 표기한다", () => {
+    expect(formatDateRange("2026-09-15", "2026-09-17")).toBe("9월 15일~9월 17일");
+  });
+});
+
+describe("formatDday", () => {
+  it("시작 전이면 D-n", () => {
+    expect(formatDday("2026-09-15", "2026-09-17", "2026-09-04")).toBe("D-11");
   });
 });

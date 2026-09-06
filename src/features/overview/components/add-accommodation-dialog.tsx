@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { Plus } from "lucide-react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useCreateAccommodation, useUpdateAccommodation } from "@/features/overview/hooks";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { MoneyInput } from "@/components/ui/money-input";
 import {
   createAccommodationInputSchema,
   type Accommodation,
@@ -27,11 +29,15 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function AddAccommodationDialog({
   tripId,
+  tripStartDate,
+  tripEndDate,
   initial,
   open: openProp,
   onOpenChange,
 }: {
   tripId: string;
+  tripStartDate?: string;
+  tripEndDate?: string;
   initial?: Accommodation;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -55,7 +61,19 @@ export function AddAccommodationDialog({
       : { name: "", checkinDate: "", checkoutDate: "" },
   });
 
+  const checkinDate = useWatch({ control: form.control, name: "checkinDate" });
+  const checkoutDate = useWatch({ control: form.control, name: "checkoutDate" });
+  const outsideTrip =
+    tripStartDate &&
+    tripEndDate &&
+    checkinDate &&
+    checkoutDate &&
+    (checkinDate < tripStartDate || checkoutDate > tripEndDate);
+
   function onSubmit(values: FormValues) {
+    if (values.checkoutDate && values.checkinDate && values.checkoutDate < values.checkinDate) {
+      return;
+    }
     if (initial) {
       updateAccommodation.mutate(
         { id: initial.id, patch: values },
@@ -87,15 +105,22 @@ export function AddAccommodationDialog({
             <Label htmlFor="acc-name">숙소명</Label>
             <Input id="acc-name" placeholder="예: 제주 신라호텔" {...form.register("name")} />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="acc-checkin">체크인</Label>
-              <Input id="acc-checkin" type="date" {...form.register("checkinDate")} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="acc-checkout">체크아웃</Label>
-              <Input id="acc-checkout" type="date" {...form.register("checkoutDate")} />
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>체크인 ~ 체크아웃</Label>
+            <DateRangePicker
+              startDate={checkinDate}
+              endDate={checkoutDate}
+              onChange={(start, end) => {
+                form.setValue("checkinDate", start, { shouldValidate: true });
+                form.setValue("checkoutDate", end, { shouldValidate: true });
+              }}
+            />
+            {checkoutDate && checkinDate && checkoutDate < checkinDate && (
+              <p className="text-xs text-destructive">체크아웃은 체크인 이후여야 해.</p>
+            )}
+            {outsideTrip && (
+              <p className="text-xs text-destructive">여행 기간 밖 숙소야. 날짜를 확인해.</p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
@@ -109,13 +134,12 @@ export function AddAccommodationDialog({
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="acc-cost">비용</Label>
-            <Input
-              id="acc-cost"
-              type="number"
-              min={0}
-              {...form.register("cost", {
-                setValueAs: (v) => (v === "" ? undefined : Number(v)),
-              })}
+            <Controller
+              control={form.control}
+              name="cost"
+              render={({ field }) => (
+                <MoneyInput id="acc-cost" value={field.value} onChange={field.onChange} />
+              )}
             />
           </div>
           <Button
