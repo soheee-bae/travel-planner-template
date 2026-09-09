@@ -70,7 +70,9 @@ export function PlaceCard({
             {place.category}
           </span>
         </div>
-        {place.address ? <p className="mt-0.5 truncate text-xs text-muted-foreground">{place.address}</p> : null}
+        {place.address ? (
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">📍 {place.address}</p>
+        ) : null}
         {place.tags.length > 0 ? (
           <div className="mt-1 flex flex-wrap gap-1">
             {place.tags.map((tag) => (

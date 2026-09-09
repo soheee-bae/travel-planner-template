@@ -65,8 +65,14 @@ function SortableItem({ place, index }: { place: Place; index: number }) {
         {CATEGORY_ICON[place.category]}
       </span>
       <div className="min-w-0 flex-1">
-        {hours ? <p className="text-[11px] text-muted-foreground">{index + 1} · {hours}</p> : null}
-        <p className="truncate text-sm font-bold text-foreground">{place.name}</p>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <p className="truncate text-sm font-bold text-foreground">{place.name}</p>
+          <span className="rounded-full bg-[#E3F4FA] px-2 py-0.5 text-[10px] font-bold text-[#3A7CA5]">
+            {place.category === "맛집" ? "식당" : place.category}
+          </span>
+          {hours ? <span className="text-[11px] text-muted-foreground">{hours}</span> : null}
+        </div>
+        {place.memo ? <p className="truncate text-xs font-bold text-[#FF893B]">{place.memo}</p> : null}
         {place.address ? <p className="truncate text-xs text-muted-foreground">{place.address}</p> : null}
       </div>
     </div>

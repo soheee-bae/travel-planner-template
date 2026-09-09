@@ -183,15 +183,57 @@ export function AddPlaceDialog({
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="place-name">장소명</Label>
-            <Input id="place-name" placeholder="예: 성산일출봉" {...form.register("name")} />
+            <Input id="place-name" placeholder="예) 협재 해수욕장" {...form.register("name")} />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="place-category">카테고리</Label>
+            <Label htmlFor="place-address">주소</Label>
+            <div className="flex gap-2">
+              <Input
+                id="place-address"
+                placeholder="주소 또는 지역명"
+                {...form.register("address")}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={autofill.fetchFromAddress}
+                disabled={autofill.status === "loading"}
+              >
+                찾기
+              </Button>
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>카테고리</Label>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  ["관광", "관광"],
+                  ["카페", "카페"],
+                  ["맛집", "식당"],
+                  ["쇼핑", "쇼핑"],
+                  ["기타", "교통"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => form.setValue("category", value)}
+                  className={`rounded-full px-3 py-1.5 text-sm font-bold ${
+                    form.watch("category") === value
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <Select
               defaultValue={form.getValues("category")}
               onValueChange={(v) => form.setValue("category", v as FormValues["category"])}
             >
-              <SelectTrigger id="place-category" className="w-full">
+              <SelectTrigger id="place-category" className="sr-only" aria-hidden>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -202,6 +244,22 @@ export function AddPlaceDialog({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="place-duration">예상 소요시간</Label>
+            <Input
+              id="place-duration"
+              type="number"
+              min={0}
+              placeholder="예) 1h 30m → 분"
+              {...form.register("durationMin", {
+                setValueAs: (v) => (v === "" ? undefined : Number(v)),
+              })}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="place-memo">메모 (선택)</Label>
+            <Textarea id="place-memo" placeholder="예) 예약 필수!" {...form.register("memo")} />
           </div>
 
           <div className="flex flex-col gap-1.5 rounded-md border border-dashed border-border p-3">
@@ -254,21 +312,6 @@ export function AddPlaceDialog({
             )}
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="place-address">주소</Label>
-            <div className="flex gap-2">
-              <Input id="place-address" {...form.register("address")} />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={autofill.fetchFromAddress}
-                disabled={autofill.status === "loading"}
-              >
-                찾기
-              </Button>
-            </div>
-          </div>
-
           <details className="rounded-md border border-border p-3">
             <summary className="cursor-pointer text-sm font-medium text-foreground">
               자세히 입력
@@ -292,29 +335,16 @@ export function AddPlaceDialog({
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="place-cost">예상 비용</Label>
-                  <Input
-                    id="place-cost"
-                    type="number"
-                    min={0}
-                    {...form.register("estimatedCost", {
-                      setValueAs: (v) => (v === "" ? undefined : Number(v)),
-                    })}
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="place-duration">소요시간(분)</Label>
-                  <Input
-                    id="place-duration"
-                    type="number"
-                    min={0}
-                    {...form.register("durationMin", {
-                      setValueAs: (v) => (v === "" ? undefined : Number(v)),
-                    })}
-                  />
-                </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="place-cost">예상 비용</Label>
+                <Input
+                  id="place-cost"
+                  type="number"
+                  min={0}
+                  {...form.register("estimatedCost", {
+                    setValueAs: (v) => (v === "" ? undefined : Number(v)),
+                  })}
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="place-priority">우선순위</Label>
@@ -365,10 +395,6 @@ export function AddPlaceDialog({
                   <Label htmlFor="place-photo">사진 URL</Label>
                   <Input id="place-photo" {...form.register("photoUrl")} />
                 </div>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="place-memo">메모</Label>
-                <Textarea id="place-memo" {...form.register("memo")} />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="place-link-url">링크</Label>

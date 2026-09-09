@@ -64,6 +64,15 @@ export function AddExpenseDialog({
   const createExpense = useCreateExpense(tripId);
   const updateExpense = useUpdateExpense(tripId);
   const [payers, setPayers] = useState<string[]>(["나", "준형", "같이"]);
+  const [dayIndex, setDayIndex] = useState<number | null>(initial?.dayIndex ?? null);
+
+  const FIGMA_EXPENSE_CATS = [
+    { label: "🏨 숙소", value: "숙소" as const },
+    { label: "✈️ 교통", value: "교통" as const },
+    { label: "🍽️ 식비", value: "식비" as const },
+    { label: "🎡 관광", value: "관광·입장" as const },
+    { label: "🛍️ 기타", value: "기타" as const },
+  ];
 
   useEffect(() => {
     void listTripMembers(tripId)
@@ -99,14 +108,14 @@ export function AddExpenseDialog({
   function onSubmit(values: FormValues) {
     if (initial) {
       updateExpense.mutate(
-        { id: initial.id, patch: { ...values, isManual: true } },
+        { id: initial.id, patch: { ...values, dayIndex, isManual: true } },
         { onSuccess: () => setOpen(false) },
       );
       return;
     }
     const input: CreateExpenseInput = {
       tripId,
-      dayIndex: null,
+      dayIndex,
       placeId: null,
       isManual: true,
       ...values,
@@ -127,15 +136,25 @@ export function AddExpenseDialog({
       )}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{initial ? "비용 수정" : "비용 추가"}</DialogTitle>
+          <DialogTitle>{initial ? "비용 수정" : "비용 추가 💰"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="exp-title">항목명</Label>
-            <Input id="exp-title" placeholder="예: 우진해장국 점심" {...form.register("title")} />
+            <Input id="exp-title" placeholder="예) 흑돼지 저녁 2인" {...form.register("title")} />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label>누가냈나요</Label>
+            <Label htmlFor="exp-amount">금액</Label>
+            <Controller
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <MoneyInput id="exp-amount" value={field.value} onChange={(v) => field.onChange(v ?? 0)} />
+              )}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>누가 냈나요?</Label>
             <div className="flex flex-wrap gap-2">
               {payers.map((p) => (
                 <SoftChip
@@ -149,7 +168,36 @@ export function AddExpenseDialog({
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="exp-category">카테고리</Label>
+            <Label>날짜</Label>
+            <div className="flex flex-wrap gap-2">
+              <SoftChip active={dayIndex == null} onClick={() => setDayIndex(null)}>
+                여행준비
+              </SoftChip>
+              {([1, 2, 3] as const).map((d) => (
+                <SoftChip key={d} active={dayIndex === d} onClick={() => setDayIndex(d)}>
+                  Day {d}
+                </SoftChip>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>카테고리</Label>
+            <div className="flex flex-wrap gap-2">
+              {FIGMA_EXPENSE_CATS.map((c) => (
+                <SoftChip
+                  key={c.value}
+                  active={form.watch("category") === c.value}
+                  onClick={() => form.setValue("category", c.value)}
+                >
+                  {c.label}
+                </SoftChip>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="exp-category" className="sr-only">
+              카테고리
+            </Label>
             <Select
               defaultValue={form.getValues("category")}
               onValueChange={(v) => form.setValue("category", v as FormValues["category"])}
@@ -166,21 +214,9 @@ export function AddExpenseDialog({
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="exp-amount">금액</Label>
-              <Controller
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <MoneyInput id="exp-amount" value={field.value} onChange={(v) => field.onChange(v ?? 0)} />
-                )}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="exp-date">날짜</Label>
-              <Input id="exp-date" type="date" {...form.register("date")} />
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="exp-date">날짜</Label>
+            <Input id="exp-date" type="date" {...form.register("date")} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">

@@ -129,7 +129,7 @@ export function MemoTab({ tripId, embedded }: { tripId: string; embedded?: boole
   return (
     <div className={embedded ? "flex flex-col gap-3" : "mx-auto flex w-full flex-col gap-3 p-4"}>
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-foreground">메모</p>
+        <p className="text-sm font-semibold text-foreground">📝 위시리스트 & 메모</p>
         <WishlistItemDialog
           onSubmit={(values) => createItem.mutate({ tripId, orderIndex: items.length, ...values })}
           trigger={

@@ -13,6 +13,7 @@ import {
 import { ChecklistCategorySection } from "@/features/checklists/components/checklist-category";
 import { CHECKLIST_RECOMMENDED_CATEGORIES } from "@/mocks/fixtures/checklists";
 import { SoftChip, EndMascot } from "@/components/ui/soft-chip";
+import { AddChecklistItemDialog } from "@/features/checklists/components/add-checklist-item-dialog";
 
 export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boolean }) {
   const { data: categories, isLoading: loadingCategories } = useChecklistCategories(tripId);
@@ -125,6 +126,8 @@ export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boole
             }
           />
         ))}
+
+      <AddChecklistItemDialog tripId={tripId} categories={categories ?? []} />
 
       <form onSubmit={handleAddCategory} className="flex gap-2">
         <Input

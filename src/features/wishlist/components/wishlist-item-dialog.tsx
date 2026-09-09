@@ -85,14 +85,19 @@ export function WishlistItemDialog({
               <Label htmlFor="wish-title">제목</Label>
               <Input
                 id="wish-title"
-                placeholder="예: 현지인 추천 맛집들"
+                placeholder="메모 제목"
                 {...form.register("title")}
               />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="wish-content">내용</Label>
-            <Textarea id="wish-content" rows={5} {...form.register("content")} />
+            <Textarea
+              id="wish-content"
+              rows={5}
+              placeholder="메모 내용을 입력하세요"
+              {...form.register("content")}
+            />
           </div>
           <Button type="submit" className="h-10">
             {initial ? "저장" : "추가"}

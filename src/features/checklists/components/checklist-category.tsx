@@ -106,7 +106,7 @@ export function ChecklistCategorySection({
         {items.map((item) => (
           <label
             key={item.id}
-            className="flex items-center gap-2 rounded-2xl bg-card px-3 py-2.5 text-sm shadow-sm ring-1 ring-border"
+            className="flex items-center gap-2 rounded-[18px] bg-white px-3 py-3 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
           >
             <input
               type="checkbox"
