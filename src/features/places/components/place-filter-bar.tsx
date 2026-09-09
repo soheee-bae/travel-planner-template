@@ -1,8 +1,17 @@
 import { cn } from "@/lib/utils";
-import { PLACE_CATEGORIES, type PlaceCategory } from "@/mocks/fixtures/places";
+import type { PlaceCategory } from "@/mocks/fixtures/places";
 
 export type PlaceFilter = "전체" | PlaceCategory;
-const FILTERS: PlaceFilter[] = ["전체", ...PLACE_CATEGORIES];
+const FILTERS: PlaceFilter[] = ["전체", "카페", "맛집", "관광", "쇼핑", "액티비티", "기타"];
+const FILTER_LABEL: Record<PlaceFilter, string> = {
+  전체: "전체",
+  카페: "카페",
+  맛집: "식당",
+  관광: "관광",
+  쇼핑: "쇼핑",
+  액티비티: "액티비티",
+  기타: "기타",
+};
 
 export function PlaceFilterBar({
   active,
@@ -29,7 +38,7 @@ export function PlaceFilterBar({
               : "bg-muted text-muted-foreground",
           )}
         >
-          {filter} {counts[filter] > 0 && `(${counts[filter]})`}
+          {FILTER_LABEL[filter]}
         </button>
       ))}
     </div>

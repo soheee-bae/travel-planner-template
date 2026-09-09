@@ -57,13 +57,17 @@ export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boole
           </SoftChip>
         ))}
       </div>
-      <div>
-        <p className="text-sm font-medium text-foreground">
-          ✅ 여행 준비 ({checkedCount}/{totalCount} 완료)
+      <div className="rounded-[20px] bg-[#FFF8EE] p-4 ring-1 ring-[#FFE0BC]">
+        <p className="text-sm font-bold text-[#1A1A1A]">🎒 준비 현황</p>
+        <p className="mt-1 font-heading text-2xl font-bold text-[#FF9F43]">
+          {checkedCount}/{totalCount}
         </p>
-        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
+        <p className="text-xs text-[#8C8885]">
+          {pct}% 완료 · {checkedCount}/{totalCount} 완료
+        </p>
+        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#F0EDE8]">
           <div
-            className="h-full rounded-full bg-primary transition-[width]"
+            className="h-full rounded-full bg-[#FF9F43] transition-[width]"
             style={{ width: `${pct}%` }}
             role="progressbar"
             aria-valuenow={pct}

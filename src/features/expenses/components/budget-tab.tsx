@@ -48,9 +48,31 @@ export function BudgetTab({ trip }: { trip: Trip }) {
   return (
     <div className="mx-auto flex w-full flex-col gap-4 p-4 pb-6">
       <div>
-        <h2 className="font-heading text-xl font-bold">💸 여행 비용</h2>
-        <p className="text-sm font-bold text-foreground">💰 총 비용 {total.toLocaleString()}원</p>
+        <h2 className="font-heading text-xl font-bold">여행 비용</h2>
+        <p className="text-sm font-bold text-foreground">
+          합계{" "}
+          <span className="text-[#FF9F43]">
+            {total >= 10000 ? `${Math.round(total / 10000)}만원` : `${total.toLocaleString()}원`}
+          </span>
+        </p>
+        <p className="sr-only">💰 총 비용 {total.toLocaleString()}원</p>
       </div>
+
+      {categoryShares.length > 0 ? (
+        <ul className="grid grid-cols-2 gap-2">
+          {categoryShares.map((g) => (
+            <li
+              key={g.category}
+              className="flex items-center justify-between rounded-2xl bg-white px-3 py-2 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+            >
+              <span className="text-[#8C8885]">{g.category}</span>
+              <span className="font-bold text-[#1A1A1A]">
+                {g.total >= 10000 ? `${(g.total / 10000).toFixed(1)}만` : `${g.total.toLocaleString()}원`}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       <div className="rounded-3xl bg-card p-4 shadow-sm ring-1 ring-border">
         {categoryShares.length > 0 ? (

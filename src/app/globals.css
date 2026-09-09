@@ -70,7 +70,7 @@
 
 :root {
   /* Notion 실측값 기반 (DESIGN.md §색상 토큰). 웜 미니멀리즘 — 쿨톤이 아니다. */
-  --background: oklch(0.985 0.012 85); /* cream #FFF8EE */
+  --background: oklch(0.985 0.004 90); /* #FBFBFB 시안 페이지 배경 */
   --foreground: oklch(0.28 0.03 50); /* #3D2B1F */
   --card: oklch(0.995 0.006 90);
   --card-foreground: oklch(0.28 0.03 50);

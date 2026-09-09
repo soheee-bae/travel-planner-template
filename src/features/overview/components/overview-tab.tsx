@@ -34,15 +34,14 @@ export function OverviewTab({ tripId }: { tripId: string }) {
 
   if (trip && tripId === JEJU_TRIP_ID) {
     const flights = (transports ?? []).filter((item) => item.type === "비행기");
-    const rental = (transports ?? []).find((item) => item.type === "렌터카");
     return (
-      <div className="relative mx-auto flex w-full flex-col p-4">
-        <JejuHomeHero trip={trip} flights={flights} stays={accommodations ?? []} rental={rental} />
+      <div className="relative mx-auto flex w-full flex-col px-5 pt-2">
+        <JejuHomeHero trip={trip} flights={flights} stays={accommodations ?? []} />
         <button
           type="button"
           aria-label="타임캡슐 열기"
           onClick={() => setCapsuleOpen(true)}
-          className="fixed right-5 bottom-20 z-20 flex size-14 items-center justify-center rounded-full bg-[#FFB4C8] text-2xl shadow-md"
+          className="fixed right-5 bottom-20 z-20 flex size-[60px] items-center justify-center rounded-full bg-[#FF9F43] text-2xl text-white shadow-[0_4px_16px_rgba(255,159,67,0.45)]"
         >
           🎁
         </button>

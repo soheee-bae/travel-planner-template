@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePlaces, useDeletePlace, useUpdatePlace } from "@/features/places/hooks";
 import { PlaceCard } from "@/features/places/components/place-card";
@@ -86,15 +87,21 @@ export function PlacesTab({ trip }: { trip: Trip }) {
 
   return (
     <div className="mx-auto flex w-full flex-col gap-3 p-4">
-      <h2 className="font-heading text-xl font-bold">📍 장소 리스트</h2>
+      <h2 className="font-heading text-xl font-bold">장소 리스트</h2>
       <div className="flex gap-2">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="장소 검색"
-          aria-label="장소 검색"
-          className="h-11 flex-1 rounded-full bg-card px-4 text-sm ring-1 ring-border outline-none"
-        />
+        <label className="relative flex-1">
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3 size-[21px] -translate-y-1/2 text-[#B0AAA6]"
+            aria-hidden
+          />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="장소 검색..."
+            aria-label="장소 검색"
+            className="h-11 w-full rounded-full bg-card pr-4 pl-9 text-sm ring-1 ring-border outline-none"
+          />
+        </label>
         <Button size="sm" variant="outline" className="h-11 rounded-full" onClick={() => setSelectionMode(true)}>
           선택
         </Button>

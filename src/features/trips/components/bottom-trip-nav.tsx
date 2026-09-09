@@ -1,14 +1,16 @@
 "use client";
 
+import { CalendarDays, CircleCheck, Home, MapPin, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TripTab } from "@/features/trips/hooks/use-trip-tab";
+import type { LucideIcon } from "lucide-react";
 
-const NAV_ITEMS: { tab: TripTab; label: string; emoji: string }[] = [
-  { tab: "overview", label: "홈", emoji: "🏠" },
-  { tab: "planner", label: "플래너", emoji: "📅" },
-  { tab: "places", label: "리스트", emoji: "📍" },
-  { tab: "budget", label: "비용", emoji: "👛" },
-  { tab: "prep", label: "준비", emoji: "✅" },
+const NAV_ITEMS: { tab: TripTab; label: string; icon: LucideIcon }[] = [
+  { tab: "overview", label: "홈", icon: Home },
+  { tab: "planner", label: "플래너", icon: CalendarDays },
+  { tab: "places", label: "리스트", icon: MapPin },
+  { tab: "budget", label: "비용", icon: Wallet },
+  { tab: "prep", label: "준비", icon: CircleCheck },
 ];
 
 export function BottomTripNav({
@@ -24,11 +26,12 @@ export function BottomTripNav({
     <nav
       role="tablist"
       aria-label="여행 상세 탭"
-      className="sticky bottom-0 z-30 border-t border-border bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1"
+      className="sticky bottom-0 z-30 border-t border-black/5 bg-white/92 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-md"
     >
       <div className="grid grid-cols-5">
         {NAV_ITEMS.map((item) => {
           const isActive = current === item.tab;
+          const Icon = item.icon;
           return (
             <button
               key={item.tab}
@@ -39,13 +42,16 @@ export function BottomTripNav({
               id={`trip-tab-${item.tab}`}
               onClick={() => onChange(item.tab)}
               className={cn(
-                "flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-2xl text-[11px] font-semibold",
-                isActive ? "text-primary" : "text-muted-foreground",
+                "flex min-h-12 flex-col items-center justify-center gap-0.5 pt-2.5 pb-1 text-[9px]",
+                isActive ? "font-bold text-[#FF9F43]" : "font-normal text-[#AAA]",
               )}
             >
-              <span aria-hidden="true" className="text-base">
-                {item.emoji}
-              </span>
+              <Icon
+                aria-hidden="true"
+                className="size-6"
+                strokeWidth={1.4}
+                fill={isActive ? "#FFE0BC" : "#F5F5F5"}
+              />
               {item.label}
             </button>
           );

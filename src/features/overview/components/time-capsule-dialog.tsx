@@ -4,10 +4,35 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 
 const CAPSULES = [
-  { emoji: "🍊", when: "Day 1 저녁 20:00", title: "설레는 아침!", body: "도착하면 귤 아이스크림부터!", locked: false },
-  { emoji: "🐷", when: "Day 1 밤", title: "흑돼지 타임", body: "고기 굽는 동안 사진 많이 찍기", locked: false },
-  { emoji: "🎂", when: "10월 15일 생일 당일!", title: "생일 서프라이즈", body: "케이크는 미리 픽업해 두기", locked: false, highlight: true },
-  { emoji: "🔒", when: "Day 3", title: "아직 비밀", body: "여행 중에 열려요", locked: true },
+  {
+    emoji: "🍊",
+    when: "출발 당일 09:15",
+    title: "설레는 아침!",
+    body: "제주행 탑승구 앞에서 이 봉투를 열어봐 🍊",
+    locked: false,
+  },
+  {
+    emoji: "🐷",
+    when: "Day 1 저녁 20:00",
+    title: "흑돼지 먹으면서 열어 봐",
+    body: "오늘 하루도 수고했어 🐷",
+    locked: false,
+  },
+  {
+    emoji: "🎂",
+    when: "10월 15일 생일 당일!",
+    title: "생일 축하해 준형아 🎂",
+    body: "네가 있어서 이 여행이 더 빛나 💕",
+    locked: false,
+    highlight: true,
+  },
+  {
+    emoji: "🔒",
+    when: "귀국 후 10.19 자정",
+    title: "???",
+    body: "🔒 잠김",
+    locked: true,
+  },
 ];
 
 export function TimeCapsuleDialog({
@@ -24,7 +49,7 @@ export function TimeCapsuleDialog({
           <p className="text-3xl" aria-hidden>
             🗺️
           </p>
-          <DialogTitle className="font-heading text-xl">타임캡슐 여정</DialogTitle>
+          <DialogTitle className="font-heading text-xl">🗺 타임캡슐 여정</DialogTitle>
           <p className="text-sm text-muted-foreground">여행 중 열어볼 특별한 메시지들</p>
         </DialogHeader>
         <ol className="relative mx-auto max-w-sm space-y-4 border-l border-dashed border-primary/40 pl-6">

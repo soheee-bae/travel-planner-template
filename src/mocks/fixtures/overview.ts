@@ -76,6 +76,7 @@ export const initialTransports: Transport[] = [
     departureAt: "2026-10-14T08:20",
     arrivalAt: "2026-10-14T09:30",
     bookingRef: "제주항공",
+    memo: "JEJU AIR · 7C101",
     cost: 98000,
   },
   {
@@ -87,6 +88,7 @@ export const initialTransports: Transport[] = [
     departureAt: "2026-10-16T19:10",
     arrivalAt: "2026-10-16T20:20",
     bookingRef: "제주항공",
+    memo: "JEJU AIR · 7C102",
     cost: 98000,
   },
   {

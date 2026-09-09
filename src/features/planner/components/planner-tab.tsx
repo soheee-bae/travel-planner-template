@@ -39,7 +39,7 @@ export function PlannerTab({ trip }: { trip: Trip }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <h2 className="px-4 pt-4 font-heading text-xl font-bold">📅 여행 플래너</h2>
+      <h2 className="px-4 pt-4 font-heading text-xl font-bold">여행 플래너</h2>
       <PlannerDayTabs
         startDate={trip.startDate}
         endDate={trip.endDate}
