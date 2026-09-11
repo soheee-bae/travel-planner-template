@@ -8,11 +8,8 @@
 
 ## 현재 상태
 
-**로그인(매직링크)은 유지한다.** `ENABLE_MSW=false`이면 `/login` 후 Supabase CRUD.
-테스트/e2e는 MSW. 스키마는 아직 실 프로젝트에 없다 (`public.trips` 없음).
-
-- 여행 카드 리스트 → 여행 생성 폼 → 여행 디테일 6탭(개요/플래너/리스트/비용/준비/메모)
-  전부 mock 시드로 채워져 있다.
+**V1은 로그인 없다.** `/` → 스플래시 → `/trips/trip_jeju` 홈.
+`.env.local`에 Supabase URL이 있으면 실 DB(anon RLS). 테스트/e2e는 MSW.
 
 ## 시작하기
 
@@ -36,7 +33,7 @@ Supabase 연결 없이도 모든 화면이 정상 동작한다. `.env.example`�
 | 산출물 | 위치 | 상태 |
 | --- | --- | --- |
 | 마이그레이션 9개 | `supabase/migrations/` | `libpg-query`(실제 Postgres 파서)로 문법 검증 완료. **실 DB에 적용해본 적은 없음** |
-| 시드 | `supabase/seed.sql` (로컬) / `supabase/seed-jeju-hosted.sql` (호스트 SQL Editor) | 로컬은 나고야 중심 + 더미 auth 유저. 호스트는 제주만, 본인 User UID 필요 |
+| 시드 | `supabase/reset-public-jeju.sql` | 호스트 SQL Editor 한 방: RLS 공개 + 기존 여행 삭제 + 제주 시드 |
 | 브라우저/서버 클라이언트 | `src/lib/supabase/{client,server}.ts` | `@supabase/ssr` 표준 패턴 |
 | 세션 갱신 | `src/proxy.ts` | Next.js 16 `proxy.ts`(구 middleware). **환경변수가 없으면 완전히 no-op** — 이 가드가 없으면 앱 전체가 깨진다는 것을 실제로 확인하고 넣었다 |
 | DB 타입 | (아직 없음) | `pnpm db:types`로 실제 프로젝트 연결 후 생성 |
@@ -48,18 +45,15 @@ Supabase 연결 없이도 모든 화면이 정상 동작한다. `.env.example`�
   더미 사용자를 `auth.users`에 직접 삽입한다.
 - **클라이언트 코드**: 실제 프로젝트에 연결되어 있지 않다(환경변수 없으면 호출 시
   런타임 에러).
-- **`src/proxy.ts`**: mock이 꺼져 있으면 미로그인 → `/login`.
-- 로그인: `/login` 매직링크, `/auth/callback`에서 세션 교환.
-- CRUD: `isMockData()`가 false일 때 Supabase.
+- **`src/proxy.ts`**: 세션 가드 없음.
+- CRUD: Supabase URL이 있으면 anon으로 실 DB. `NEXT_PUBLIC_ENABLE_MSW=true`면 mock.
 
 ### 네가 해야 할 일
 
 1. Secrets URL은 `https://<ref>.supabase.co`만 (`/rest/v1/` 제거)
 2. 키는 JWT anon (`eyJ...`)
-3. Auth Site URL `http://localhost:3000`, Redirect `http://localhost:3000/auth/callback`
-4. `npx supabase link --project-ref rocruhhuxdvkweobsmzr` 후 `pnpm db:push`
-5. `/login`에서 메일 링크로 접속
-6. 제주 시드: `supabase/seed-jeju-hosted.sql`에서 `v_owner`만 본인 UID로 바꾼 뒤 SQL Editor에 실행. `/trips/trip_jeju`가 그 UUID로 매핑된다. `.env.local`에 `NEXT_PUBLIC_ENABLE_MSW=false`
+3. SQL Editor에 `supabase/reset-public-jeju.sql` 전체 실행 (UID 불필요)
+4. `pnpm dev` → `http://localhost:3000`
 
 ### 스코프 밖 (P10-06, P10-08~11)
 

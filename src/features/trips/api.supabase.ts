@@ -5,7 +5,7 @@ import type { CreateTripInput, Trip, UpdateTripInput } from "@/mocks/fixtures/tr
 
 interface TripRow {
   id: string;
-  owner_id: string;
+  owner_id: string | null;
   title: string;
   destination_country: string;
   destination_city: string;
@@ -33,7 +33,7 @@ function toTrip(row: TripRow, userId: string | null): Trip {
     companions: row.companions,
     coverEmoji: row.cover_emoji,
     baseCurrency: row.base_currency,
-    ownerId: row.owner_id,
+    ownerId: row.owner_id ?? undefined,
     role: userId && row.owner_id === userId ? "owner" : "editor",
   };
 }
@@ -59,16 +59,10 @@ export async function fetchTrip(id: string): Promise<Trip> {
 
 export async function createTrip(input: CreateTripInput): Promise<Trip> {
   const supabase = createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError || !user) throw new Error("로그인이 필요합니다.");
-
   const result = await supabase
     .from("trips")
     .insert({
-      owner_id: user.id,
+      owner_id: null,
       title: input.title,
       destination_country: input.destinationCountry,
       destination_city: input.destinationCity,
@@ -80,7 +74,7 @@ export async function createTrip(input: CreateTripInput): Promise<Trip> {
     })
     .select(TRIP_COLUMNS)
     .single();
-  return toTrip(throwIfError(result), user.id);
+  return toTrip(throwIfError(result), await currentUserId());
 }
 
 export async function updateTrip(id: string, patch: UpdateTripInput): Promise<Trip> {

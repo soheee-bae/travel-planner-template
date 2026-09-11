@@ -1,13 +1,11 @@
 /**
- * mock(MSW/Next mock API) vs Supabase 전환.
- * - 단위 테스트는 항상 mock
- * - 개발은 기본 mock. `.env.local`에 NEXT_PUBLIC_ENABLE_MSW=false 일 때만 실 DB
- * - URL만 있고 ENABLE_MSW를 안 적으면 예전엔 supabase로 가서 trip_jeju가 404였다
+ * mock vs Supabase.
+ * - 테스트·e2e(ENABLE_MSW=true)는 mock
+ * - URL이 있으면 로그인 없이 실 DB (RLS가 anon 허용이어야 함)
  */
 export function isMockData(): boolean {
   if (process.env.NODE_ENV === "test") return true;
   if (process.env.NEXT_PUBLIC_ENABLE_MSW === "true") return true;
-  if (process.env.NEXT_PUBLIC_ENABLE_MSW === "false") return false;
-  if (process.env.NODE_ENV !== "production") return true;
-  return !process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL) return false;
+  return process.env.NODE_ENV !== "production";
 }

@@ -1,11 +1,4 @@
--- 호스트 SQL Editor용. 채팅/미리보기에서 잘라 붙이면 42601이 난다.
--- GitHub에서 파일 전체를 연 다음 Raw 또는 전체 선택해서 붙여라.
--- https://github.com/soheee-bae/travel-planner/blob/feature/travel-planner-basic/supabase/seed-jeju-hosted.sql
---
--- 1) Authentication → Users → User UID 복사
--- 2) 아래 REPLACE_WITH_YOUR_USER_UUID 한 곳만 그 UID로 교체
--- 3) 에디터에 이 파일 끝(wishlist on conflict)까지 넣고 Run
--- 4) NEXT_PUBLIC_ENABLE_MSW=false, 그 계정 로그인, /trips/trip_jeju
+-- 구버전. 호스트에서는 supabase/reset-public-jeju.sql 을 써라 (로그인 없음 + 기존 여행 삭제).
 
 insert into trips (
   id, owner_id, title, destination_country, destination_city,
