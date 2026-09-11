@@ -1,45 +1,31 @@
--- 호스트 Supabase(Dashboard SQL Editor)용. auth.users에 직접 insert 하지 않는다.
+-- 호스트 SQL Editor용. 채팅/미리보기에서 잘라 붙이면 42601이 난다.
+-- GitHub에서 파일 전체를 연 다음 Raw 또는 전체 선택해서 붙여라.
+-- https://github.com/soheee-bae/travel-planner/blob/feature/travel-planner-basic/supabase/seed-jeju-hosted.sql
 --
--- 1) Authentication → Users 에서 본인 User UID 복사
--- 2) 아래 v_owner 값만 그 UUID로 바꾼다
--- 3) SQL Editor에 전부 붙여넣고 Run
--- 4) .env.local: NEXT_PUBLIC_ENABLE_MSW=false 후 그 계정으로 로그인
--- 5) 앱에서 /trips/trip_jeju 열기 (코드가 이 UUID로 매핑함)
---
--- 같은 SQL을 다시 실행하면 upsert라 덮어쓴다.
--- 로컬 `supabase db reset`용 seed.sql 과는 별개다. 그걸 호스트에 넣지 말 것.
+-- 1) Authentication → Users → User UID 복사
+-- 2) 아래 REPLACE_WITH_YOUR_USER_UUID 한 곳만 그 UID로 교체
+-- 3) 에디터에 이 파일 끝(wishlist on conflict)까지 넣고 Run
+-- 4) NEXT_PUBLIC_ENABLE_MSW=false, 그 계정 로그인, /trips/trip_jeju
 
-do $$
-declare
-  v_owner uuid := '00000000-0000-0000-0000-ffffffffffff'; -- ★ 여기만 본인 User UID로
-  v_trip  uuid := '00000000-0000-0000-0001-000000000001';
-begin
-  if v_owner = '00000000-0000-0000-0000-ffffffffffff' then
-    raise exception 'v_owner를 Authentication > Users의 User UID로 바꿔줘.';
-  end if;
-
-  if not exists (select 1 from auth.users where id = v_owner) then
-    raise exception 'auth.users에 없는 UUID다. 대시보드에서 가입한 계정의 UID인지 확인해.';
-  end if;
-
-  insert into trips (
-    id, owner_id, title, destination_country, destination_city,
-    start_date, end_date, companions, cover_emoji, base_currency
-  ) values (
-    v_trip, v_owner, '소희 & 준형의 제주', 'KR', '제주도',
-    '2026-10-14', '2026-10-16', '커플 · 생일 기념', '🍊', 'KRW'
-  )
-  on conflict (id) do update set
-    owner_id = excluded.owner_id,
-    title = excluded.title,
-    destination_country = excluded.destination_country,
-    destination_city = excluded.destination_city,
-    start_date = excluded.start_date,
-    end_date = excluded.end_date,
-    companions = excluded.companions,
-    cover_emoji = excluded.cover_emoji,
-    base_currency = excluded.base_currency;
-end $$;
+insert into trips (
+  id, owner_id, title, destination_country, destination_city,
+  start_date, end_date, companions, cover_emoji, base_currency
+) values (
+  '00000000-0000-0000-0001-000000000001',
+  'REPLACE_WITH_YOUR_USER_UUID',
+  '소희 & 준형의 제주', 'KR', '제주도',
+  '2026-10-14', '2026-10-16', '커플 · 생일 기념', '🍊', 'KRW'
+)
+on conflict (id) do update set
+  owner_id = excluded.owner_id,
+  title = excluded.title,
+  destination_country = excluded.destination_country,
+  destination_city = excluded.destination_city,
+  start_date = excluded.start_date,
+  end_date = excluded.end_date,
+  companions = excluded.companions,
+  cover_emoji = excluded.cover_emoji,
+  base_currency = excluded.base_currency;
 
 -- 숙소 (홈 카드 고정 시드)
 insert into accommodations (
