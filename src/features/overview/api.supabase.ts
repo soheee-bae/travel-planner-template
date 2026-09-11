@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import { asNumber, asTime, throwIfError, throwIfWriteError } from "@/lib/supabase/throw";
+import { toClientTripId, toDbTripId } from "@/lib/trip-ids";
 import type {
   Accommodation,
   CreateAccommodationInput,
@@ -37,7 +38,7 @@ interface TransportRow {
 function toAccommodation(row: AccommodationRow): Accommodation {
   return {
     id: row.id,
-    tripId: row.trip_id,
+    tripId: toClientTripId(row.trip_id),
     name: row.name,
     checkinDate: row.checkin_date,
     checkoutDate: row.checkout_date,
@@ -53,7 +54,7 @@ function toAccommodation(row: AccommodationRow): Accommodation {
 function toTransport(row: TransportRow): Transport {
   return {
     id: row.id,
-    tripId: row.trip_id,
+    tripId: toClientTripId(row.trip_id),
     type: row.type,
     departureFrom: row.departure_from,
     arrivalTo: row.arrival_to,
@@ -67,7 +68,7 @@ function toTransport(row: TransportRow): Transport {
 
 export async function fetchAccommodations(tripId: string): Promise<Accommodation[]> {
   const supabase = createClient();
-  const result = await supabase.from("accommodations").select("*").eq("trip_id", tripId);
+  const result = await supabase.from("accommodations").select("*").eq("trip_id", toDbTripId(tripId));
   return throwIfError(result).map(toAccommodation);
 }
 
@@ -76,7 +77,7 @@ export async function createAccommodation(input: CreateAccommodationInput): Prom
   const result = await supabase
     .from("accommodations")
     .insert({
-      trip_id: input.tripId,
+      trip_id: toDbTripId(input.tripId),
       name: input.name,
       checkin_date: input.checkinDate,
       checkout_date: input.checkoutDate,
@@ -111,7 +112,7 @@ export async function updateAccommodation(
       ...(patch.cost !== undefined ? { cost: patch.cost ?? null } : {}),
       ...(patch.memo !== undefined ? { memo: patch.memo ?? null } : {}),
     })
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .eq("id", id)
     .select("*")
     .single();
@@ -123,14 +124,14 @@ export async function deleteAccommodation(tripId: string, id: string): Promise<v
   const { error } = await supabase
     .from("accommodations")
     .delete()
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .eq("id", id);
   throwIfWriteError(error);
 }
 
 export async function fetchTransports(tripId: string): Promise<Transport[]> {
   const supabase = createClient();
-  const result = await supabase.from("transports").select("*").eq("trip_id", tripId);
+  const result = await supabase.from("transports").select("*").eq("trip_id", toDbTripId(tripId));
   return throwIfError(result).map(toTransport);
 }
 
@@ -139,7 +140,7 @@ export async function createTransport(input: CreateTransportInput): Promise<Tran
   const result = await supabase
     .from("transports")
     .insert({
-      trip_id: input.tripId,
+      trip_id: toDbTripId(input.tripId),
       type: input.type,
       departure_from: input.departureFrom,
       arrival_to: input.arrivalTo,
@@ -172,7 +173,7 @@ export async function updateTransport(
       ...(patch.cost !== undefined ? { cost: patch.cost ?? null } : {}),
       ...(patch.memo !== undefined ? { memo: patch.memo ?? null } : {}),
     })
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .eq("id", id)
     .select("*")
     .single();
@@ -181,6 +182,6 @@ export async function updateTransport(
 
 export async function deleteTransport(tripId: string, id: string): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.from("transports").delete().eq("trip_id", tripId).eq("id", id);
+  const { error } = await supabase.from("transports").delete().eq("trip_id", toDbTripId(tripId)).eq("id", id);
   throwIfWriteError(error);
 }

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import { asRequiredNumber, throwIfError, throwIfWriteError } from "@/lib/supabase/throw";
+import { toClientTripId, toDbTripId } from "@/lib/trip-ids";
 import type {
   CreateExpenseInput,
   Expense,
@@ -27,7 +28,7 @@ interface ExpenseRow {
 function toExpense(row: ExpenseRow): Expense {
   return {
     id: row.id,
-    tripId: row.trip_id,
+    tripId: toClientTripId(row.trip_id),
     title: row.title,
     category: row.category,
     amount: asRequiredNumber(row.amount),
@@ -44,7 +45,7 @@ function toExpense(row: ExpenseRow): Expense {
 
 function toRow(input: CreateExpenseInput | UpdateExpenseInput): Record<string, unknown> {
   const row: Record<string, unknown> = {};
-  if ("tripId" in input && input.tripId) row.trip_id = input.tripId;
+  if ("tripId" in input && input.tripId) row.trip_id = toDbTripId(input.tripId);
   if (input.title !== undefined) row.title = input.title;
   if (input.category !== undefined) row.category = input.category;
   if (input.amount !== undefined) row.amount = input.amount;
@@ -61,7 +62,7 @@ function toRow(input: CreateExpenseInput | UpdateExpenseInput): Record<string, u
 
 export async function fetchExpenses(tripId: string): Promise<Expense[]> {
   const supabase = createClient();
-  const result = await supabase.from("expenses").select("*").eq("trip_id", tripId);
+  const result = await supabase.from("expenses").select("*").eq("trip_id", toDbTripId(tripId));
   return throwIfError(result).map(toExpense);
 }
 
@@ -80,7 +81,7 @@ export async function updateExpense(
   const result = await supabase
     .from("expenses")
     .update(toRow(patch))
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .eq("id", id)
     .select("*")
     .single();
@@ -89,6 +90,10 @@ export async function updateExpense(
 
 export async function deleteExpense(tripId: string, id: string): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.from("expenses").delete().eq("trip_id", tripId).eq("id", id);
+  const { error } = await supabase
+    .from("expenses")
+    .delete()
+    .eq("trip_id", toDbTripId(tripId))
+    .eq("id", id);
   throwIfWriteError(error);
 }

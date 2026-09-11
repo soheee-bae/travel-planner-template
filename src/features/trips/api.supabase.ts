@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import { throwIfError, throwIfWriteError } from "@/lib/supabase/throw";
+import { toClientTripId, toDbTripId } from "@/lib/trip-ids";
 import type { CreateTripInput, Trip, UpdateTripInput } from "@/mocks/fixtures/trips";
 
 interface TripRow {
@@ -23,7 +24,7 @@ async function currentUserId(): Promise<string | null> {
 
 function toTrip(row: TripRow, userId: string | null): Trip {
   return {
-    id: row.id,
+    id: toClientTripId(row.id),
     title: row.title,
     destinationCountry: row.destination_country,
     destinationCity: row.destination_city,
@@ -52,7 +53,7 @@ export async function fetchTrips(): Promise<Trip[]> {
 export async function fetchTrip(id: string): Promise<Trip> {
   const supabase = createClient();
   const userId = await currentUserId();
-  const result = await supabase.from("trips").select(TRIP_COLUMNS).eq("id", id).single();
+  const result = await supabase.from("trips").select(TRIP_COLUMNS).eq("id", toDbTripId(id)).single();
   return toTrip(throwIfError(result), userId);
 }
 
@@ -93,12 +94,17 @@ export async function updateTrip(id: string, patch: UpdateTripInput): Promise<Tr
   if (patch.companions !== undefined) row.companions = patch.companions;
   if (patch.coverEmoji !== undefined) row.cover_emoji = patch.coverEmoji;
   if (patch.baseCurrency !== undefined) row.base_currency = patch.baseCurrency;
-  const result = await supabase.from("trips").update(row).eq("id", id).select(TRIP_COLUMNS).single();
+  const result = await supabase
+    .from("trips")
+    .update(row)
+    .eq("id", toDbTripId(id))
+    .select(TRIP_COLUMNS)
+    .single();
   return toTrip(throwIfError(result), await currentUserId());
 }
 
 export async function deleteTrip(id: string): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.from("trips").delete().eq("id", id);
+  const { error } = await supabase.from("trips").delete().eq("id", toDbTripId(id));
   throwIfWriteError(error);
 }

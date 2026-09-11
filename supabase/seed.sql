@@ -1,5 +1,6 @@
 -- Phase 10: src/mocks/fixtures/*.ts의 시드 데이터를 그대로 옮긴 것.
 -- 로컬 개발 전용 더미 사용자를 auth.users에 직접 삽입한다(프로덕션에서는 하지 않는 패턴).
+-- 호스트 Dashboard에 넣을 때는 이 파일 말고 supabase/seed-jeju-hosted.sql 을 쓴다.
 
 insert into auth.users (
   instance_id,

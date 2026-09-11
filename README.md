@@ -36,7 +36,7 @@ Supabase 연결 없이도 모든 화면이 정상 동작한다. `.env.example`�
 | 산출물 | 위치 | 상태 |
 | --- | --- | --- |
 | 마이그레이션 9개 | `supabase/migrations/` | `libpg-query`(실제 Postgres 파서)로 문법 검증 완료. **실 DB에 적용해본 적은 없음** |
-| 시드 | `supabase/seed.sql` | `src/mocks/fixtures/*.ts`와 동일한 데이터(나고야 여행 전체) |
+| 시드 | `supabase/seed.sql` (로컬) / `supabase/seed-jeju-hosted.sql` (호스트 SQL Editor) | 로컬은 나고야 중심 + 더미 auth 유저. 호스트는 제주만, 본인 User UID 필요 |
 | 브라우저/서버 클라이언트 | `src/lib/supabase/{client,server}.ts` | `@supabase/ssr` 표준 패턴 |
 | 세션 갱신 | `src/proxy.ts` | Next.js 16 `proxy.ts`(구 middleware). **환경변수가 없으면 완전히 no-op** — 이 가드가 없으면 앱 전체가 깨진다는 것을 실제로 확인하고 넣었다 |
 | DB 타입 | (아직 없음) | `pnpm db:types`로 실제 프로젝트 연결 후 생성 |
@@ -59,6 +59,7 @@ Supabase 연결 없이도 모든 화면이 정상 동작한다. `.env.example`�
 3. Auth Site URL `http://localhost:3000`, Redirect `http://localhost:3000/auth/callback`
 4. `npx supabase link --project-ref rocruhhuxdvkweobsmzr` 후 `pnpm db:push`
 5. `/login`에서 메일 링크로 접속
+6. 제주 시드: `supabase/seed-jeju-hosted.sql`에서 `v_owner`만 본인 UID로 바꾼 뒤 SQL Editor에 실행. `/trips/trip_jeju`가 그 UUID로 매핑된다. `.env.local`에 `NEXT_PUBLIC_ENABLE_MSW=false`
 
 ### 스코프 밖 (P10-06, P10-08~11)
 

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import { asRequiredNumber, throwIfError, throwIfWriteError } from "@/lib/supabase/throw";
+import { toClientTripId, toDbTripId } from "@/lib/trip-ids";
 import type {
   ChecklistCategory,
   ChecklistItem,
@@ -29,7 +30,7 @@ interface ItemRow {
 function toCategory(row: CategoryRow): ChecklistCategory {
   return {
     id: row.id,
-    tripId: row.trip_id,
+    tripId: toClientTripId(row.trip_id),
     name: row.name,
     icon: row.icon,
     orderIndex: asRequiredNumber(row.order_index),
@@ -40,7 +41,7 @@ function toItem(row: ItemRow): ChecklistItem {
   return {
     id: row.id,
     categoryId: row.category_id,
-    tripId: row.trip_id,
+    tripId: toClientTripId(row.trip_id),
     title: row.title,
     isChecked: row.is_checked,
     notes: row.notes ?? undefined,
@@ -53,7 +54,7 @@ export async function fetchChecklistCategories(tripId: string): Promise<Checklis
   const result = await supabase
     .from("checklist_categories")
     .select("*")
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .order("order_index");
   return throwIfError(result).map(toCategory);
 }
@@ -65,7 +66,7 @@ export async function createChecklistCategory(
   const result = await supabase
     .from("checklist_categories")
     .insert({
-      trip_id: input.tripId,
+      trip_id: toDbTripId(input.tripId),
       name: input.name,
       icon: input.icon,
       order_index: input.orderIndex,
@@ -88,7 +89,7 @@ export async function updateChecklistCategory(
   const result = await supabase
     .from("checklist_categories")
     .update(row)
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .eq("id", id)
     .select("*")
     .single();
@@ -100,7 +101,7 @@ export async function deleteChecklistCategory(tripId: string, id: string): Promi
   const { error } = await supabase
     .from("checklist_categories")
     .delete()
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .eq("id", id);
   throwIfWriteError(error);
 }
@@ -110,7 +111,7 @@ export async function fetchChecklistItems(tripId: string): Promise<ChecklistItem
   const result = await supabase
     .from("checklist_items")
     .select("*")
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .order("order_index");
   return throwIfError(result).map(toItem);
 }
@@ -121,7 +122,7 @@ export async function createChecklistItem(input: CreateChecklistItemInput): Prom
     .from("checklist_items")
     .insert({
       category_id: input.categoryId,
-      trip_id: input.tripId,
+      trip_id: toDbTripId(input.tripId),
       title: input.title,
       is_checked: input.isChecked,
       notes: input.notes ?? null,
@@ -146,7 +147,7 @@ export async function updateChecklistItem(
   const result = await supabase
     .from("checklist_items")
     .update(row)
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .eq("id", id)
     .select("*")
     .single();
@@ -158,7 +159,7 @@ export async function deleteChecklistItem(tripId: string, id: string): Promise<v
   const { error } = await supabase
     .from("checklist_items")
     .delete()
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .eq("id", id);
   throwIfWriteError(error);
 }

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import { asRequiredNumber, throwIfError, throwIfWriteError } from "@/lib/supabase/throw";
+import { toClientTripId, toDbTripId } from "@/lib/trip-ids";
 import type {
   CreateWishlistItemInput,
   UpdateWishlistItemInput,
@@ -18,7 +19,7 @@ interface WishlistRow {
 function toItem(row: WishlistRow): WishlistItem {
   return {
     id: row.id,
-    tripId: row.trip_id,
+    tripId: toClientTripId(row.trip_id),
     icon: row.icon,
     title: row.title,
     content: row.content ?? undefined,
@@ -31,7 +32,7 @@ export async function fetchWishlist(tripId: string): Promise<WishlistItem[]> {
   const result = await supabase
     .from("wishlist_items")
     .select("*")
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .order("order_index");
   return throwIfError(result).map(toItem);
 }
@@ -41,7 +42,7 @@ export async function createWishlistItem(input: CreateWishlistItemInput): Promis
   const result = await supabase
     .from("wishlist_items")
     .insert({
-      trip_id: input.tripId,
+      trip_id: toDbTripId(input.tripId),
       icon: input.icon,
       title: input.title,
       content: input.content ?? null,
@@ -66,7 +67,7 @@ export async function updateWishlistItem(
   const result = await supabase
     .from("wishlist_items")
     .update(row)
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .eq("id", id)
     .select("*")
     .single();
@@ -78,7 +79,7 @@ export async function deleteWishlistItem(tripId: string, id: string): Promise<vo
   const { error } = await supabase
     .from("wishlist_items")
     .delete()
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .eq("id", id);
   throwIfWriteError(error);
 }

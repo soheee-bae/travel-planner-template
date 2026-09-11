@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import { asNumber, asRequiredNumber, throwIfError, throwIfWriteError } from "@/lib/supabase/throw";
+import { toClientTripId, toDbTripId } from "@/lib/trip-ids";
 import type {
   CreatePlaceInput,
   Place,
@@ -33,7 +34,7 @@ interface PlaceRow {
 function toPlace(row: PlaceRow): Place {
   return {
     id: row.id,
-    tripId: row.trip_id,
+    tripId: toClientTripId(row.trip_id),
     name: row.name,
     category: row.category,
     address: row.address ?? undefined,
@@ -56,7 +57,7 @@ function toPlace(row: PlaceRow): Place {
 
 function toRow(input: CreatePlaceInput | UpdatePlaceInput): Record<string, unknown> {
   const row: Record<string, unknown> = {};
-  if ("tripId" in input && input.tripId) row.trip_id = input.tripId;
+  if ("tripId" in input && input.tripId) row.trip_id = toDbTripId(input.tripId);
   if (input.name !== undefined) row.name = input.name;
   if (input.category !== undefined) row.category = input.category;
   if (input.address !== undefined) row.address = input.address ?? null;
@@ -82,7 +83,7 @@ export async function fetchPlaces(tripId: string): Promise<Place[]> {
   const result = await supabase
     .from("places")
     .select("*")
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .order("order_index");
   return throwIfError(result).map(toPlace);
 }
@@ -102,7 +103,7 @@ export async function updatePlace(
   const result = await supabase
     .from("places")
     .update(toRow(patch))
-    .eq("trip_id", tripId)
+    .eq("trip_id", toDbTripId(tripId))
     .eq("id", id)
     .select("*")
     .single();
@@ -111,6 +112,10 @@ export async function updatePlace(
 
 export async function deletePlace(tripId: string, id: string): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.from("places").delete().eq("trip_id", tripId).eq("id", id);
+  const { error } = await supabase
+    .from("places")
+    .delete()
+    .eq("trip_id", toDbTripId(tripId))
+    .eq("id", id);
   throwIfWriteError(error);
 }
