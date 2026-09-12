@@ -40,7 +40,7 @@ export function WishlistItemDialog({
 }: {
   trigger: ReactNode;
   initial?: WishlistItem;
-  onSubmit: (values: FormValues) => void | Promise<void>;
+  onSubmit: (values: FormValues) => void | Promise<void | unknown>;
 }) {
   const [open, setOpen] = useState(false);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);

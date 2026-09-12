@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IconAction } from "@/components/ui/icon-action";
+import { ExpandableCardBody } from "@/components/ui/expandable-card-body";
 import { Input } from "@/components/ui/input";
 import { useConfirmDelete } from "@/components/ui/confirm-delete-dialog";
 import { cn } from "@/lib/utils";
@@ -150,21 +151,31 @@ export function ChecklistCategorySection({
                   </span>
                 ) : null}
               </span>
-              <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-                <p
-                  className={cn(
-                    "line-clamp-2 w-full break-words text-[14px] leading-[21px] font-semibold",
-                    item.isChecked ? "text-[#AAAAAA] line-through" : "text-[#4A4543]",
-                  )}
-                >
-                  {item.title}
-                </p>
-                {content ? (
-                  <p className="line-clamp-2 w-full break-words text-[11px] leading-4 text-[#AAAAAA]">
-                    {content}
-                  </p>
-                ) : null}
-              </div>
+              <ExpandableCardBody label={item.title} className="flex flex-col items-start gap-0.5">
+                {(expanded) => (
+                  <>
+                    <p
+                      className={cn(
+                        "w-full break-words text-[14px] leading-[21px] font-semibold",
+                        expanded ? "whitespace-pre-wrap" : "line-clamp-2",
+                        item.isChecked ? "text-[#AAAAAA] line-through" : "text-[#4A4543]",
+                      )}
+                    >
+                      {item.title}
+                    </p>
+                    {content ? (
+                      <p
+                        className={cn(
+                          "w-full break-words text-[11px] leading-4 text-[#AAAAAA]",
+                          expanded ? "whitespace-pre-wrap" : "line-clamp-2",
+                        )}
+                      >
+                        {content}
+                      </p>
+                    ) : null}
+                  </>
+                )}
+              </ExpandableCardBody>
               <div className="flex h-[22px] shrink-0 items-center gap-0">
                 {onEdit ? (
                   <IconAction

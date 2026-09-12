@@ -1,4 +1,4 @@
-import type { Expense } from "@/mocks/fixtures/expenses";
+import { isGiftPayer, type Expense } from "@/mocks/fixtures/expenses";
 
 export interface CategoryShare {
   category: string;
@@ -10,6 +10,11 @@ export interface CategoryShare {
  * 하나를 고치면 이 값들도 자동으로 맞아야 한다(docs/06 §6.6). */
 export function sumAmount(expenses: Expense[]): number {
   return expenses.reduce((sum, e) => sum + e.amount, 0);
+}
+
+/** 정산 🎁 / paid_by 선물은 파이·라벨 합계에서 뺀다. */
+export function withoutGiftExpenses(expenses: Expense[]): Expense[] {
+  return expenses.filter((e) => !isGiftPayer(e.paidBy));
 }
 
 export function groupByCategory(expenses: Expense[]): CategoryShare[] {

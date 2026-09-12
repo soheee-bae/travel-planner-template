@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { nextOrderIndexForDay, visitNumbers } from "@/lib/visit-order";
+import { nextOrderIndexForDay, placesOnDay, placesOnDayWithCoords, visitNumbers } from "@/lib/visit-order";
 import type { Place } from "@/mocks/fixtures/places";
 
 function place(partial: Partial<Place> & Pick<Place, "id" | "dayIndex" | "orderIndex">): Place {
@@ -24,6 +24,16 @@ describe("visitNumbers", () => {
     expect(nums.get("b")).toBe(1);
     expect(nums.get("a")).toBe(2);
     expect(nums.has("c")).toBe(false);
+  });
+
+  it("placesOnDay는 그날 순서대로만 돌려준다", () => {
+    const places = [
+      place({ id: "a", dayIndex: 1, orderIndex: 2 }),
+      place({ id: "b", dayIndex: 1, orderIndex: 0 }),
+      place({ id: "c", dayIndex: 2, orderIndex: 0, lat: 33, lng: 126 }),
+    ];
+    expect(placesOnDay(places, 1).map((p) => p.id)).toEqual(["b", "a"]);
+    expect(placesOnDayWithCoords(places, 2).map((p) => p.id)).toEqual(["c"]);
   });
 });
 

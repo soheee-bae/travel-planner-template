@@ -115,7 +115,6 @@ export function useReorderDayPlaces(tripId: string) {
       );
     },
     onMutate: async (orderedIds) => {
-      await queryClient.cancelQueries({ queryKey: key });
       const previous = queryClient.getQueryData<Place[]>(key);
       queryClient.setQueryData<Place[]>(key, (old) =>
         (old ?? []).map((p) => {
@@ -123,12 +122,12 @@ export function useReorderDayPlaces(tripId: string) {
           return orderIndex === -1 ? p : { ...p, orderIndex };
         }),
       );
+      await queryClient.cancelQueries({ queryKey: key });
       return { previous };
     },
     onError: (_err, _ids, context) => {
       if (context?.previous) queryClient.setQueryData(key, context.previous);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
   });
 }
 

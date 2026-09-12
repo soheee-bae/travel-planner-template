@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { groupByCategory, sumAmount } from "@/lib/expense-aggregation";
+import { groupByCategory, sumAmount, withoutGiftExpenses } from "@/lib/expense-aggregation";
 import { useDeleteExpense, useExpenses } from "@/features/expenses/hooks";
 import { BudgetDonutChart } from "@/features/expenses/components/budget-donut-chart";
 import { ExpenseCard, SecretAmount } from "@/features/expenses/components/expense-card";
@@ -27,8 +27,9 @@ export function BudgetTab({ trip }: { trip: Trip }) {
   const [editing, setEditing] = useState<Expense | null>(null);
   const [addOpen, setAddOpen] = useState(false);
 
-  const total = useMemo(() => sumAmount(expenses ?? []), [expenses]);
-  const categoryShares = useMemo(() => groupByCategory(expenses ?? []), [expenses]);
+  const chartExpenses = useMemo(() => withoutGiftExpenses(expenses ?? []), [expenses]);
+  const total = useMemo(() => sumAmount(chartExpenses), [chartExpenses]);
+  const categoryShares = useMemo(() => groupByCategory(chartExpenses), [chartExpenses]);
   const days = useMemo(
     () => (trip.startDate && trip.endDate ? getTripDays(trip.startDate, trip.endDate) : []),
     [trip.startDate, trip.endDate],
@@ -39,6 +40,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
     let jun = 0;
     let together = 0;
     for (const e of expenses ?? []) {
+      // 정산 🎁 열은 paid_by가 선물(또는 예전 값 같이)일 때만. is_blur는 카드 숨김용.
       if (e.paidBy === "준형") jun += e.amount;
       else if (isGiftPayer(e.paidBy)) together += e.amount;
       else me += e.amount;
@@ -57,7 +59,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
     if (dayFilter === "all") return list;
     return list.filter((e) => e.dayIndex === dayFilter);
   }, [expenses, group, dayFilter, categoryFilter, categoryShares]);
-  const visibleTotal = useMemo(() => sumAmount(visible), [visible]);
+  const visibleTotal = useMemo(() => sumAmount(withoutGiftExpenses(visible)), [visible]);
   const activeCategory = categoryFilter ?? (categoryShares[0]?.category as ExpenseCategory | undefined);
 
   if (isLoading) return <p className="p-6 text-sm text-muted-foreground">불러오는 중…</p>;

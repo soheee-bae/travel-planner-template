@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { loadNaverMapsScript, type NaverMapsApi } from "@/lib/naver-maps-script";
-import { visitNumbers } from "@/lib/visit-order";
+import { placesOnDayWithCoords, visitNumbers } from "@/lib/visit-order";
 import type { Place } from "@/mocks/fixtures/places";
 
-function markerHtml(label: string, selected: boolean, faded: boolean): string {
-  const bg = selected ? "#2563eb" : faded ? "#94a3b8" : "#1d4ed8";
-  return `<div style="width:24px;height:24px;border-radius:9999px;background:${bg};color:#fff;font:700 11px/24px sans-serif;text-align:center;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.25)">${label}</div>`;
+function markerHtml(label: string, selected: boolean): string {
+  const bg = selected ? "#E87820" : "#FF9F43";
+  return `<div style="width:28px;height:28px;border-radius:9999px;background:${bg};color:#fff;font:700 12px/28px sans-serif;text-align:center;border:2px solid #fff;box-shadow:0 2px 8px rgba(255,159,67,.4)">${label}</div>`;
 }
 
 export function NaverPlannerMap({
@@ -21,16 +21,21 @@ export function NaverPlannerMap({
 }: {
   clientId: string;
   places: Place[];
-  activeDayIndex: number | "all";
+  activeDayIndex: number;
   selectedPlaceId?: string;
-  onSelectPlace?: (placeId: string) => void;
+  onSelectPlace?: (placeId: string | null) => void;
   onFatalError: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapsRef = useRef<NaverMapsApi | null>(null);
   const mapRef = useRef<InstanceType<NaverMapsApi["Map"]> | null>(null);
   const overlaysRef = useRef<Array<{ setMap: (map: unknown) => void }>>([]);
+  const onSelectRef = useRef(onSelectPlace);
+  const suppressMapClickRef = useRef(false);
+  const fitKeyRef = useRef("");
+  const zoomedInRef = useRef(false);
   const [ready, setReady] = useState(false);
+  onSelectRef.current = onSelectPlace;
 
   useEffect(() => {
     let cancelled = false;
@@ -50,9 +55,15 @@ export function NaverPlannerMap({
           mapDataControl: false,
           zoomControl: false,
           logoControl: true,
-          logoControlOptions: maps.Position
-            ? { position: maps.Position.TOP_LEFT }
-            : undefined,
+          logoControlOptions: maps.Position ? { position: maps.Position.TOP_LEFT } : undefined,
+          compassControl: false,
+        });
+        maps.Event.addListener(mapRef.current, "click", () => {
+          if (suppressMapClickRef.current) {
+            suppressMapClickRef.current = false;
+            return;
+          }
+          onSelectRef.current?.(null);
         });
         setReady(true);
         requestAnimationFrame(() => mapRef.current?.autoResize?.());
@@ -83,67 +94,89 @@ export function NaverPlannerMap({
     overlaysRef.current.forEach((o) => o.setMap(null));
     overlaysRef.current = [];
 
+    const dayPlaces = placesOnDayWithCoords(places, activeDayIndex);
     const numbers = visitNumbers(places, activeDayIndex);
-    const withCoords = places.filter((p) => p.lat != null && p.lng != null);
-    if (withCoords.length === 0) return;
+    if (dayPlaces.length === 0) {
+      map.setCenter?.(new maps.LatLng(33.4996, 126.5312));
+      map.setZoom?.(11);
+      fitKeyRef.current = `${activeDayIndex}:`;
+      return;
+    }
 
+    const path: unknown[] = [];
     const bounds = new maps.LatLngBounds(
-      new maps.LatLng(withCoords[0].lat!, withCoords[0].lng!),
-      new maps.LatLng(withCoords[0].lat!, withCoords[0].lng!),
+      new maps.LatLng(dayPlaces[0].lat!, dayPlaces[0].lng!),
+      new maps.LatLng(dayPlaces[0].lat!, dayPlaces[0].lng!),
     );
 
-    const dayPath: unknown[] = [];
-    const dayPlaces = withCoords
-      .filter((p) => activeDayIndex === "all" || p.dayIndex === activeDayIndex)
-      .slice()
-      .sort((a, b) => {
-        if (a.dayIndex !== b.dayIndex) return (a.dayIndex ?? 99) - (b.dayIndex ?? 99);
-        return a.orderIndex - b.orderIndex;
-      });
-
-    for (const place of withCoords) {
+    for (const place of dayPlaces) {
       const pos = new maps.LatLng(place.lat!, place.lng!);
       bounds.extend(pos);
-      const isCurrentDay = activeDayIndex === "all" || place.dayIndex === activeDayIndex;
+      path.push(pos);
       const label = numbers.get(place.id)?.toString() ?? "·";
+      const selected = selectedPlaceId === place.id;
       const marker = new maps.Marker({
         position: pos,
         map,
         title: place.name,
-        zIndex: selectedPlaceId === place.id ? 20 : 10,
+        zIndex: selected ? 20 : 10,
         icon: {
-          content: markerHtml(label, selectedPlaceId === place.id, !isCurrentDay),
-          anchor: new maps.Point(12, 12),
+          content: markerHtml(label, selected),
+          anchor: new maps.Point(14, 14),
         },
       });
-      maps.Event.addListener(marker, "click", () => onSelectPlace?.(place.id));
+      maps.Event.addListener(marker, "click", () => {
+        suppressMapClickRef.current = true;
+        onSelectRef.current?.(place.id);
+      });
       overlaysRef.current.push(marker);
     }
 
-    for (const place of dayPlaces) {
-      dayPath.push(new maps.LatLng(place.lat!, place.lng!));
-    }
-    if (dayPath.length >= 2) {
+    if (path.length >= 2) {
       overlaysRef.current.push(
         new maps.Polyline({
           map,
-          path: dayPath,
-          strokeColor: "#2563eb",
+          path,
+          strokeColor: "#FF9F43",
           strokeWeight: 3,
-          strokeOpacity: 0.7,
+          strokeOpacity: 0.95,
+          strokeStyle: "shortdash",
+          clickable: false,
         }),
       );
     }
 
-    map.fitBounds(bounds);
-  }, [places, activeDayIndex, selectedPlaceId, onSelectPlace, ready]);
+    const fitKey = `${activeDayIndex}:${dayPlaces.map((p) => p.id).join(",")}`;
+    if (fitKeyRef.current !== fitKey) {
+      fitKeyRef.current = fitKey;
+      if (dayPlaces.length === 1) {
+        map.setCenter?.(path[0]);
+        map.setZoom?.(14);
+      } else {
+        map.fitBounds(bounds);
+      }
+    }
+
+    const highlighted = dayPlaces.find((p) => p.id === selectedPlaceId);
+    if (highlighted) {
+      map.panTo?.(new maps.LatLng(highlighted.lat!, highlighted.lng!));
+      map.setZoom?.(16);
+      zoomedInRef.current = true;
+    } else if (zoomedInRef.current) {
+      zoomedInRef.current = false;
+      if (dayPlaces.length === 1) {
+        map.setCenter?.(path[0]);
+        map.setZoom?.(14);
+      } else if (dayPlaces.length > 1) {
+        map.fitBounds(bounds);
+      }
+    }
+  }, [places, activeDayIndex, selectedPlaceId, ready]);
 
   return (
     <div
       ref={containerRef}
-      className={cn(
-        "naver-map-root h-full min-h-[180px] w-full overflow-hidden",
-      )}
+      className={cn("naver-map-root h-full min-h-[180px] w-full overflow-hidden")}
       role="img"
       aria-label="일정 지도"
     />

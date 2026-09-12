@@ -1,15 +1,70 @@
 -- 호스트 SQL Editor에 이 파일 전체를 붙여넣는다 (Raw에서 Ctrl+A).
 -- 채팅에서 잘라 붙이면 42601이 난다.
--- https://github.com/soheee-bae/travel-planner/blob/feature/travel-planner-basic/supabase/reset-public-jeju.sql
 --
--- 하는 일:
--- 1) owner_id의 auth.users FK 제거 (로그인 없이 trips 유지)
--- 2) RLS를 anon 전체 허용으로 교체 (anon 키 있는 사람은 누구나 읽고 씀)
--- 3) trips 전부 삭제 (스크린샷의 '제주도여행' 포함, cascade)
--- 4) 제주 시드 한 건만 다시 넣음. User UID 필요 없음.
+-- 데이터 없음 전제. trips cascade 삭제 후 제주 1건만 다시 넣는다.
+-- 스키마도 현재 앱(장소 7종, 비용 7종, 할거리 5종, 메모 제목 2000자)에 맞춘다.
+-- 여행 날짜는 이 시드 기준 2026-10-14 ~ 2026-10-16.
+-- (앱 mock fixture는 2026-09-17 ~ 19. 호스트는 이 파일 날짜가 맞다.)
+
+-- ---------------------------------------------------------------------------
+-- 1) 앱이 안 쓰는 공유·RPC·집계 뷰
+-- ---------------------------------------------------------------------------
+
+drop view if exists trip_totals cascade;
+drop view if exists trip_cost_by_category cascade;
+drop view if exists trip_cost_by_day cascade;
+
+drop function if exists invite_trip_member(uuid, text);
+drop function if exists create_trip_invite(uuid);
+drop function if exists accept_trip_invite(text);
+drop function if exists list_trip_members(uuid);
+drop function if exists remove_trip_member(uuid, uuid);
+drop function if exists assign_places_to_day(uuid, uuid[], smallint);
+drop function if exists reclaim_places_beyond_day(uuid, smallint);
+drop function if exists reorder_places(uuid, jsonb);
+
+drop table if exists trip_invites cascade;
+drop table if exists trip_members cascade;
+
+-- ---------------------------------------------------------------------------
+-- 2) 로그인 없이 쓰기
+-- ---------------------------------------------------------------------------
 
 alter table trips drop constraint if exists trips_owner_id_fkey;
 alter table trips alter column owner_id drop not null;
+
+alter table expenses add column if not exists is_blur boolean not null default false;
+alter table transports add column if not exists seat1 text;
+alter table transports add column if not exists seat2 text;
+alter table transports add column if not exists departure_code text;
+alter table transports add column if not exists arrival_code text;
+alter table accommodations add column if not exists icon text;
+
+-- ---------------------------------------------------------------------------
+-- 3) 기존 행 삭제 후 enum을 앱 라벨만 남긴다
+-- ---------------------------------------------------------------------------
+
+delete from trips;
+
+alter table places alter column category type text using category::text;
+drop type if exists place_category;
+create type place_category as enum ('관광', '맛집', '카페', '숙소', '교통', '쇼핑', '기타');
+alter table places alter column category type place_category using category::place_category;
+
+alter table expenses alter column category type text using category::text;
+drop type if exists expense_category;
+create type expense_category as enum (
+  '식비', '카페', '교통/주유', '숙소', '쇼핑/선물', '놀거리', '기타'
+);
+alter table expenses alter column category type expense_category using category::expense_category;
+
+alter table wishlist_items drop constraint if exists wishlist_items_title_check;
+alter table wishlist_items add constraint wishlist_items_title_check
+  check (char_length(title) between 1 and 2000);
+
+-- ---------------------------------------------------------------------------
+-- 4) RLS: anon 전체 허용
+-- ---------------------------------------------------------------------------
 
 drop policy if exists "owner full access to trips" on trips;
 drop policy if exists "members can read shared trips" on trips;
@@ -52,9 +107,33 @@ grant select, insert, update, delete on
   trips, accommodations, transports, places, expenses,
   checklist_categories, checklist_items, wishlist_items
   to anon, authenticated;
+
+create view trip_totals with (security_invoker = on) as
+select trip_id, sum(amount) as total
+from expenses
+group by trip_id;
+
+create view trip_cost_by_category with (security_invoker = on) as
+select
+  trip_id,
+  category,
+  sum(amount) as total,
+  round(
+    100.0 * sum(amount) / nullif(sum(sum(amount)) over (partition by trip_id), 0)
+  )::int as pct
+from expenses
+group by trip_id, category;
+
+create view trip_cost_by_day with (security_invoker = on) as
+select trip_id, day_index, sum(amount) as total
+from expenses
+group by trip_id, day_index;
+
 grant select on trip_totals, trip_cost_by_category, trip_cost_by_day to anon, authenticated;
 
-delete from trips;
+-- ---------------------------------------------------------------------------
+-- 5) 제주 시드 (앱 슬러그 trip_jeju = 아래 UUID)
+-- ---------------------------------------------------------------------------
 
 insert into trips (
   id, owner_id, title, destination_country, destination_city,
@@ -65,64 +144,44 @@ insert into trips (
   '소희랑 준형이랑 귤 까먹으러', 'KR', '제주도',
   '2026-10-14', '2026-10-16', '커플 · 생일 기념', '🍊', 'KRW'
 );
--- 숙소 (홈 카드 고정 시드)
+
 insert into accommodations (
   id, trip_id, name, checkin_date, checkout_date,
-  checkin_time, checkout_time, address, cost, memo
+  checkin_time, checkout_time, address, cost, memo, icon
 ) values (
   '00000000-0000-0000-0002-000000000010',
   '00000000-0000-0000-0001-000000000001',
   '제주 파라다이스 호텔', '2026-10-14', '2026-10-16',
-  '15:00', '11:00', '서귀포시', 220000, '오션뷰 디럭스'
-)
-on conflict (id) do update set
-  name = excluded.name,
-  checkin_date = excluded.checkin_date,
-  checkout_date = excluded.checkout_date,
-  checkin_time = excluded.checkin_time,
-  checkout_time = excluded.checkout_time,
-  address = excluded.address,
-  cost = excluded.cost,
-  memo = excluded.memo;
+  '15:00', '11:00', '서귀포시', 220000, '오션뷰 디럭스', '🏨'
+);
 
--- 교통 (항공 왕복 + 렌터카. 홈 UI는 렌터카 행을 숨길 수 있음)
 insert into transports (
   id, trip_id, type, departure_from, arrival_to,
-  departure_at, arrival_at, booking_ref, cost, memo
+  departure_at, arrival_at, booking_ref, cost, memo,
+  seat1, seat2, departure_code, arrival_code
 ) values
   (
     '00000000-0000-0000-0003-000000000010',
     '00000000-0000-0000-0001-000000000001',
     '비행기', '서울 김포', '제주',
     '2026-10-14T08:20', '2026-10-14T09:30', '제주항공', 98000,
-    'JEJU AIR · 7C101'
+    'JEJU AIR · 7C101', null, null, 'GMP', 'CJU'
   ),
   (
     '00000000-0000-0000-0003-000000000011',
     '00000000-0000-0000-0001-000000000001',
     '비행기', '제주', '서울 김포',
     '2026-10-16T19:10', '2026-10-16T20:20', '제주항공', 98000,
-    'JEJU AIR · 7C102'
+    'JEJU AIR · 7C102', null, null, 'CJU', 'GMP'
   ),
   (
     '00000000-0000-0000-0003-000000000012',
     '00000000-0000-0000-0001-000000000001',
     '렌터카', '제주공항', '제주공항',
     '2026-10-14T10:00', '2026-10-16T17:00', '롯데렌터카', 145000,
-    null
-  )
-on conflict (id) do update set
-  type = excluded.type,
-  departure_from = excluded.departure_from,
-  arrival_to = excluded.arrival_to,
-  departure_at = excluded.departure_at,
-  arrival_at = excluded.arrival_at,
-  booking_ref = excluded.booking_ref,
-  cost = excluded.cost,
-  memo = excluded.memo;
+    null, null, null, null, null
+  );
 
--- 장소: fixtures 3곳 + 시안 리스트 예시(협재·오설록·성산·카페 드 파리·흑돼지)
--- 위경도는 공개 POI 대략값. 카페 드 파리·흑돼지 거리는 구역이라 좌표를 비움.
 insert into places (
   id, trip_id, name, category, address, lat, lng,
   duration_min, priority, day_index, order_index, tags
@@ -174,116 +233,62 @@ insert into places (
     '00000000-0000-0000-0001-000000000001',
     '흑돼지 거리', '맛집', '제주시', null, null,
     90, '필수', 1, 3, array['흑돼지']
-  )
-on conflict (id) do update set
-  name = excluded.name,
-  category = excluded.category,
-  address = excluded.address,
-  lat = excluded.lat,
-  lng = excluded.lng,
-  duration_min = excluded.duration_min,
-  priority = excluded.priority,
-  day_index = excluded.day_index,
-  order_index = excluded.order_index,
-  tags = excluded.tags;
+  );
 
--- 비용: 시안 칩 비율에 맞춤
--- 교통(항공+렌터) 243000 / 숙소 220000 / 식비 68000+32000 / 관광 5000 / 쇼핑 45000
--- 합계 613000원. 비용 enum에 '카페'가 없어 오설록은 식비로 넣었다.
+-- 호텔·렌터는 paid_by 같이 → 정산 선물 합계. 오설록은 카페.
 insert into expenses (
   id, trip_id, title, category, amount, currency, date,
-  day_index, payment_method, paid_by, place_id, is_manual
+  day_index, payment_method, paid_by, place_id, is_manual, is_blur
 ) values
   (
     '00000000-0000-0000-0005-000000000101',
     '00000000-0000-0000-0001-000000000001',
     '제주항공 왕복', '교통/주유', 148000, 'KRW', '2026-10-14',
-    1, '카드', '준형', null, true
+    1, '카드', '준형', null, true, false
   ),
   (
     '00000000-0000-0000-0005-000000000102',
     '00000000-0000-0000-0001-000000000001',
     '파라다이스 호텔', '숙소', 220000, 'KRW', '2026-10-14',
-    1, '카드', '같이', null, true
+    1, '카드', '같이', null, true, false
   ),
   (
     '00000000-0000-0000-0005-000000000103',
     '00000000-0000-0000-0001-000000000001',
     '롯데렌터카', '교통/주유', 95000, 'KRW', '2026-10-14',
-    1, '카드', '같이', null, true
+    1, '카드', '같이', null, true, false
   ),
   (
     '00000000-0000-0000-0005-000000000104',
     '00000000-0000-0000-0001-000000000001',
     '흑돼지 저녁 2인', '식비', 68000, 'KRW', '2026-10-14',
-    1, '카드', '소희', '00000000-0000-0000-0004-000000000108', true
+    1, '카드', '소희', '00000000-0000-0000-0004-000000000108', true, false
   ),
   (
     '00000000-0000-0000-0005-000000000105',
     '00000000-0000-0000-0001-000000000001',
     '성산일출봉 입장', '놀거리', 5000, 'KRW', '2026-10-16',
-    3, '현금', '소희', '00000000-0000-0000-0004-000000000106', true
+    3, '현금', '소희', '00000000-0000-0000-0004-000000000106', true, false
   ),
   (
     '00000000-0000-0000-0005-000000000106',
     '00000000-0000-0000-0001-000000000001',
-    '오설록', '식비', 32000, 'KRW', '2026-10-14',
-    1, '카드', '소희', '00000000-0000-0000-0004-000000000105', true
+    '오설록', '카페', 32000, 'KRW', '2026-10-14',
+    1, '카드', '소희', '00000000-0000-0000-0004-000000000105', true, false
   ),
   (
     '00000000-0000-0000-0005-000000000107',
     '00000000-0000-0000-0001-000000000001',
     '기념품', '쇼핑/선물', 45000, 'KRW', '2026-10-15',
-    2, '카드', '같이', null, true
-  )
-on conflict (id) do update set
-  title = excluded.title,
-  category = excluded.category,
-  amount = excluded.amount,
-  currency = excluded.currency,
-  date = excluded.date,
-  day_index = excluded.day_index,
-  payment_method = excluded.payment_method,
-  paid_by = excluded.paid_by,
-  place_id = excluded.place_id,
-  is_manual = excluded.is_manual;
+    2, '카드', '같이', null, true, false
+  );
 
 insert into checklist_categories (id, trip_id, name, icon, order_index) values
-  ('00000000-0000-0000-0006-000000000101', '00000000-0000-0000-0001-000000000001', '예약 관련', '✈️', 0),
-  ('00000000-0000-0000-0006-000000000102', '00000000-0000-0000-0001-000000000001', '서류/필수', '📄', 1),
-  ('00000000-0000-0000-0006-000000000103', '00000000-0000-0000-0001-000000000001', '디지털', '📱', 2),
-  ('00000000-0000-0000-0006-000000000104', '00000000-0000-0000-0001-000000000001', '금융', '💱', 3),
-  ('00000000-0000-0000-0006-000000000105', '00000000-0000-0000-0001-000000000001', '패킹리스트', '🧳', 4)
-on conflict (id) do update set
-  name = excluded.name,
-  icon = excluded.icon,
-  order_index = excluded.order_index;
-
-insert into checklist_items (id, category_id, trip_id, title, is_checked, notes, order_index) values
-  ('00000000-0000-0000-0007-000000000101', '00000000-0000-0000-0006-000000000101', '00000000-0000-0000-0001-000000000001', '항공권 예약', true, '공통', 0),
-  ('00000000-0000-0000-0007-000000000102', '00000000-0000-0000-0006-000000000101', '00000000-0000-0000-0001-000000000001', '숙소 예약', true, '소희', 1),
-  ('00000000-0000-0000-0007-000000000103', '00000000-0000-0000-0006-000000000101', '00000000-0000-0000-0001-000000000001', '렌터카 예약', false, '준형', 2),
-  ('00000000-0000-0000-0007-000000000104', '00000000-0000-0000-0006-000000000101', '00000000-0000-0000-0001-000000000001', '투어/액티비티 예약', false, '공통', 3),
-  ('00000000-0000-0000-0007-000000000105', '00000000-0000-0000-0006-000000000102', '00000000-0000-0000-0001-000000000001', '여권 유효기간 확인', false, '소희', 0),
-  ('00000000-0000-0000-0007-000000000106', '00000000-0000-0000-0006-000000000102', '00000000-0000-0000-0001-000000000001', '여행자보험 가입', false, '준형', 1),
-  ('00000000-0000-0000-0007-000000000107', '00000000-0000-0000-0006-000000000102', '00000000-0000-0000-0001-000000000001', '비자 확인', false, '공통', 2),
-  ('00000000-0000-0000-0007-000000000108', '00000000-0000-0000-0006-000000000102', '00000000-0000-0000-0001-000000000001', '국제운전면허증', false, '소희', 3),
-  ('00000000-0000-0000-0007-000000000109', '00000000-0000-0000-0006-000000000103', '00000000-0000-0000-0001-000000000001', '포켓와이파이/유심 예약', false, '준형', 0),
-  ('00000000-0000-0000-0007-000000000110', '00000000-0000-0000-0006-000000000103', '00000000-0000-0000-0001-000000000001', '오프라인 지도 다운로드', false, '공통', 1),
-  ('00000000-0000-0000-0007-000000000111', '00000000-0000-0000-0006-000000000103', '00000000-0000-0000-0001-000000000001', '교통카드 충전', false, '소희', 2),
-  ('00000000-0000-0000-0007-000000000112', '00000000-0000-0000-0006-000000000104', '00000000-0000-0000-0001-000000000001', '환전', false, '준형', 0),
-  ('00000000-0000-0000-0007-000000000113', '00000000-0000-0000-0006-000000000104', '00000000-0000-0000-0001-000000000001', '해외결제 카드 확인', false, '공통', 1),
-  ('00000000-0000-0000-0007-000000000114', '00000000-0000-0000-0006-000000000104', '00000000-0000-0000-0001-000000000001', '트래블월렛', false, '소희', 2),
-  ('00000000-0000-0000-0007-000000000115', '00000000-0000-0000-0006-000000000105', '00000000-0000-0000-0001-000000000001', '여권 + 사본', false, '준형', 0),
-  ('00000000-0000-0000-0007-000000000116', '00000000-0000-0000-0006-000000000105', '00000000-0000-0000-0001-000000000001', '충전기 / 보조배터리', false, '공통', 1),
-  ('00000000-0000-0000-0007-000000000117', '00000000-0000-0000-0006-000000000105', '00000000-0000-0000-0001-000000000001', '여행용 어댑터', false, '소희', 2),
-  ('00000000-0000-0000-0007-000000000118', '00000000-0000-0000-0006-000000000105', '00000000-0000-0000-0001-000000000001', '상비약', false, '준형', 3),
-  ('00000000-0000-0000-0007-000000000119', '00000000-0000-0000-0006-000000000105', '00000000-0000-0000-0001-000000000001', '세면도구', false, '공통', 4)
-on conflict (id) do update set
-  title = excluded.title,
-  is_checked = excluded.is_checked,
-  notes = excluded.notes,
-  order_index = excluded.order_index;
+  ('00000000-0000-0000-0006-000000000101', '00000000-0000-0000-0001-000000000001', '맛집/카페', '☕', 0),
+  ('00000000-0000-0000-0006-000000000102', '00000000-0000-0000-0001-000000000001', '관광', '🌊', 1),
+  ('00000000-0000-0000-0006-000000000103', '00000000-0000-0000-0001-000000000001', '선물/기념품', '🍊', 2),
+  ('00000000-0000-0000-0006-000000000104', '00000000-0000-0000-0001-000000000001', '쇼핑', '🛍️', 3),
+  ('00000000-0000-0000-0006-000000000105', '00000000-0000-0000-0001-000000000001', '기타', '🎸', 4);
 
 insert into wishlist_items (id, trip_id, icon, title, content, order_index) values
   (
@@ -303,9 +308,4 @@ insert into wishlist_items (id, trip_id, icon, title, content, order_index) valu
     '00000000-0000-0000-0001-000000000001',
     '🛒', '쇼핑 메모',
     '- 오설록 티 / 한라봉 초콜릿', 2
-  )
-on conflict (id) do update set
-  icon = excluded.icon,
-  title = excluded.title,
-  content = excluded.content,
-  order_index = excluded.order_index;
+  );

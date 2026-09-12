@@ -5,6 +5,7 @@ import {
   groupByPayer,
   groupByPaymentMethod,
   sumAmount,
+  withoutGiftExpenses,
 } from "@/lib/expense-aggregation";
 import type { Expense } from "@/mocks/fixtures/expenses";
 
@@ -56,6 +57,17 @@ describe("groupByCategory", () => {
       makeExpense({ category: "식비", amount: 900 }),
     ];
     expect(groupByCategory(expenses).map((g) => g.category)).toEqual(["식비", "쇼핑/선물"]);
+  });
+});
+
+describe("withoutGiftExpenses", () => {
+  it("paid_by 선물·같이 항목은 뺀다", () => {
+    const expenses = [
+      makeExpense({ amount: 1000, paidBy: "소희" }),
+      makeExpense({ amount: 5000, paidBy: "선물" }),
+      makeExpense({ amount: 2000, paidBy: "같이" }),
+    ];
+    expect(withoutGiftExpenses(expenses).map((e) => e.amount)).toEqual([1000]);
   });
 });
 

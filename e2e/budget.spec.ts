@@ -27,6 +27,15 @@ test("결제자가 둘이면 더치페이 정산이 보인다", async ({ page })
   await expect(page.getByRole("heading", { name: "더치페이 정산" }).locator("..").getByText("준형", { exact: true })).toBeVisible();
 });
 
+test("결제 요정을 고르지 않으면 에러 메시지가 보인다", async ({ page }) => {
+  await page.goto("/trips/trip_nagoya?tab=budget");
+  await page.getByRole("button", { name: "긁었다!" }).click();
+  await page.getByLabel("항목 이름").fill("에러 확인용");
+  await page.getByLabel("금액").fill("1000");
+  await page.getByRole("button", { name: "영수증에 넣기" }).click();
+  await expect(page.getByRole("alert")).toHaveText("고구마냐... 감자냐... 그것이 문제로다...");
+});
+
 test("비용을 추가하면 즉시 목록과 총액에 반영된다", async ({ page }) => {
   await page.goto("/trips/trip_nagoya?tab=budget");
   await page.getByRole("button", { name: "긁었다!" }).click();

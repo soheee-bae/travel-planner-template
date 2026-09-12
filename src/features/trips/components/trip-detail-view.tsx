@@ -71,7 +71,7 @@ export function TripDetailView({ tripId }: { tripId: string }) {
             exit="exit"
             transition={{ duration: slideDuration, ease: easing.standard }}
             className="absolute inset-0 overflow-x-clip overflow-y-auto [overflow-anchor:none]"
-            drag={isDesktop ? false : "x"}
+            drag={isDesktop || panel === "planner" ? false : "x"}
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.12}
             onDragEnd={(_e, info) => {

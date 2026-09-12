@@ -56,11 +56,12 @@ export const expenseSchema = z.object({
 export type Expense = z.infer<typeof expenseSchema>;
 
 export function isGiftPayer(paidBy?: string): boolean {
-  return paidBy === "같이" || paidBy === "선물";
+  const payer = paidBy?.trim();
+  return payer === "선물" || payer === "같이";
 }
 
-export function shouldBlurExpense(expense: Pick<Expense, "isBlur" | "paidBy">): boolean {
-  return expense.isBlur === true || expense.paidBy === "선물";
+export function shouldBlurExpense(expense: Pick<Expense, "isBlur">): boolean {
+  return expense.isBlur === true;
 }
 
 export function paidByTagLabel(paidBy: string): string {

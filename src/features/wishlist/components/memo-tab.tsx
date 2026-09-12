@@ -1,6 +1,8 @@
 "use client";
 
 import { IconAction } from "@/components/ui/icon-action";
+import { ExpandableCardBody } from "@/components/ui/expandable-card-body";
+import { cn } from "@/lib/utils";
 import {
   useCreateWishlistItem,
   useDeleteWishlistItem,
@@ -24,16 +26,30 @@ function WishlistCard({
   return (
     <div className="flex w-full flex-col items-start rounded-[20px] bg-white px-4 pt-5 pb-4 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
       <div className="flex w-full items-start gap-0">
-        <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
-          <p className="line-clamp-2 w-full break-words text-[14px] leading-[21px] font-bold text-[#4A4543]">
-            {item.icon} {item.title}
-          </p>
-          {item.content ? (
-            <p className="line-clamp-2 w-full break-words text-[13px] leading-[21px] font-normal text-[#8C8885]">
-              {item.content}
-            </p>
-          ) : null}
-        </div>
+        <ExpandableCardBody label={item.title} className="flex flex-col items-start gap-1.5">
+          {(expanded) => (
+            <>
+              <p
+                className={cn(
+                  "w-full break-words text-[14px] leading-[21px] font-bold text-[#4A4543]",
+                  expanded ? "whitespace-pre-wrap" : "line-clamp-2",
+                )}
+              >
+                {item.icon} {item.title}
+              </p>
+              {item.content ? (
+                <p
+                  className={cn(
+                    "w-full break-words text-[13px] leading-[21px] font-normal text-[#8C8885]",
+                    expanded ? "whitespace-pre-wrap" : "line-clamp-2",
+                  )}
+                >
+                  {item.content}
+                </p>
+              ) : null}
+            </>
+          )}
+        </ExpandableCardBody>
         <div className="flex items-start gap-0">
           <WishlistItemDialog
             initial={item}

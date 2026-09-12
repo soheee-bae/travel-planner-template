@@ -3,7 +3,10 @@ import { test, expect } from "@playwright/test";
 test("플래너 탭은 Day 1이 기본으로 활성화되고 해당 일정이 보인다", async ({ page }) => {
   await page.goto("/trips/trip_nagoya?tab=planner");
   await expect(page.getByRole("tab", { name: "Day 1" })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByText("아츠타 호라이켄 마츠자카야점")).toBeVisible();
+  await expect(page.getByRole("button", { name: "지도 크게 보기" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /네이버 지도에서 보기/ })).toHaveCount(0);
+  await page.getByText("아츠타 호라이켄 마츠자카야점").click();
+  await expect(page.getByRole("link", { name: "네이버 지도에서 보기" })).toBeVisible();
 });
 
 test("Day 2로 전환하면 순서대로 장소가 보이고 이동시간 pill이 표시된다", async ({ page }) => {

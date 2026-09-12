@@ -25,8 +25,8 @@ const cache = new Map<string, TravelLeg>();
 
 async function resolveLeg(start: LatLng, end: LatLng): Promise<TravelLeg> {
   const key = `car:${legCacheKey(start, end)}`;
-  const hit = cache.get(key);
-  if (hit) return hit;
+  const cachedCar = cache.get(key);
+  if (cachedCar) return resolveDisplayedLeg(cachedCar, start, end);
 
   let naver: TravelLeg | null = null;
   try {
@@ -34,9 +34,8 @@ async function resolveLeg(start: LatLng, end: LatLng): Promise<TravelLeg> {
   } catch {
     naver = null;
   }
-  const leg = resolveDisplayedLeg(naver, start, end);
-  cache.set(key, leg);
-  return leg;
+  if (naver) cache.set(key, naver);
+  return resolveDisplayedLeg(naver, start, end);
 }
 
 export async function POST(request: Request) {

@@ -2,21 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { visitNumbers } from "@/lib/visit-order";
+import { placesOnDayWithCoords, visitNumbers } from "@/lib/visit-order";
 import type { Place } from "@/mocks/fixtures/places";
 
 const TILE_SIZE = 256;
 const JEJU = { minLat: 33.12, maxLat: 33.58, minLng: 126.14, maxLng: 126.98 };
-
-const CATEGORY_DOT: Record<Place["category"], string> = {
-  관광: "bg-category-sight-bg",
-  맛집: "bg-category-food-bg",
-  카페: "bg-category-cafe-bg",
-  쇼핑: "bg-category-shop-bg",
-  숙소: "bg-category-stay-bg",
-  교통: "bg-category-transport-bg",
-  기타: "bg-category-move-bg",
-};
 
 function latLngToWorld(lat: number, lng: number, zoom: number): { x: number; y: number } {
   const scale = TILE_SIZE * 2 ** zoom;
@@ -40,8 +30,8 @@ function boundsOf(places: Place[]): typeof JEJU {
   };
 }
 
-function pickZoom(bbox: typeof JEJU, width: number, height: number): number {
-  for (let zoom = 13; zoom >= 8; zoom -= 1) {
+function pickZoom(bbox: typeof JEJU, width: number, height: number, maxZoom = 13): number {
+  for (let zoom = maxZoom; zoom >= 8; zoom -= 1) {
     const sw = latLngToWorld(bbox.minLat, bbox.minLng, zoom);
     const ne = latLngToWorld(bbox.maxLat, bbox.maxLng, zoom);
     const w = Math.abs(ne.x - sw.x);
@@ -53,7 +43,7 @@ function pickZoom(bbox: typeof JEJU, width: number, height: number): number {
 
 /**
  * iframe은 AppShell transform 안에서 빈 화면이 되는 경우가 있어
- * OSM 래스터 타일을 img로 깐다.
+ * OSM 래스터 타일을 img로 깐다. 네이버 키가 없을 때의 폴백.
  */
 export function MockMap({
   places,
@@ -63,9 +53,9 @@ export function MockMap({
   className,
 }: {
   places: Place[];
-  activeDayIndex: number | "all";
+  activeDayIndex: number;
   selectedPlaceId?: string;
-  onSelectPlace?: (placeId: string) => void;
+  onSelectPlace?: (placeId: string | null) => void;
   className?: string;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -81,13 +71,18 @@ export function MockMap({
     return () => observer.disconnect();
   }, []);
 
-  const visiblePlaces =
-    activeDayIndex === "all" ? places : places.filter((p) => p.dayIndex === activeDayIndex);
-  const markerPlaces = (visiblePlaces.length > 0 ? visiblePlaces : places).filter(
-    (p) => p.lat != null && p.lng != null,
-  );
-  const bbox = boundsOf(markerPlaces);
-  const zoom = pickZoom(bbox, size.w, size.h);
+  const markerPlaces = placesOnDayWithCoords(places, activeDayIndex);
+  const focused = markerPlaces.find((p) => p.id === selectedPlaceId);
+  const bbox =
+    focused && focused.lat != null && focused.lng != null
+      ? {
+          minLat: focused.lat - 0.008,
+          maxLat: focused.lat + 0.008,
+          minLng: focused.lng - 0.012,
+          maxLng: focused.lng + 0.012,
+        }
+      : boundsOf(markerPlaces);
+  const zoom = pickZoom(bbox, size.w, size.h, focused ? 16 : 13);
   const sw = latLngToWorld(bbox.minLat, bbox.minLng, zoom);
   const ne = latLngToWorld(bbox.maxLat, bbox.maxLng, zoom);
   const viewLeft = Math.min(sw.x, ne.x);
@@ -119,6 +114,12 @@ export function MockMap({
   }
 
   const numbers = visitNumbers(places, activeDayIndex);
+  const linePoints = markerPlaces
+    .map((place) => {
+      const point = latLngToWorld(place.lat!, place.lng!, zoom);
+      return `${offsetX + (point.x - viewLeft) * scale},${offsetY + (point.y - viewTop) * scale}`;
+    })
+    .join(" ");
 
   return (
     <div
@@ -126,6 +127,7 @@ export function MockMap({
       className={cn("osm-map-root relative h-full min-h-[180px] w-full overflow-hidden bg-[#dbe4d8]", className)}
       role="img"
       aria-label="일정 지도"
+      onClick={() => onSelectPlace?.(null)}
     >
       <div className="absolute inset-0 overflow-hidden">
         {tiles.map((tile) => (
@@ -145,30 +147,41 @@ export function MockMap({
           />
         ))}
       </div>
+      {linePoints.length > 0 && markerPlaces.length >= 2 ? (
+        <svg className="pointer-events-none absolute inset-0 z-[9] h-full w-full">
+          <polyline
+            points={linePoints}
+            fill="none"
+            stroke="#FF9F43"
+            strokeWidth="3"
+            strokeDasharray="7 6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ) : null}
       {markerPlaces.map((place) => {
         const point = latLngToWorld(place.lat!, place.lng!, zoom);
         const left = offsetX + (point.x - viewLeft) * scale;
         const top = offsetY + (point.y - viewTop) * scale;
-        const isCurrentDay = activeDayIndex === "all" || place.dayIndex === activeDayIndex;
-        const isUnassigned = place.dayIndex == null;
+        const selected = selectedPlaceId === place.id;
         return (
           <button
             key={place.id}
             type="button"
-            onClick={() => onSelectPlace?.(place.id)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onSelectPlace?.(place.id);
+            }}
             aria-label={place.name}
             title={place.name}
             className={cn(
-              "absolute z-10 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white text-[10px] font-bold shadow-sm",
-              isUnassigned
-                ? "bg-muted-foreground/70 text-white"
-                : cn(CATEGORY_DOT[place.category], "text-foreground"),
-              !isCurrentDay && !isUnassigned && "opacity-30",
-              selectedPlaceId === place.id && "scale-125 ring-2 ring-primary",
+              "absolute z-10 flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white text-[11px] font-bold text-white shadow-sm",
+              selected ? "bg-[#E87820] scale-110" : "bg-[#FF9F43]",
             )}
             style={{ left, top }}
           >
-            {numbers.get(place.id) ?? (isUnassigned ? "·" : "?")}
+            {numbers.get(place.id) ?? "·"}
           </button>
         );
       })}

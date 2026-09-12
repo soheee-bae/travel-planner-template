@@ -10,6 +10,9 @@ export interface NaverMapsApi {
     opts: Record<string, unknown>,
   ) => {
     fitBounds: (bounds: unknown) => void;
+    setCenter?: (latlng: unknown) => void;
+    setZoom?: (zoom: number) => void;
+    panTo?: (latlng: unknown) => void;
     autoResize?: () => void;
     destroy?: () => void;
   };
@@ -31,6 +34,8 @@ export interface NaverMapsApi {
     strokeColor: string;
     strokeWeight: number;
     strokeOpacity: number;
+    strokeStyle?: string;
+    clickable?: boolean;
   }) => { setMap: (map: unknown) => void };
   Event: {
     addListener: (target: unknown, event: string, handler: () => void) => unknown;
