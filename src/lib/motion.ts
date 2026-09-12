@@ -46,6 +46,8 @@ export const sheetSpring = {
 export const offset = {
   slide: 60,
   reveal: 10,
+  /** 카드 안 세그먼트(출발/귀국, 할거리/메모) 전환. */
+  segment: 24,
 } as const;
 
 /** 카드 누름 피드백. `whileTap`에 그대로 전달한다. */
