@@ -6,9 +6,9 @@ import { TRIP_TABS, type TripTab } from "@/features/trips/hooks/use-trip-tab";
 const TAB_LABELS: Record<TripTab, string> = {
   overview: "홈",
   planner: "플래너",
-  places: "리스트",
-  budget: "비용",
-  prep: "준비",
+  places: "스팟",
+  budget: "영수증",
+  prep: "할거리",
   memo: "메모",
 };
 

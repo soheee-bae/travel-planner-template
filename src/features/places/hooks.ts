@@ -15,7 +15,7 @@ import {
   canOverwriteExpense,
   findLinkedExpense,
 } from "@/lib/place-expense-sync";
-import type { CreatePlaceInput, Place, UpdatePlaceInput } from "@/mocks/fixtures/places";
+import { applyPlacePatch, type CreatePlaceInput, type Place, type UpdatePlaceInput } from "@/mocks/fixtures/places";
 
 async function syncAutoExpense(place: Place): Promise<void> {
   const trip = await fetchTrip(place.tripId);
@@ -84,7 +84,7 @@ export function useUpdatePlace(tripId: string) {
       await queryClient.cancelQueries({ queryKey: key });
       const previous = queryClient.getQueryData<Place[]>(key);
       queryClient.setQueryData<Place[]>(key, (old) =>
-        (old ?? []).map((p) => (p.id === id ? { ...p, ...patch } : p)),
+        (old ?? []).map((p) => (p.id === id ? applyPlacePatch(p, patch) : p)),
       );
       return { previous };
     },
@@ -95,7 +95,7 @@ export function useUpdatePlace(tripId: string) {
       const places = queryClient.getQueryData<Place[]>(key);
       const place = places?.find((p) => p.id === id);
       if (place && (patch.estimatedCost !== undefined || patch.name || patch.category)) {
-        await syncAutoExpense({ ...place, ...patch });
+        await syncAutoExpense(applyPlacePatch(place, patch));
         await queryClient.invalidateQueries({ queryKey: expensesKeys.all(tripId) });
       }
     },

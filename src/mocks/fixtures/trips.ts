@@ -19,7 +19,7 @@ export type Trip = z.infer<typeof tripSchema>;
 export const createTripInputSchema = tripSchema
   .omit({ id: true, ownerId: true, role: true })
   .refine((value) => !value.startDate || !value.endDate || value.endDate >= value.startDate, {
-    message: "종료일은 시작일 이후여야 합니다.",
+    message: "종료일은 시작일 이후로 선택해 주세요.",
     path: ["endDate"],
   });
 export type CreateTripInput = z.infer<typeof createTripInputSchema>;
@@ -32,11 +32,11 @@ export type UpdateTripInput = z.infer<typeof updateTripInputSchema>;
 export const initialTrips: Trip[] = [
   {
     id: "trip_jeju",
-    title: "소희 & 준형의 제주",
+    title: "소희랑 준형이랑 귤 까먹으러",
     destinationCountry: "KR",
     destinationCity: "제주도",
-    startDate: "2026-10-14",
-    endDate: "2026-10-16",
+    startDate: "2026-09-17",
+    endDate: "2026-09-19",
     companions: "커플 · 생일 기념",
     coverEmoji: "🍊",
     baseCurrency: "KRW",

@@ -12,6 +12,7 @@ export const accommodationSchema = z.object({
   bookingRef: z.string().optional(),
   cost: z.number().nonnegative().optional(),
   memo: z.string().optional(),
+  icon: z.string().optional(),
 });
 export type Accommodation = z.infer<typeof accommodationSchema>;
 export const createAccommodationInputSchema = accommodationSchema.omit({ id: true });
@@ -33,6 +34,10 @@ export const transportSchema = z.object({
   bookingRef: z.string().optional(),
   cost: z.number().nonnegative().optional(),
   memo: z.string().optional(),
+  seat1: z.string().optional(),
+  seat2: z.string().optional(),
+  departureCode: z.string().optional(),
+  arrivalCode: z.string().optional(),
 });
 export type Transport = z.infer<typeof transportSchema>;
 export const createTransportInputSchema = transportSchema.omit({ id: true });
@@ -45,12 +50,13 @@ export const initialAccommodations: Accommodation[] = [
     id: "acc_jeju_1",
     tripId: "trip_jeju",
     name: "제주 파라다이스 호텔",
-    checkinDate: "2026-10-14",
-    checkoutDate: "2026-10-16",
+    checkinDate: "2026-09-17",
+    checkoutDate: "2026-09-19",
     checkinTime: "15:00",
     checkoutTime: "11:00",
     address: "서귀포시",
     memo: "오션뷰 디럭스",
+    icon: "🏨",
     cost: 220000,
   },
   {
@@ -73,10 +79,12 @@ export const initialTransports: Transport[] = [
     type: "비행기",
     departureFrom: "서울 김포",
     arrivalTo: "제주",
-    departureAt: "2026-10-14T08:20",
-    arrivalAt: "2026-10-14T09:30",
+    departureAt: "2026-09-17T08:20",
+    arrivalAt: "2026-09-17T09:30",
     bookingRef: "제주항공",
     memo: "JEJU AIR · 7C101",
+    departureCode: "GMP",
+    arrivalCode: "CJU",
     cost: 98000,
   },
   {
@@ -85,10 +93,12 @@ export const initialTransports: Transport[] = [
     type: "비행기",
     departureFrom: "제주",
     arrivalTo: "서울 김포",
-    departureAt: "2026-10-16T19:10",
-    arrivalAt: "2026-10-16T20:20",
+    departureAt: "2026-09-19T19:10",
+    arrivalAt: "2026-09-19T20:20",
     bookingRef: "제주항공",
     memo: "JEJU AIR · 7C102",
+    departureCode: "CJU",
+    arrivalCode: "GMP",
     cost: 98000,
   },
   {
@@ -97,8 +107,8 @@ export const initialTransports: Transport[] = [
     type: "렌터카",
     departureFrom: "제주공항",
     arrivalTo: "제주공항",
-    departureAt: "2026-10-14T10:00",
-    arrivalAt: "2026-10-16T17:00",
+    departureAt: "2026-09-17T10:00",
+    arrivalAt: "2026-09-19T17:00",
     bookingRef: "롯데렌터카",
     cost: 145000,
   },

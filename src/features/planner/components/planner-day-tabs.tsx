@@ -1,9 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { FigmaChip, FigmaChipRow } from "@/components/ui/figma";
 import { getTripDays } from "@/lib/trip-days";
-
-export type PlannerDaySelection = number | "all";
 
 export function PlannerDayTabs({
   startDate,
@@ -13,40 +11,24 @@ export function PlannerDayTabs({
 }: {
   startDate: string;
   endDate: string;
-  active: PlannerDaySelection;
-  onChange: (day: PlannerDaySelection) => void;
+  active: number;
+  onChange: (day: number) => void;
 }) {
   const days = getTripDays(startDate, endDate);
 
   return (
-    <div className="flex gap-2 overflow-x-auto px-4 py-2">
+    <FigmaChipRow role="tablist" aria-label="일차 선택">
       {days.map((day) => (
-        <button
+        <FigmaChip
           key={day.dayIndex}
-          type="button"
+          role="tab"
+          aria-selected={active === day.dayIndex}
+          active={active === day.dayIndex}
           onClick={() => onChange(day.dayIndex)}
-          className={cn(
-            "shrink-0 rounded-full px-3 py-1.5 text-sm font-bold whitespace-nowrap",
-            active === day.dayIndex
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-muted-foreground",
-          )}
         >
-          Day{day.dayIndex}
-        </button>
+          Day {day.dayIndex}
+        </FigmaChip>
       ))}
-      <button
-        type="button"
-        onClick={() => onChange("all")}
-        className={cn(
-          "shrink-0 rounded-full px-3 py-1.5 text-sm font-bold whitespace-nowrap",
-          active === "all"
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted text-muted-foreground",
-        )}
-      >
-        전체
-      </button>
-    </div>
+    </FigmaChipRow>
   );
 }

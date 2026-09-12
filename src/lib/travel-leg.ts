@@ -36,6 +36,12 @@ export function drivingSummaryToLeg(distanceM: number, durationMs: number): Trav
   };
 }
 
+/** 자차 우선. 5분 이하면 도보로 다시 계산한다. */
+export function resolveDisplayedLeg(car: TravelLeg | null, start: LatLng, end: LatLng): TravelLeg {
+  if (car && car.mode === "car" && car.durationMin > 5) return car;
+  return estimateWalkLeg(start, end);
+}
+
 /** 캐시·쿼리 키용. 소수 5자리 ≈ 1.1m (docs/06 §6.5). */
 export function roundCoord(value: number): number {
   return Math.round(value * 1e5) / 1e5;

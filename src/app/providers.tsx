@@ -5,8 +5,10 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import type { ReactNode } from "react";
 import { getQueryClient } from "@/lib/query-client";
 import { MSWProvider } from "@/mocks/msw-provider";
+import { useKeyboardInset } from "@/hooks/use-keyboard-inset";
 
 export function Providers({ children }: { children: ReactNode }) {
+  useKeyboardInset();
   const queryClient = getQueryClient();
 
   return (

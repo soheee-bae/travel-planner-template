@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseNaverDriving, parseNaverGeocode } from "@/lib/naver-maps";
-import { drivingSummaryToLeg, estimateWalkLeg, legCacheKey, roundCoord } from "@/lib/travel-leg";
+import { drivingSummaryToLeg, estimateWalkLeg, legCacheKey, resolveDisplayedLeg, roundCoord } from "@/lib/travel-leg";
 
 describe("parseNaverGeocode", () => {
   it("x/y를 lng/lat로 바꾼다", () => {
@@ -67,5 +67,12 @@ describe("travel-leg", () => {
 
   it("자차 변환은 최소 1분", () => {
     expect(drivingSummaryToLeg(10, 1000).durationMin).toBe(1);
+  });
+
+  it("자차가 5분 이하면 도보로 바꾼다", () => {
+    const car = drivingSummaryToLeg(400, 180_000);
+    expect(car.durationMin).toBe(3);
+    const shown = resolveDisplayedLeg(car, { lat: 37.55, lng: 126.97 }, { lat: 37.56, lng: 126.98 });
+    expect(shown.mode).toBe("walk");
   });
 });

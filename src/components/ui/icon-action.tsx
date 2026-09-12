@@ -10,8 +10,9 @@ export const IconAction = forwardRef<
     action: "edit" | "delete";
     label: string;
     onClick?: () => void;
+    className?: string;
   }
->(function IconAction({ action, label, onClick }, ref) {
+>(function IconAction({ action, label, onClick, className }, ref) {
   const Icon = action === "edit" ? PencilLine : Trash2;
   return (
     <button
@@ -25,6 +26,7 @@ export const IconAction = forwardRef<
       className={cn(
         "flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors",
         action === "delete" ? "hover:bg-destructive/10 hover:text-destructive" : "hover:bg-muted",
+        className,
       )}
     >
       <Icon className="size-3.5" strokeWidth={1.75} />

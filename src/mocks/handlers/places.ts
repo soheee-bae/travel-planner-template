@@ -4,6 +4,7 @@ import {
   createPlaceInputSchema,
   initialPlaces,
   updatePlaceInputSchema,
+  applyPlacePatch,
   type Place,
 } from "@/mocks/fixtures/places";
 
@@ -44,7 +45,7 @@ export const placesHandlers = [
     if (index === -1) {
       return HttpResponse.json({ message: "장소를 찾을 수 없습니다." }, { status: 404 });
     }
-    places[index] = { ...places[index], ...parsed.data };
+    places[index] = applyPlacePatch(places[index], parsed.data);
     return HttpResponse.json(places[index]);
   }),
 

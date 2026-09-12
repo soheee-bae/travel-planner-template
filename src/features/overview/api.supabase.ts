@@ -1,3 +1,4 @@
+import { airportCodeFromName } from "@/lib/airport";
 import { createClient } from "@/lib/supabase/client";
 import { asNumber, asTime, throwIfError, throwIfWriteError } from "@/lib/supabase/throw";
 import { toClientTripId, toDbTripId } from "@/lib/trip-ids";
@@ -20,6 +21,7 @@ interface AccommodationRow {
   booking_ref: string | null;
   cost: number | string | null;
   memo: string | null;
+  icon: string | null;
 }
 
 interface TransportRow {
@@ -33,6 +35,10 @@ interface TransportRow {
   booking_ref: string | null;
   cost: number | string | null;
   memo: string | null;
+  seat1: string | null;
+  seat2: string | null;
+  departure_code: string | null;
+  arrival_code: string | null;
 }
 
 function toAccommodation(row: AccommodationRow): Accommodation {
@@ -48,6 +54,7 @@ function toAccommodation(row: AccommodationRow): Accommodation {
     bookingRef: row.booking_ref ?? undefined,
     cost: asNumber(row.cost),
     memo: row.memo ?? undefined,
+    icon: row.icon ?? undefined,
   };
 }
 
@@ -63,6 +70,10 @@ function toTransport(row: TransportRow): Transport {
     bookingRef: row.booking_ref ?? undefined,
     cost: asNumber(row.cost),
     memo: row.memo ?? undefined,
+    seat1: row.seat1 ?? undefined,
+    seat2: row.seat2 ?? undefined,
+    departureCode: row.departure_code ?? airportCodeFromName(row.departure_from),
+    arrivalCode: row.arrival_code ?? airportCodeFromName(row.arrival_to),
   };
 }
 
@@ -87,6 +98,7 @@ export async function createAccommodation(input: CreateAccommodationInput): Prom
       booking_ref: input.bookingRef ?? null,
       cost: input.cost ?? null,
       memo: input.memo ?? null,
+      icon: input.icon ?? "🏨",
     })
     .select("*")
     .single();
@@ -111,6 +123,7 @@ export async function updateAccommodation(
       ...(patch.bookingRef !== undefined ? { booking_ref: patch.bookingRef ?? null } : {}),
       ...(patch.cost !== undefined ? { cost: patch.cost ?? null } : {}),
       ...(patch.memo !== undefined ? { memo: patch.memo ?? null } : {}),
+      ...(patch.icon !== undefined ? { icon: patch.icon ?? null } : {}),
     })
     .eq("trip_id", toDbTripId(tripId))
     .eq("id", id)
@@ -149,6 +162,10 @@ export async function createTransport(input: CreateTransportInput): Promise<Tran
       booking_ref: input.bookingRef ?? null,
       cost: input.cost ?? null,
       memo: input.memo ?? null,
+      seat1: input.seat1 ?? null,
+      seat2: input.seat2 ?? null,
+      departure_code: input.departureCode ?? airportCodeFromName(input.departureFrom),
+      arrival_code: input.arrivalCode ?? airportCodeFromName(input.arrivalTo),
     })
     .select("*")
     .single();
@@ -172,6 +189,18 @@ export async function updateTransport(
       ...(patch.bookingRef !== undefined ? { booking_ref: patch.bookingRef ?? null } : {}),
       ...(patch.cost !== undefined ? { cost: patch.cost ?? null } : {}),
       ...(patch.memo !== undefined ? { memo: patch.memo ?? null } : {}),
+      ...(patch.seat1 !== undefined ? { seat1: patch.seat1 ?? null } : {}),
+      ...(patch.seat2 !== undefined ? { seat2: patch.seat2 ?? null } : {}),
+      ...(patch.departureCode !== undefined
+        ? { departure_code: patch.departureCode ?? null }
+        : patch.departureFrom !== undefined
+          ? { departure_code: airportCodeFromName(patch.departureFrom) }
+          : {}),
+      ...(patch.arrivalCode !== undefined
+        ? { arrival_code: patch.arrivalCode ?? null }
+        : patch.arrivalTo !== undefined
+          ? { arrival_code: airportCodeFromName(patch.arrivalTo) }
+          : {}),
     })
     .eq("trip_id", toDbTripId(tripId))
     .eq("id", id)

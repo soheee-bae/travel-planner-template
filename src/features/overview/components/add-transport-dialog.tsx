@@ -23,6 +23,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useCreateTransport, useUpdateTransport } from "@/features/overview/hooks";
+import { airportCodeFromName } from "@/lib/airport";
 import {
   createTransportInputSchema,
   TRANSPORT_TYPES,
@@ -60,6 +61,9 @@ export function AddTransportDialog({
           arrivalAt: initial.arrivalAt,
           bookingRef: initial.bookingRef,
           cost: initial.cost,
+          memo: initial.memo,
+          seat1: initial.seat1,
+          seat2: initial.seat2,
         }
       : {
           type: "비행기",
@@ -71,11 +75,16 @@ export function AddTransportDialog({
   });
 
   function onSubmit(values: FormValues) {
+    const payload = {
+      ...values,
+      departureCode: values.departureCode?.trim() || airportCodeFromName(values.departureFrom),
+      arrivalCode: values.arrivalCode?.trim() || airportCodeFromName(values.arrivalTo),
+    };
     if (initial) {
-      updateTransport.mutate({ id: initial.id, patch: values }, { onSuccess: () => setOpen(false) });
+      updateTransport.mutate({ id: initial.id, patch: payload }, { onSuccess: () => setOpen(false) });
       return;
     }
-    const input: CreateTransportInput = { tripId, ...values };
+    const input: CreateTransportInput = { tripId, ...payload };
     createTransport.mutate(input, { onSuccess: () => setOpen(false) });
     form.reset();
   }
@@ -148,6 +157,16 @@ export function AddTransportDialog({
                   setValueAs: (v) => (v === "" ? undefined : Number(v)),
                 })}
               />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="tr-seat1">좌석1</Label>
+              <Input id="tr-seat1" placeholder="예: 14A" {...form.register("seat1")} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="tr-seat2">좌석2</Label>
+              <Input id="tr-seat2" placeholder="예: 14B" {...form.register("seat2")} />
             </div>
           </div>
           <Button

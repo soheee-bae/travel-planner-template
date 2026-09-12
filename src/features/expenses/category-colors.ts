@@ -5,13 +5,11 @@ import type { ExpenseCategory } from "@/mocks/fixtures/expenses";
  * Recharts의 Pie `fill`은 CSS 커스텀 프로퍼티보다 리터럴 hex가 더 안전하다.
  */
 export const CATEGORY_COLORS: Record<ExpenseCategory, string> = {
-  식비: "#5EC26A",
-  숙소: "#0E7490",
-  교통: "#4E81EE",
-  "관광·입장": "#9D5AEF",
-  쇼핑: "#C2568F",
-  항공: "#1F4FC4",
-  통신: "#6D727F",
-  액티비티: "#DA9B35",
-  기타: "#8A5A16",
+  식비: "#F29C9F",
+  카페: "#F3C65B",
+  "교통/주유": "#F09040",
+  숙소: "#8CB9D2",
+  "쇼핑/선물": "#C2568F",
+  놀거리: "#7AB87A",
+  기타: "#9E8FD0",
 };

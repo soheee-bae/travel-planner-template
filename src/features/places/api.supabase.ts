@@ -1,19 +1,13 @@
 import { createClient } from "@/lib/supabase/client";
 import { asNumber, asRequiredNumber, throwIfError, throwIfWriteError } from "@/lib/supabase/throw";
 import { toClientTripId, toDbTripId } from "@/lib/trip-ids";
-import type {
-  CreatePlaceInput,
-  Place,
-  PlaceCategory,
-  PlacePriority,
-  UpdatePlaceInput,
-} from "@/mocks/fixtures/places";
+import { normalizePlaceCategory, type CreatePlaceInput, type Place, type PlacePriority, type UpdatePlaceInput } from "@/mocks/fixtures/places";
 
 interface PlaceRow {
   id: string;
   trip_id: string;
   name: string;
-  category: PlaceCategory;
+  category: string;
   address: string | null;
   lat: number | string | null;
   lng: number | string | null;
@@ -36,7 +30,7 @@ function toPlace(row: PlaceRow): Place {
     id: row.id,
     tripId: toClientTripId(row.trip_id),
     name: row.name,
-    category: row.category,
+    category: normalizePlaceCategory(row.category),
     address: row.address ?? undefined,
     lat: asNumber(row.lat),
     lng: asNumber(row.lng),

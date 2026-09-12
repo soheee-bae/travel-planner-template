@@ -2,16 +2,36 @@ import { z } from "zod";
 
 export const EXPENSE_CATEGORIES = [
   "식비",
+  "카페",
+  "교통/주유",
   "숙소",
-  "교통",
-  "관광·입장",
-  "쇼핑",
-  "항공",
-  "통신",
-  "액티비티",
+  "쇼핑/선물",
+  "놀거리",
   "기타",
 ] as const;
 export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
+
+export const EXPENSE_CATEGORY_EMOJI: Record<ExpenseCategory, string> = {
+  식비: "🍽️",
+  카페: "☕",
+  "교통/주유": "🚗",
+  숙소: "🛏️",
+  "쇼핑/선물": "🛍️",
+  놀거리: "🎡",
+  기타: "🏷️",
+};
+
+/** DB에 남은 예전 비용 카테고리를 새 7종으로 본다. */
+export function normalizeExpenseCategory(raw: string): ExpenseCategory {
+  if (raw === "식비" || raw === "맛집") return "식비";
+  if (raw === "카페") return "카페";
+  if (raw === "교통/주유" || raw === "교통" || raw === "항공") return "교통/주유";
+  if (raw === "숙소") return "숙소";
+  if (raw === "쇼핑/선물" || raw === "쇼핑") return "쇼핑/선물";
+  if (raw === "놀거리" || raw === "관광" || raw === "관광·입장" || raw === "액티비티") return "놀거리";
+  if ((EXPENSE_CATEGORIES as readonly string[]).includes(raw)) return raw as ExpenseCategory;
+  return "기타";
+}
 
 export const PAYMENT_METHODS = ["현금", "카드", "선불"] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
@@ -31,8 +51,23 @@ export const expenseSchema = z.object({
   placeId: z.string().nullable(),
   memo: z.string().optional(),
   isManual: z.boolean(),
+  isBlur: z.boolean().optional(),
 });
 export type Expense = z.infer<typeof expenseSchema>;
+
+export function isGiftPayer(paidBy?: string): boolean {
+  return paidBy === "같이" || paidBy === "선물";
+}
+
+export function shouldBlurExpense(expense: Pick<Expense, "isBlur" | "paidBy">): boolean {
+  return expense.isBlur === true || expense.paidBy === "선물";
+}
+
+export function paidByTagLabel(paidBy: string): string {
+  if (paidBy === "나" || paidBy === "소희") return "소희";
+  if (paidBy === "준형") return "준형";
+  return paidBy;
+}
 
 export const createExpenseInputSchema = expenseSchema.omit({ id: true });
 export type CreateExpenseInput = z.infer<typeof createExpenseInputSchema>;
@@ -45,15 +80,16 @@ export const initialExpenses: Expense[] = [
     id: "exp_jeju_1",
     tripId: "trip_jeju",
     title: "제주항공 왕복",
-    category: "항공",
+    category: "교통/주유",
     amount: 148000,
     currency: "KRW",
-    date: "2026-10-14",
+    date: "2026-09-17",
     dayIndex: 1,
     paymentMethod: "카드",
     paidBy: "준형",
     placeId: null,
     isManual: true,
+    isBlur: false,
   },
   {
     id: "exp_jeju_2",
@@ -62,12 +98,13 @@ export const initialExpenses: Expense[] = [
     category: "숙소",
     amount: 220000,
     currency: "KRW",
-    date: "2026-10-14",
+    date: "2026-09-17",
     dayIndex: 1,
     paymentMethod: "카드",
     paidBy: "같이",
     placeId: null,
     isManual: true,
+    isBlur: false,
   },
   {
     id: "exp_nagoya_1",
@@ -79,64 +116,69 @@ export const initialExpenses: Expense[] = [
     date: "2026-11-06",
     dayIndex: 1,
     paymentMethod: "카드",
-    paidBy: "나",
+    paidBy: "소희",
     placeId: "place_nagoya_2",
     isManual: false,
+    isBlur: false,
   },
   {
     id: "exp_nagoya_2",
     tripId: "trip_nagoya",
     title: "코메다 커피",
-    category: "식비",
+    category: "카페",
     amount: 800,
     currency: "JPY",
     date: "2026-11-07",
     dayIndex: 2,
     paymentMethod: "카드",
-    paidBy: "나",
+    paidBy: "소희",
     placeId: "place_nagoya_3",
     isManual: false,
+    isBlur: false,
   },
   {
     id: "exp_nagoya_3",
     tripId: "trip_nagoya",
     title: "지브리 파크 입장권",
-    category: "관광·입장",
+    category: "놀거리",
     amount: 3500,
     currency: "JPY",
     date: "2026-11-07",
     dayIndex: 2,
     paymentMethod: "카드",
-    paidBy: "나",
+    paidBy: "소희",
     placeId: "place_nagoya_1",
     isManual: false,
+    isBlur: false,
   },
   {
     id: "exp_nagoya_4",
     tripId: "trip_nagoya",
     title: "지하철 1일 승차권",
-    category: "교통",
+    category: "교통/주유",
     amount: 760,
     currency: "JPY",
     date: "2026-11-07",
     dayIndex: 2,
     paymentMethod: "현금",
-    paidBy: "나",
+    paidBy: "소희",
     placeId: null,
     isManual: true,
+    isBlur: false,
   },
   {
     id: "exp_nagoya_5",
     tripId: "trip_nagoya",
     title: "오스카상점가 기념품",
-    category: "쇼핑",
+    category: "쇼핑/선물",
     amount: 2800,
     currency: "JPY",
     date: "2026-11-06",
     dayIndex: 1,
     paymentMethod: "카드",
-    paidBy: "나",
+    paidBy: "소희",
     placeId: null,
     isManual: true,
+    isBlur: false,
   },
 ];

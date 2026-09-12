@@ -27,13 +27,24 @@ export function formatIsoDot(iso: string): string {
   return `${y}.${m}.${d}`;
 }
 
-/** 오늘 기준 D-day. 여행 당일은 D-Day, 지난 여행은 종료 후 경과일. */
+export function todayIsoSeoul(): string {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Seoul" });
+}
+
+/** 오늘 기준 D-day. 출발 전 D-n, 당일 D-Day, 여행 중 D+n, 종료 후 지난 여행. */
 export function formatDday(startDate: string, endDate: string, todayIso?: string): string {
-  const today = todayIso ?? new Date().toISOString().slice(0, 10);
-  if (today < startDate) {
-    const days = calcNights(today, startDate);
-    return `D-${days}`;
-  }
+  const today = todayIso ?? todayIsoSeoul();
+  if (today < startDate) return `D-${calcNights(today, startDate)}`;
+  if (today === startDate) return "D-Day";
+  if (today <= endDate) return `D+${calcNights(startDate, today)}`;
+  return "지난 여행";
+}
+
+/** D-day 카드 위 라벨. */
+export function formatDdayCaption(startDate: string, endDate: string, todayIso?: string): string {
+  const today = todayIso ?? todayIsoSeoul();
+  if (today < startDate) return "비행기 뜨는 날까지";
+  if (today === startDate) return "출발일";
   if (today <= endDate) return "여행 중";
   return "지난 여행";
 }

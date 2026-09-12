@@ -28,9 +28,44 @@ export type ChecklistItem = z.infer<typeof checklistItemSchema>;
 export const createChecklistItemInputSchema = checklistItemSchema.omit({ id: true });
 export type CreateChecklistItemInput = z.infer<typeof createChecklistItemInputSchema>;
 export const updateChecklistItemInputSchema = checklistItemSchema
-  .omit({ id: true, categoryId: true, tripId: true })
+  .omit({ id: true, tripId: true })
   .partial();
 export type UpdateChecklistItemInput = z.infer<typeof updateChecklistItemInputSchema>;
+
+export const PREP_CATEGORIES = [
+  { name: "맛집/카페", icon: "☕", aliases: ["맛집/카페", "맛집", "카페", "음식"] },
+  { name: "관광", icon: "🌊", aliases: ["관광"] },
+  { name: "선물/기념품", icon: "🍊", aliases: ["선물/기념품", "선물리스트", "선물"] },
+  { name: "쇼핑", icon: "🛍️", aliases: ["쇼핑", "쇼핑리스트"] },
+  { name: "기타", icon: "🎸", aliases: ["기타"] },
+] as const;
+export type PrepCategoryName = (typeof PREP_CATEGORIES)[number]["name"];
+export const PREP_PAGE_FILTERS = ["전체", "맛집/카페", "관광", "선물/기념품", "쇼핑", "기타"] as const;
+export type PrepPageFilter = (typeof PREP_PAGE_FILTERS)[number];
+
+const PREP_ASSIGNEES = ["공통", "소희", "준형"] as const;
+export type PrepAssignee = (typeof PREP_ASSIGNEES)[number];
+
+export function canonicalPrepCategory(name: string): PrepCategoryName {
+  const found = PREP_CATEGORIES.find(
+    (preset) => preset.name === name || preset.aliases.some((alias) => name.includes(alias)),
+  );
+  return found?.name ?? "기타";
+}
+
+export function parseChecklistNotes(notes?: string): { assignee: PrepAssignee; content: string } {
+  if (!notes) return { assignee: "공통", content: "" };
+  const [first, ...rest] = notes.split("\n");
+  if ((PREP_ASSIGNEES as readonly string[]).includes(first)) {
+    return { assignee: first as PrepAssignee, content: rest.join("\n") };
+  }
+  return { assignee: "공통", content: notes };
+}
+
+export function formatChecklistNotes(content: string): string | undefined {
+  const trimmed = content.trim();
+  return trimmed ? trimmed : undefined;
+}
 
 /**
  * 여행 생성 시 자동으로 채워지는 기본 카테고리 5종(docs 계획서 "기본

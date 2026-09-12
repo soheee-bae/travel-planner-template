@@ -26,6 +26,7 @@ import {
   type Expense,
 } from "@/mocks/fixtures/expenses";
 import {
+  applyPlacePatch,
   createPlaceInputSchema,
   initialPlaces,
   updatePlaceInputSchema,
@@ -107,7 +108,7 @@ export const memory = {
     const data = parseOrThrow(updatePlaceInputSchema.safeParse(body));
     const index = places.findIndex((p) => p.id === id && p.tripId === tripId);
     if (index === -1) throw new MockHttpError(404, "장소를 찾을 수 없습니다.");
-    places[index] = { ...places[index], ...data };
+    places[index] = applyPlacePatch(places[index], data);
     return places[index];
   },
   deletePlace: (tripId: string, id: string) => {

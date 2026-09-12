@@ -1,21 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Plus } from "lucide-react";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  FigmaChip,
+  FigmaChipRow,
+  FigmaCtaButton,
+  FigmaFieldLabel,
+  FigmaSheetHandle,
+  figmaInputClass,
+} from "@/components/ui/figma";
 import {
   Dialog,
   DialogContent,
@@ -25,395 +22,342 @@ import {
 } from "@/components/ui/dialog";
 import { useCreatePlace, useUpdatePlace } from "@/features/places/hooks";
 import {
-  createPlaceInputSchema,
   PLACE_CATEGORIES,
-  PLACE_PRIORITIES,
   type CreatePlaceInput,
   type Place,
+  type PlaceCategory,
 } from "@/mocks/fixtures/places";
+import { formatDurationText, parseDurationText } from "@/lib/duration-text";
+import { getTripDays } from "@/lib/trip-days";
+import { nextOrderIndexForDay } from "@/lib/visit-order";
 
-const formSchema = createPlaceInputSchema
-  .omit({ tripId: true, dayIndex: true, orderIndex: true, tags: true })
-  .extend({ tagsInput: z.string().optional() });
+const formSchema = z.object({
+  name: z.string().trim().min(1, "어딜 가볼까~?"),
+  address: z.string().trim().min(1, "주소 안 넣으면 운전 안해!"),
+  category: z.enum(PLACE_CATEGORIES),
+  dayIndex: z.number().int().positive().nullable(),
+  durationText: z
+    .string()
+    .optional()
+    .refine((value) => !value?.trim() || parseDurationText(value) != null, {
+      message: "1시간 30분, 90분, 1h 30m처럼 입력해 주세요",
+    }),
+  memo: z.string().optional(),
+});
 type FormValues = z.infer<typeof formSchema>;
 
-/** 지도 링크나 주소 한 번에 붙여넣으면 좌표를 자동으로 채운다 — 이 앱의
- * 실제 병목은 장소 수십 개를 손으로 입력하는 것이기 때문이다
- * (docs/06-features-and-algorithms.md §6.9 1순위). */
-function useAutofillCoordinates(form: ReturnType<typeof useForm<FormValues>>) {
-  const [linkInput, setLinkInput] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
-  const [lat, setLat] = useState<number>();
-  const [lng, setLng] = useState<number>();
+const PLACE_CATEGORY_EMOJI: Record<PlaceCategory, string> = {
+  관광: "🏝️",
+  맛집: "🍜",
+  카페: "☕",
+  숙소: "🏨",
+  교통: "🚗",
+  쇼핑: "🛍️",
+  기타: "📌",
+};
 
-  async function fetchFromLink() {
-    if (!linkInput.trim()) return;
-    setStatus("loading");
-    try {
-      const res = await fetch(`/api/geocode/parse?url=${encodeURIComponent(linkInput)}`);
-      if (!res.ok) throw new Error();
-      const data = (await res.json()) as { lat: number; lng: number; name?: string };
-      setLat(data.lat);
-      setLng(data.lng);
-      if (data.name && !form.getValues("name")) form.setValue("name", data.name);
-      setStatus("idle");
-    } catch {
-      setStatus("error");
-    }
-  }
+async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+  const res = await fetch(`/api/geocode?q=${encodeURIComponent(address)}`);
+  if (!res.ok) return null;
+  const data = (await res.json()) as { lat?: number; lng?: number };
+  if (typeof data.lat !== "number" || typeof data.lng !== "number") return null;
+  if (!Number.isFinite(data.lat) || !Number.isFinite(data.lng)) return null;
+  return { lat: data.lat, lng: data.lng };
+}
 
-  async function fetchFromAddress() {
-    const address = form.getValues("address");
-    if (!address?.trim()) return;
-    setStatus("loading");
-    try {
-      const res = await fetch(`/api/geocode?q=${encodeURIComponent(address)}`);
-      if (!res.ok) throw new Error();
-      const data = (await res.json()) as { lat: number; lng: number };
-      setLat(data.lat);
-      setLng(data.lng);
-      setStatus("idle");
-    } catch {
-      setStatus("error");
-    }
-  }
-
-  return { linkInput, setLinkInput, status, lat, lng, fetchFromLink, fetchFromAddress };
+function emptyForm(defaults?: { category?: PlaceCategory; dayIndex?: number | null }): FormValues {
+  return {
+    name: "",
+    category: defaults?.category ?? "관광",
+    address: "",
+    dayIndex: defaults?.dayIndex ?? null,
+    durationText: "",
+    memo: "",
+  };
 }
 
 export function AddPlaceDialog({
   tripId,
   initial,
-  existingTags = [],
   existingPlaces = [],
+  hideTrigger,
   open: openProp,
   onOpenChange,
+  startDate,
+  endDate,
+  defaultDayIndex,
+  defaultCategory,
+  onSaved,
 }: {
   tripId: string;
   initial?: Place;
   existingTags?: string[];
   existingPlaces?: Place[];
+  hideTrigger?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  startDate?: string;
+  endDate?: string;
+  defaultDayIndex?: number | null;
+  defaultCategory?: PlaceCategory;
+  onSaved?: (place: { dayIndex: number | null; category: PlaceCategory }) => void;
 }) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const open = openProp ?? uncontrolledOpen;
   const setOpen = onOpenChange ?? setUncontrolledOpen;
   const createPlace = useCreatePlace(tripId);
   const updatePlace = useUpdatePlace(tripId);
+  const [geoError, setGeoError] = useState<string>();
+  const [geoLoading, setGeoLoading] = useState(false);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initial
       ? {
           name: initial.name,
           category: initial.category,
-          priority: initial.priority,
-          address: initial.address,
-          estimatedCost: initial.estimatedCost,
-          durationMin: initial.durationMin,
-          memo: initial.memo,
-          linkUrl: initial.linkUrl,
-          photoUrl: initial.photoUrl,
-          tagsInput: initial.tags.join(", "),
+          address: initial.address ?? "",
+          dayIndex: initial.dayIndex,
+          durationText: formatDurationText(initial.durationMin),
+          memo: initial.memo ?? "",
         }
-      : { name: "", category: "관광", priority: "가능하면" },
+      : emptyForm({ category: defaultCategory, dayIndex: defaultDayIndex }),
   });
-  const autofill = useAutofillCoordinates(form);
-  const [pinLat, setPinLat] = useState<number | undefined>(initial?.lat);
-  const [pinLng, setPinLng] = useState<number | undefined>(initial?.lng);
-  const tagSuggestions = Array.from(new Set(existingTags)).slice(0, 12);
+  const category = form.watch("category");
+  const dayIndex = form.watch("dayIndex");
+  const days = startDate && endDate ? getTripDays(startDate, endDate) : [];
 
-  function onSubmit(values: FormValues) {
-    const { tagsInput, ...rest } = values;
-    const tags = tagsInput
-      ? tagsInput
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : [];
-    const lat = autofill.lat ?? pinLat;
-    const lng = autofill.lng ?? pinLng;
+  useEffect(() => {
+    if (!open || initial) return;
+    form.reset(emptyForm({ category: defaultCategory, dayIndex: defaultDayIndex }));
+    // Defaults are captured when the sheet opens; `form` identity changes every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (!initial) {
+      form.reset(emptyForm({ category: defaultCategory, dayIndex: defaultDayIndex }));
+    }
+    if (!next) {
+      setGeoError(undefined);
+    }
+  }
+
+  async function onSubmit(values: FormValues) {
+    setGeoError(undefined);
+    const durationMin = parseDurationText(values.durationText);
+    const addressUnchanged =
+      initial != null && (initial.address ?? "").trim() === values.address.trim();
+    let lat = addressUnchanged ? initial.lat : undefined;
+    let lng = addressUnchanged ? initial.lng : undefined;
+
+    if (lat == null || lng == null) {
+      setGeoLoading(true);
+      let coords: { lat: number; lng: number } | null = null;
+      try {
+        coords = await geocodeAddress(values.address);
+      } catch {
+        coords = null;
+      } finally {
+        setGeoLoading(false);
+      }
+      if (!coords) {
+        setGeoError("주소를 지도에서 찾지 못했습니다. 주소를 다시 확인해 주세요.");
+        return;
+      }
+      lat = coords.lat;
+      lng = coords.lng;
+    }
+
     const duplicate = existingPlaces.some(
       (p) =>
         p.id !== initial?.id &&
-        p.name.trim() === rest.name.trim() &&
+        p.name.trim() === values.name.trim() &&
         p.dayIndex != null &&
-        p.dayIndex === (initial?.dayIndex ?? null),
+        p.dayIndex === (values.dayIndex ?? initial?.dayIndex ?? null),
     );
-    if (duplicate && !window.confirm("같은 날 같은 이름 장소가 있어. 그래도 저장할까?")) {
+    if (duplicate && !window.confirm("같은 날 같은 이름 장소가 있습니다. 그래도 저장할까요?")) {
       return;
     }
+
+    const memo = values.memo?.trim() ? values.memo : undefined;
+
+    const nextDay = values.dayIndex;
+    const dayChanged = initial != null && initial.dayIndex !== nextDay;
+    const orderIndex =
+      nextDay == null
+        ? 0
+        : dayChanged || initial == null
+          ? nextOrderIndexForDay(existingPlaces, nextDay)
+          : initial.orderIndex;
+
     if (initial) {
       updatePlace.mutate(
         {
           id: initial.id,
-          patch: { ...rest, tags, lat, lng },
+          patch: {
+            name: values.name,
+            address: values.address,
+            category: values.category,
+            durationMin: durationMin ?? null,
+            memo: memo ?? null,
+            lat,
+            lng,
+            dayIndex: nextDay,
+            orderIndex,
+          },
         },
-        { onSuccess: () => setOpen(false) },
+        {
+          onSuccess: () => {
+            onSaved?.({ dayIndex: nextDay, category: values.category });
+            setOpen(false);
+          },
+        },
       );
       return;
     }
+
     const input: CreatePlaceInput = {
       tripId,
-      dayIndex: null,
-      orderIndex: 0,
-      tags,
+      dayIndex: nextDay,
+      orderIndex,
+      tags: [],
+      priority: "가능하면",
+      name: values.name,
+      address: values.address,
+      category: values.category,
+      durationMin,
+      memo,
       lat,
       lng,
-      ...rest,
     };
-    createPlace.mutate(input, { onSuccess: () => setOpen(false) });
-    form.reset();
+    createPlace.mutate(input, {
+      onSuccess: () => {
+        onSaved?.({ dayIndex: nextDay, category: values.category });
+        form.reset(emptyForm({ category: defaultCategory, dayIndex: defaultDayIndex }));
+        setOpen(false);
+      },
+    });
   }
 
+  const saving = geoLoading || createPlace.isPending || updatePlace.isPending;
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {!initial && (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {!initial && !hideTrigger && (
         <DialogTrigger asChild>
-          <Button className="h-12 w-full rounded-3xl border-2 border-dashed border-primary/70 bg-primary/5 text-primary">
-            <Plus className="size-4" aria-hidden="true" />
-            새 장소 추가
-          </Button>
+          <FigmaCtaButton>+ 여기 가볼까?</FigmaCtaButton>
         </DialogTrigger>
       )}
-      <DialogContent className="max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{initial ? "장소 수정" : "장소 추가"}</DialogTitle>
+      <DialogContent
+        showCloseButton={false}
+        className="max-h-[min(1048.05px,var(--vv-height,100dvh))] gap-0 overflow-y-auto"
+      >
+        <FigmaSheetHandle />
+        <DialogHeader className="gap-0">
+          <DialogTitle className="flex h-[26px] items-center text-[17px] leading-[26px] font-bold text-[#1A1A1A]">
+            {initial ? "장소 수정" : "어디 가볼까?"}
+          </DialogTitle>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="place-name">장소명</Label>
-            <Input id="place-name" placeholder="예) 협재 해수욕장" {...form.register("name")} />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full flex-col">
+          <div className="flex flex-col gap-1.5 pt-5">
+            <FigmaFieldLabel htmlFor="place-name">장소 이름</FigmaFieldLabel>
+            <Input
+              id="place-name"
+              placeholder="바다 보면서 멍때릴 해변"
+              aria-required="true"
+              className={figmaInputClass}
+              {...form.register("name")}
+            />
+            {form.formState.errors.name ? (
+              <p className="text-[12px] leading-[18px] text-destructive">
+                {form.formState.errors.name.message}
+              </p>
+            ) : null}
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="place-address">주소</Label>
-            <div className="flex gap-2">
-              <Input
-                id="place-address"
-                placeholder="주소 또는 지역명"
-                {...form.register("address")}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={autofill.fetchFromAddress}
-                disabled={autofill.status === "loading"}
-              >
-                찾기
-              </Button>
-            </div>
+          <div className="flex flex-col gap-1.5 pt-3.5">
+            <FigmaFieldLabel htmlFor="place-address">주소</FigmaFieldLabel>
+            <Input
+              id="place-address"
+              placeholder="네이버 지도 주소 복붙! (그래야 길 안 잃어 🚗)"
+              aria-required="true"
+              className={figmaInputClass}
+              {...form.register("address")}
+            />
+            {form.formState.errors.address ? (
+              <p className="text-[12px] leading-[18px] text-destructive">
+                {form.formState.errors.address.message}
+              </p>
+            ) : null}
+            {geoError ? (
+              <p className="text-[12px] leading-[18px] text-destructive">{geoError}</p>
+            ) : null}
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label>카테고리</Label>
-            <div className="flex flex-wrap gap-2">
-              {(
-                [
-                  ["관광", "관광"],
-                  ["카페", "카페"],
-                  ["맛집", "식당"],
-                  ["쇼핑", "쇼핑"],
-                  ["기타", "교통"],
-                ] as const
-              ).map(([value, label]) => (
-                <button
+          <div className="flex flex-col gap-2 pt-3.5">
+            <FigmaFieldLabel>카테고리</FigmaFieldLabel>
+            <div className="flex w-full flex-wrap items-start gap-2 py-1" role="group" aria-label="카테고리">
+              {PLACE_CATEGORIES.map((value) => (
+                <FigmaChip
                   key={value}
-                  type="button"
-                  onClick={() => form.setValue("category", value)}
-                  className={`rounded-full px-3 py-1.5 text-sm font-bold ${
-                    form.watch("category") === value
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
-                  }`}
+                  size="sm"
+                  active={category === value}
+                  onClick={() => form.setValue("category", value, { shouldDirty: true })}
                 >
-                  {label}
-                </button>
+                  {PLACE_CATEGORY_EMOJI[value]} {value}
+                </FigmaChip>
               ))}
             </div>
-            <Select
-              defaultValue={form.getValues("category")}
-              onValueChange={(v) => form.setValue("category", v as FormValues["category"])}
-            >
-              <SelectTrigger id="place-category" className="sr-only" aria-hidden>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PLACE_CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="place-duration">예상 소요시간</Label>
+          <div className="flex flex-col pt-3.5">
+            <FigmaFieldLabel>일차 (선택)</FigmaFieldLabel>
+            <FigmaChipRow role="group" aria-label="일차">
+              <FigmaChip
+                size="sm"
+                active={dayIndex == null}
+                onClick={() => form.setValue("dayIndex", null, { shouldDirty: true })}
+              >
+                언젠가
+              </FigmaChip>
+              {days.map((day) => (
+                <FigmaChip
+                  key={day.dayIndex}
+                  size="sm"
+                  active={dayIndex === day.dayIndex}
+                  onClick={() => form.setValue("dayIndex", day.dayIndex, { shouldDirty: true })}
+                >
+                  Day {day.dayIndex}
+                </FigmaChip>
+              ))}
+            </FigmaChipRow>
+          </div>
+          <div className="flex flex-col gap-1.5 pt-3.5">
+            <FigmaFieldLabel htmlFor="place-duration">예상 소요 시간 (선택)</FigmaFieldLabel>
             <Input
               id="place-duration"
-              type="number"
-              min={0}
-              placeholder="예) 1h 30m → 분"
-              {...form.register("durationMin", {
-                setValueAs: (v) => (v === "" ? undefined : Number(v)),
-              })}
+              inputMode="text"
+              placeholder="예: 해 질 때까지 멍때리기"
+              className={figmaInputClass}
+              {...form.register("durationText")}
+            />
+            {form.formState.errors.durationText ? (
+              <p className="text-[12px] leading-[18px] text-destructive">
+                {form.formState.errors.durationText.message}
+              </p>
+            ) : null}
+          </div>
+          <div className="flex flex-col gap-1.5 py-3.5">
+            <FigmaFieldLabel htmlFor="place-memo">메모 (선택)</FigmaFieldLabel>
+            <Input
+              id="place-memo"
+              placeholder="예: 여기서 꼭 서로 사진 찍어주기 📸"
+              className={figmaInputClass}
+              {...form.register("memo")}
             />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="place-memo">메모 (선택)</Label>
-            <Textarea id="place-memo" placeholder="예) 예약 필수!" {...form.register("memo")} />
-          </div>
 
-          <div className="flex flex-col gap-1.5 rounded-md border border-dashed border-border p-3">
-            <Label htmlFor="place-link">지도 링크 붙여넣기</Label>
-            <div className="flex gap-2">
-              <Input
-                id="place-link"
-                placeholder="구글/네이버 지도 공유 링크"
-                value={autofill.linkInput}
-                onChange={(e) => autofill.setLinkInput(e.target.value)}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={autofill.fetchFromLink}
-                disabled={autofill.status === "loading"}
-              >
-                가져오기
-              </Button>
-            </div>
-            {autofill.lat != null && autofill.lng != null && (
-              <p className="text-xs text-money">
-                좌표 확인됨: {autofill.lat.toFixed(5)}, {autofill.lng.toFixed(5)}
-              </p>
-            )}
-            {autofill.status === "error" && (
-              <div className="flex flex-col gap-2">
-                <p className="text-xs text-destructive">
-                  좌표를 찾지 못했습니다. 위경도를 직접 찍거나 입력해 주세요.
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    type="number"
-                    step="0.0001"
-                    placeholder="위도"
-                    aria-label="위도"
-                    value={pinLat ?? ""}
-                    onChange={(e) => setPinLat(e.target.value === "" ? undefined : Number(e.target.value))}
-                  />
-                  <Input
-                    type="number"
-                    step="0.0001"
-                    placeholder="경도"
-                    aria-label="경도"
-                    value={pinLng ?? ""}
-                    onChange={(e) => setPinLng(e.target.value === "" ? undefined : Number(e.target.value))}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <details className="rounded-md border border-border p-3">
-            <summary className="cursor-pointer text-sm font-medium text-foreground">
-              자세히 입력
-            </summary>
-            <div className="mt-3 flex flex-col gap-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="place-hours">영업시간</Label>
-                  <Input
-                    id="place-hours"
-                    placeholder="09:00~18:00"
-                    {...form.register("businessHours")}
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="place-closed">휴무일</Label>
-                  <Input
-                    id="place-closed"
-                    placeholder="매주 월요일"
-                    {...form.register("closedDays")}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="place-cost">예상 비용</Label>
-                <Input
-                  id="place-cost"
-                  type="number"
-                  min={0}
-                  {...form.register("estimatedCost", {
-                    setValueAs: (v) => (v === "" ? undefined : Number(v)),
-                  })}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="place-priority">우선순위</Label>
-                <Select
-                  defaultValue={form.getValues("priority")}
-                  onValueChange={(v) => form.setValue("priority", v as FormValues["priority"])}
-                >
-                  <SelectTrigger id="place-priority" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PLACE_PRIORITIES.map((p) => (
-                      <SelectItem key={p} value={p}>
-                        {p}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="place-tags">태그 (쉼표로 구분)</Label>
-                <Input
-                  id="place-tags"
-                  placeholder="#바다뷰, #디저트"
-                  {...form.register("tagsInput")}
-                />
-                {tagSuggestions.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {tagSuggestions.map((tag) => (
-                      <button
-                        key={tag}
-                        type="button"
-                        className="rounded-md bg-muted px-2 py-0.5 text-xs"
-                        onClick={() => {
-                          const current = form.getValues("tagsInput") ?? "";
-                          const next = current
-                            ? `${current}, ${tag}`
-                            : tag;
-                          form.setValue("tagsInput", next);
-                        }}
-                      >
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="place-photo">사진 URL</Label>
-                  <Input id="place-photo" {...form.register("photoUrl")} />
-                </div>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="place-link-url">링크</Label>
-                <Input
-                  id="place-link-url"
-                  placeholder="인스타/블로그 등"
-                  {...form.register("linkUrl")}
-                />
-              </div>
-            </div>
-          </details>
-
-          <Button
-            type="submit"
-            className="h-10"
-            disabled={createPlace.isPending || updatePlace.isPending}
-          >
-            {initial ? "저장" : "추가"}
-          </Button>
+          <FigmaCtaButton type="submit" disabled={saving} className="h-[51px] py-3.5">
+            {geoLoading ? "주소 찾는 중…" : "지도에 담기"}
+          </FigmaCtaButton>
         </form>
       </DialogContent>
     </Dialog>

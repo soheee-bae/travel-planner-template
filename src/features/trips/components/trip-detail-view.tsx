@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTrip } from "@/features/trips/hooks";
 import { useTripTab } from "@/features/trips/hooks/use-trip-tab";
@@ -10,6 +11,7 @@ import { PlannerTab } from "@/features/planner/components/planner-tab";
 import { BudgetTab } from "@/features/expenses/components/budget-tab";
 import { PrepWorkspace } from "@/features/checklists/components/prep-workspace";
 import { useMotionSafeDuration } from "@/hooks/use-motion-safe";
+import { easing } from "@/lib/motion";
 import { NAV_SWIPE_TABS } from "@/features/trips/hooks/use-trip-tab";
 import { useIsDesktop } from "@/hooks/use-media-query";
 import { JEJU_TRIP_ID } from "@/lib/jeju-trip";
@@ -17,37 +19,58 @@ import { JEJU_TRIP_ID } from "@/lib/jeju-trip";
 export function TripDetailView({ tripId }: { tripId: string }) {
   const { data: trip, isLoading, isError } = useTrip(tripId);
   const { tab, setTab } = useTripTab();
-  const crossfade = useMotionSafeDuration("enter");
+  const slideDuration = useMotionSafeDuration("slide");
   const isDesktop = useIsDesktop();
   const panel = tab === "memo" ? "prep" : tab;
+  const panelIndex = NAV_SWIPE_TABS.indexOf(panel);
+  const prevIndexRef = useRef(panelIndex);
+  const dirRef = useRef(1);
+  if (panelIndex !== prevIndexRef.current) {
+    dirRef.current = panelIndex > prevIndexRef.current ? 1 : -1;
+    prevIndexRef.current = panelIndex;
+  }
+  const dir = dirRef.current;
 
   if (isLoading) {
-    return <p className="p-6 text-sm text-muted-foreground">불러오는 중…</p>;
+    return (
+      <p className="p-6 pt-[env(safe-area-inset-top,0px)] text-sm text-muted-foreground">불러오는 중…</p>
+    );
   }
   if (isError || !trip) {
-    return <p className="p-6 text-sm text-destructive">여행을 찾을 수 없습니다.</p>;
+    return (
+      <p className="p-6 pt-[env(safe-area-inset-top,0px)] text-sm text-destructive">
+        여행을 다시 불러와 주세요.
+      </p>
+    );
   }
 
+  const hideChromeTitle = trip.id === JEJU_TRIP_ID && panel === "overview";
+
   return (
-    <div className="flex flex-1 flex-col">
-      {!(trip.id === JEJU_TRIP_ID && panel === "overview") ? (
-        <header className="px-4 pt-4">
-          <h1 className="font-heading text-lg font-bold">
-            {trip.coverEmoji} {trip.title}
-          </h1>
-        </header>
-      ) : null}
-      <div className="flex-1 overflow-y-auto">
-        <AnimatePresence mode="wait">
+    <div className="flex min-h-0 flex-1 flex-col bg-white">
+      {hideChromeTitle ? null : (
+        <h1 className="sr-only">
+          {trip.coverEmoji} {trip.title}
+        </h1>
+      )}
+      <div className="relative min-h-0 flex-1 overflow-x-clip overflow-y-hidden">
+        <AnimatePresence initial={false} mode="sync" custom={dir}>
           <motion.div
             key={panel}
+            custom={dir}
             id={`trip-tabpanel-${panel}`}
             role="tabpanel"
             aria-labelledby={`trip-tab-${panel}`}
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -16 }}
-            transition={{ duration: crossfade }}
+            variants={{
+              enter: (direction: number) => ({ x: `${direction * 100}%` }),
+              center: { x: 0 },
+              exit: (direction: number) => ({ x: `${direction * -100}%` }),
+            }}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: slideDuration, ease: easing.standard }}
+            className="absolute inset-0 overflow-x-clip overflow-y-auto [overflow-anchor:none]"
             drag={isDesktop ? false : "x"}
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.12}
@@ -57,14 +80,20 @@ export function TripDetailView({ tripId }: { tripId: string }) {
               if (info.offset.x < -60 && idx < NAV_SWIPE_TABS.length - 1) {
                 setTab(NAV_SWIPE_TABS[idx + 1]);
               }
-              if (info.offset.x > 60 && idx > 0) setTab(NAV_SWIPE_TABS[idx - 1]);
+              if (info.offset.x > 60 && idx > 0) {
+                setTab(NAV_SWIPE_TABS[idx - 1]);
+              }
             }}
           >
-            {panel === "overview" && <OverviewTab tripId={tripId} />}
-            {panel === "places" && <PlacesTab trip={trip} />}
-            {panel === "planner" && <PlannerTab trip={trip} />}
-            {panel === "budget" && <BudgetTab trip={trip} />}
-            {panel === "prep" && <PrepWorkspace tripId={tripId} initialSub={tab === "memo" ? "memo" : "prep"} />}
+            <div className="min-h-full pt-[calc(44px+env(safe-area-inset-top,0px))]">
+              {panel === "overview" && <OverviewTab tripId={tripId} />}
+              {panel === "places" && <PlacesTab trip={trip} />}
+              {panel === "planner" && <PlannerTab trip={trip} />}
+              {panel === "budget" && <BudgetTab trip={trip} />}
+              {panel === "prep" && (
+                <PrepWorkspace tripId={tripId} initialSub={tab === "memo" ? "memo" : "prep"} />
+              )}
+            </div>
           </motion.div>
         </AnimatePresence>
       </div>

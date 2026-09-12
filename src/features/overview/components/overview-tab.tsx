@@ -13,6 +13,7 @@ import { AddAccommodationDialog } from "@/features/overview/components/add-accom
 import { AddTransportDialog } from "@/features/overview/components/add-transport-dialog";
 import { JejuHomeHero } from "@/features/overview/components/jeju-home-hero";
 import { TimeCapsuleDialog } from "@/features/overview/components/time-capsule-dialog";
+import { useConfirmDelete } from "@/components/ui/confirm-delete-dialog";
 import { SummaryStats } from "@/features/overview/components/summary-stats";
 import { usePlaces } from "@/features/places/hooks";
 import { useExpenses } from "@/features/expenses/hooks";
@@ -26,6 +27,7 @@ export function OverviewTab({ tripId }: { tripId: string }) {
   const { data: transports, isLoading: loadingTr } = useTransports(tripId);
   const deleteAccommodation = useDeleteAccommodation(tripId);
   const deleteTransport = useDeleteTransport(tripId);
+  const { request: askDelete, dialog: confirmDialog } = useConfirmDelete();
   const { data: places } = usePlaces(tripId);
   const { data: expenses } = useExpenses(tripId);
   const [editingAcc, setEditingAcc] = useState<Accommodation | null>(null);
@@ -35,13 +37,13 @@ export function OverviewTab({ tripId }: { tripId: string }) {
   if (trip && tripId === JEJU_TRIP_ID) {
     const flights = (transports ?? []).filter((item) => item.type === "비행기");
     return (
-      <div className="relative mx-auto flex w-full flex-col px-5 pt-2">
+      <div className="relative mx-auto flex w-full flex-col bg-white">
         <JejuHomeHero trip={trip} flights={flights} stays={accommodations ?? []} />
         <button
           type="button"
           aria-label="타임캡슐 열기"
           onClick={() => setCapsuleOpen(true)}
-          className="fixed right-5 bottom-20 z-20 flex size-[60px] items-center justify-center rounded-full bg-[#FF9F43] text-2xl text-white shadow-[0_4px_16px_rgba(255,159,67,0.45)]"
+          className="fixed right-5 bottom-[86px] z-20 flex size-[60px] items-center justify-center rounded-full bg-[#FF9F43] text-2xl text-white shadow-[0px_2px_12px_rgba(0,0,0,0.06)]"
         >
           🎁
         </button>
@@ -70,7 +72,7 @@ export function OverviewTab({ tripId }: { tripId: string }) {
             key={acc.id}
             accommodation={acc}
             onEdit={() => setEditingAcc(acc)}
-            onDelete={() => deleteAccommodation.mutate(acc.id)}
+            onDelete={() => askDelete(() => deleteAccommodation.mutate(acc.id))}
           />
         ))}
       </section>
@@ -89,7 +91,7 @@ export function OverviewTab({ tripId }: { tripId: string }) {
             key={tr.id}
             transport={tr}
             onEdit={() => setEditingTr(tr)}
-            onDelete={() => deleteTransport.mutate(tr.id)}
+            onDelete={() => askDelete(() => deleteTransport.mutate(tr.id))}
           />
         ))}
       </section>
@@ -122,6 +124,7 @@ export function OverviewTab({ tripId }: { tripId: string }) {
           }}
         />
       )}
+      {confirmDialog}
     </div>
   );
 }

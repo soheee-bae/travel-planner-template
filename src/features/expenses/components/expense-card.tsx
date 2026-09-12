@@ -1,29 +1,33 @@
 import { IconAction } from "@/components/ui/icon-action";
-import type { Expense } from "@/mocks/fixtures/expenses";
+import { cn } from "@/lib/utils";
+import {
+  EXPENSE_CATEGORY_EMOJI,
+  paidByTagLabel,
+  shouldBlurExpense,
+  type Expense,
+} from "@/mocks/fixtures/expenses";
 
-const CAT_ICON: Record<Expense["category"], string> = {
-  식비: "🍜",
-  숙소: "🏨",
-  교통: "🚌",
-  "관광·입장": "🌿",
-  쇼핑: "🛍️",
-  항공: "✈️",
-  통신: "📱",
-  액티비티: "🎢",
-  기타: "📌",
-};
-
-const CAT_TINT: Record<Expense["category"], string> = {
-  식비: "bg-[#FFE8EE]",
-  숙소: "bg-[#E8F4FF]",
-  교통: "bg-[#FFF1D6]",
-  "관광·입장": "bg-[#E2FBE9]",
-  쇼핑: "bg-[#FFF6C8]",
-  항공: "bg-[#E8F4FF]",
-  통신: "bg-muted",
-  액티비티: "bg-[#F3E9FE]",
-  기타: "bg-muted",
-};
+export function SecretAmount({
+  amount,
+  hidden,
+  className,
+}: {
+  amount: number;
+  hidden: boolean;
+  className?: string;
+}) {
+  const text = `${amount.toLocaleString()}원`;
+  if (!hidden) {
+    return <p className={className}>{text}</p>;
+  }
+  return (
+    <p className={className} aria-label="숨긴 금액">
+      <span className="inline-block select-none blur-[3.5px]" aria-hidden="true">
+        {text}
+      </span>
+    </p>
+  );
+}
 
 export function ExpenseCard({
   expense,
@@ -34,32 +38,42 @@ export function ExpenseCard({
   onDelete: () => void;
   onEdit: () => void;
 }) {
+  const blurred = shouldBlurExpense(expense);
   return (
-    <div className="flex items-center gap-3 rounded-3xl bg-card p-4 shadow-sm ring-1 ring-border">
-      <div
-        className={`flex size-12 shrink-0 items-center justify-center rounded-2xl text-xl ${CAT_TINT[expense.category]}`}
-      >
-        {CAT_ICON[expense.category]}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold">{expense.title}</p>
-        <div className="mt-1 flex flex-wrap gap-1">
-          {expense.dayIndex ? (
-            <span className="rounded-full bg-[#E8F4FF] px-2 py-0.5 text-[10px] font-bold text-[#3A7CA5]">
-              Day {expense.dayIndex}
-            </span>
-          ) : null}
-          {expense.paidBy ? (
-            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
-              {expense.paidBy}
-            </span>
-          ) : null}
+    <div className="flex w-full flex-col items-start rounded-[20px] bg-white px-4 py-3.5 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
+      <div className="flex h-[50px] w-full items-center gap-3">
+        <div className="flex size-[46px] shrink-0 items-center justify-center rounded-2xl bg-[#FFF8EE] text-xl">
+          {EXPENSE_CATEGORY_EMOJI[expense.category]}
         </div>
-      </div>
-      <p className="shrink-0 text-sm font-extrabold">{expense.amount.toLocaleString()}원</p>
-      <div className="flex shrink-0 flex-col">
-        <IconAction action="edit" label={`${expense.title} 수정`} onClick={onEdit} />
-        <IconAction action="delete" label={`${expense.title} 삭제`} onClick={onDelete} />
+        <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
+          <p
+            className={cn(
+              "block h-[23px] w-full truncate text-[15px] leading-[22px] font-bold text-[#1A1A1A]",
+              blurred && "select-none blur-[3.5px]",
+            )}
+          >
+            {expense.title}
+          </p>
+          <div className="flex h-[23px] w-full items-start gap-1 pt-1">
+            <span className="flex h-[19px] items-center rounded-[99px] bg-[#E3F4FA] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555]">
+              {expense.category}
+            </span>
+            {expense.paidBy ? (
+              <span className="flex h-[19px] items-center rounded-[99px] bg-[#F5F5F5] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555]">
+                {paidByTagLabel(expense.paidBy)}
+              </span>
+            ) : null}
+          </div>
+        </div>
+        <SecretAmount
+          amount={expense.amount}
+          hidden={blurred}
+          className="flex h-[21px] w-[71px] shrink-0 items-center font-nunito text-[14px] leading-[21px] font-bold text-[#4A4543]"
+        />
+        <div className="flex h-[50px] w-[25px] shrink-0 flex-col items-center justify-center gap-3">
+          <IconAction action="edit" label={`${expense.title} 수정`} onClick={onEdit} />
+          <IconAction action="delete" label={`${expense.title} 삭제`} onClick={onDelete} />
+        </div>
       </div>
     </div>
   );

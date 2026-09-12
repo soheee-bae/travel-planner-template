@@ -1,19 +1,19 @@
 import { createClient } from "@/lib/supabase/client";
 import { asRequiredNumber, throwIfError, throwIfWriteError } from "@/lib/supabase/throw";
 import { toClientTripId, toDbTripId } from "@/lib/trip-ids";
-import type {
-  CreateExpenseInput,
-  Expense,
-  ExpenseCategory,
-  PaymentMethod,
-  UpdateExpenseInput,
+import {
+  normalizeExpenseCategory,
+  type CreateExpenseInput,
+  type Expense,
+  type PaymentMethod,
+  type UpdateExpenseInput,
 } from "@/mocks/fixtures/expenses";
 
 interface ExpenseRow {
   id: string;
   trip_id: string;
   title: string;
-  category: ExpenseCategory;
+  category: string;
   amount: number | string;
   currency: string;
   date: string;
@@ -23,6 +23,7 @@ interface ExpenseRow {
   place_id: string | null;
   memo: string | null;
   is_manual: boolean;
+  is_blur: boolean | null;
 }
 
 function toExpense(row: ExpenseRow): Expense {
@@ -30,7 +31,7 @@ function toExpense(row: ExpenseRow): Expense {
     id: row.id,
     tripId: toClientTripId(row.trip_id),
     title: row.title,
-    category: row.category,
+    category: normalizeExpenseCategory(String(row.category)),
     amount: asRequiredNumber(row.amount),
     currency: row.currency,
     date: row.date,
@@ -40,6 +41,7 @@ function toExpense(row: ExpenseRow): Expense {
     placeId: row.place_id,
     memo: row.memo ?? undefined,
     isManual: row.is_manual,
+    isBlur: row.is_blur === true,
   };
 }
 
@@ -57,6 +59,7 @@ function toRow(input: CreateExpenseInput | UpdateExpenseInput): Record<string, u
   if (input.placeId !== undefined) row.place_id = input.placeId;
   if (input.memo !== undefined) row.memo = input.memo ?? null;
   if (input.isManual !== undefined) row.is_manual = input.isManual;
+  if (input.isBlur !== undefined) row.is_blur = input.isBlur;
   return row;
 }
 

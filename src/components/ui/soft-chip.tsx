@@ -1,27 +1,24 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { FigmaChip, FigmaCtaButton } from "@/components/ui/figma";
 
 export function SoftChip({
   active,
   onClick,
   children,
+  tone = "orange",
+  size = "md",
 }: {
   active?: boolean;
   onClick?: () => void;
   children: React.ReactNode;
+  tone?: "orange" | "dark";
+  size?: "sm" | "md";
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "shrink-0 rounded-full px-3 py-1.5 text-sm font-bold",
-        active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
-      )}
-    >
+    <FigmaChip active={active} tone={tone} size={size} onClick={onClick}>
       {children}
-    </button>
+    </FigmaChip>
   );
 }
 
@@ -32,15 +29,7 @@ export function DashedAddButton({
   children: React.ReactNode;
   onClick?: () => void;
 }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="h-12 w-full rounded-3xl border-2 border-dashed border-primary/70 bg-primary/5 text-sm font-bold text-primary"
-    >
-      {children}
-    </button>
-  );
+  return <FigmaCtaButton onClick={onClick}>{children}</FigmaCtaButton>;
 }
 
 export function EndMascot() {

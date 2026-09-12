@@ -13,27 +13,48 @@ test("리스트 탭에 카테고리 필터와 나고야 시드 장소 4건이 �
 });
 
 test("장소를 추가하면 즉시 리스트에 나타난다", async ({ page }) => {
+  await page.route("**/api/geocode**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ lat: 35.185, lng: 136.9 }),
+    });
+  });
   await page.goto("/trips/trip_nagoya?tab=places");
-  await page.getByRole("button", { name: "장소 추가" }).click();
-  await page.getByLabel("장소명").fill("나고야성");
-  await page.getByRole("button", { name: "추가" }).click();
+  await page.getByRole("button", { name: "여기 가볼까?" }).click();
+  await expect(page.getByText("자세히 입력")).toHaveCount(0);
+  await expect(page.getByText("지도 링크")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "찾기" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "숙소" })).toBeVisible();
+  await page.getByLabel("장소 이름").fill("나고야성");
+  await page.getByLabel("주소").fill("나고야시 나카구");
+  await page.getByLabel("예상 소요 시간 (선택)").fill("1시간 30분");
+  await page.getByRole("button", { name: "지도에 담기" }).click();
   await expect(page.getByText("나고야성")).toBeVisible();
 });
 
-test("선택 모드에서 Day에 일괄 배정할 수 있다", async ({ page }) => {
+test("선택 모드에서 취소와 삭제만 보인다", async ({ page }) => {
   await page.goto("/trips/trip_nagoya?tab=places");
-  await page.getByRole("button", { name: "선택" }).click();
+  await page.getByRole("button", { name: "선택", exact: true }).click();
   await page.getByRole("checkbox", { name: "도요타 박물관 선택" }).check();
-  await page.getByRole("button", { name: "Day1에 추가" }).click();
-  await expect(page.getByText("1개 선택됨")).not.toBeVisible();
+  await expect(page.getByText("1개 선택됨")).toBeVisible();
+  await expect(page.getByRole("button", { name: "선택", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "취소", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "삭제", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Day/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "취소", exact: true }).click();
+  await expect(page.getByRole("button", { name: "선택", exact: true })).toBeVisible();
+  await expect(page.getByText("1개 선택됨")).toHaveCount(0);
 });
 
 test("선택 모드로 여러 장소를 한 번에 삭제할 수 있다", async ({ page }) => {
   await page.goto("/trips/trip_nagoya?tab=places");
-  await page.getByRole("button", { name: "선택" }).click();
+  await page.getByRole("button", { name: "선택", exact: true }).click();
   await page.getByRole("checkbox", { name: "도요타 박물관 선택" }).check();
   await expect(page.getByText("1개 선택됨")).toBeVisible();
 
   await page.getByRole("button", { name: "삭제" }).click();
+  await expect(page.getByText("삭제하시겠습니까?")).toBeVisible();
+  await page.getByRole("button", { name: "삭제" }).last().click();
   await expect(page.getByText("도요타 박물관")).not.toBeVisible();
 });

@@ -1,7 +1,16 @@
 import { z } from "zod";
 
-export const PLACE_CATEGORIES = ["관광", "맛집", "카페", "쇼핑", "액티비티", "기타"] as const;
+export const PLACE_CATEGORIES = ["관광", "맛집", "카페", "숙소", "교통", "쇼핑", "기타"] as const;
 export type PlaceCategory = (typeof PLACE_CATEGORIES)[number];
+
+/** DB에 남은 예전 '액티비티' 값은 숙소로 본다. */
+export function normalizePlaceCategory(raw: string): PlaceCategory {
+  if (raw === "액티비티") return "숙소";
+  if ((PLACE_CATEGORIES as readonly string[]).includes(raw)) {
+    return raw as PlaceCategory;
+  }
+  return "기타";
+}
 
 export const PLACE_PRIORITIES = ["필수", "가능하면", "시간되면"] as const;
 export type PlacePriority = (typeof PLACE_PRIORITIES)[number];
@@ -38,8 +47,24 @@ export type Place = z.infer<typeof placeSchema>;
 export const createPlaceInputSchema = placeSchema.omit({ id: true });
 export type CreatePlaceInput = z.infer<typeof createPlaceInputSchema>;
 
-export const updatePlaceInputSchema = placeSchema.omit({ id: true, tripId: true }).partial();
+export const updatePlaceInputSchema = placeSchema
+  .omit({ id: true, tripId: true })
+  .partial()
+  .extend({
+    durationMin: z.number().nonnegative().nullable().optional(),
+    memo: z.string().nullable().optional(),
+  });
 export type UpdatePlaceInput = z.infer<typeof updatePlaceInputSchema>;
+
+export function applyPlacePatch(place: Place, patch: UpdatePlaceInput): Place {
+  const { durationMin, memo, ...rest } = patch;
+  return {
+    ...place,
+    ...rest,
+    durationMin: durationMin === undefined ? place.durationMin : (durationMin ?? undefined),
+    memo: memo === undefined ? place.memo : (memo ?? undefined),
+  };
+}
 
 export const initialPlaces: Place[] = [
   {

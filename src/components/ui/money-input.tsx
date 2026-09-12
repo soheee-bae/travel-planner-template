@@ -1,16 +1,19 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 export function MoneyInput({
   id,
   value,
   onChange,
+  className,
   "aria-label": ariaLabel,
 }: {
   id?: string;
   value?: number;
   onChange: (value: number | undefined) => void;
+  className?: string;
   "aria-label"?: string;
 }) {
   const display =
@@ -31,7 +34,7 @@ export function MoneyInput({
           }
           onChange(Number(digits));
         }}
-        className="pr-8"
+        className={cn("pr-8", className)}
       />
       <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
         원

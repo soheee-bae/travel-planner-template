@@ -4,18 +4,15 @@ import { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { SoftChip } from "@/components/ui/soft-chip";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  FigmaChip,
+  FigmaChipRow,
+  FigmaCtaButton,
+  FigmaFieldLabel,
+  FigmaSheetHandle,
+  figmaInputClass,
+} from "@/components/ui/figma";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -25,63 +22,88 @@ import {
 } from "@/components/ui/dialog";
 import { useCreateExpense, useUpdateExpense } from "@/features/expenses/hooks";
 import { MoneyInput } from "@/components/ui/money-input";
-import { listTripMembers } from "@/features/trips/members-api";
 import {
   createExpenseInputSchema,
   EXPENSE_CATEGORIES,
-  PAYMENT_METHODS,
+  EXPENSE_CATEGORY_EMOJI,
   type CreateExpenseInput,
   type Expense,
+  type ExpenseCategory,
 } from "@/mocks/fixtures/expenses";
+import { todayIsoSeoul } from "@/lib/date";
+import { getTripDays } from "@/lib/trip-days";
 import { z } from "zod";
 
-const formSchema = createExpenseInputSchema.omit({
-  tripId: true,
-  dayIndex: true,
-  placeId: true,
-  isManual: true,
-});
+const formSchema = createExpenseInputSchema
+  .omit({
+    tripId: true,
+    placeId: true,
+    isManual: true,
+    date: true,
+    paymentMethod: true,
+    isBlur: true,
+  })
+  .extend({
+    title: z.string().trim().min(1, "어디다 긁었는지 까먹으면 안 돼!"),
+    amount: z.number({ error: "행복 값 입력 필수!" }).positive("행복 값 입력 필수!"),
+    paidBy: z.enum(["소희", "준형"], { error: "고구마냐... 감자냐... 그것이 문제로다..." }),
+  });
 type FormValues = z.infer<typeof formSchema>;
+
+const PAYERS = [
+  { value: "소희", label: "🍠 소희" },
+  { value: "준형", label: "🥔 준형" },
+] as const;
+
+function payerValue(paidBy?: string): "소희" | "준형" | undefined {
+  if (paidBy === "준형") return "준형";
+  if (paidBy === "소희" || paidBy === "나") return "소희";
+  return undefined;
+}
 
 export function AddExpenseDialog({
   tripId,
   currency,
+  startDate,
+  endDate,
   initial,
   hideTrigger,
   open: openProp,
   onOpenChange,
+  defaultDayIndex,
+  defaultCategory,
+  onSaved,
 }: {
   tripId: string;
   currency: string;
+  startDate?: string;
+  endDate?: string;
   initial?: Expense;
   hideTrigger?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  defaultDayIndex?: number | null;
+  defaultCategory?: ExpenseCategory;
+  onSaved?: (expense: { dayIndex: number | null; category: ExpenseCategory }) => void;
 }) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const open = openProp ?? uncontrolledOpen;
   const setOpen = onOpenChange ?? setUncontrolledOpen;
   const createExpense = useCreateExpense(tripId);
   const updateExpense = useUpdateExpense(tripId);
-  const [payers, setPayers] = useState<string[]>(["나", "준형", "같이"]);
-  const [dayIndex, setDayIndex] = useState<number | null>(initial?.dayIndex ?? null);
+  const days = startDate && endDate ? getTripDays(startDate, endDate) : [];
 
-  const FIGMA_EXPENSE_CATS = [
-    { label: "🏨 숙소", value: "숙소" as const },
-    { label: "✈️ 교통", value: "교통" as const },
-    { label: "🍽️ 식비", value: "식비" as const },
-    { label: "🎡 관광", value: "관광·입장" as const },
-    { label: "🛍️ 기타", value: "기타" as const },
-  ];
+  function emptyValues(): FormValues {
+    return {
+      title: "",
+      category: defaultCategory ?? "식비",
+      amount: undefined as unknown as number,
+      currency,
+      paidBy: undefined as unknown as FormValues["paidBy"],
+      dayIndex: defaultDayIndex ?? days[0]?.dayIndex ?? 1,
+    };
+  }
 
-  useEffect(() => {
-    void listTripMembers(tripId)
-      .then((members) => {
-        const emails = members.map((m) => (m.isOwner ? "나" : m.email.split("@")[0]));
-        setPayers(Array.from(new Set(["나", "준형", "같이", ...emails])));
-      })
-      .catch(() => setPayers(["나", "준형", "같이"]));
-  }, [tripId]);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initial
@@ -90,181 +112,181 @@ export function AddExpenseDialog({
           category: initial.category,
           amount: initial.amount,
           currency: initial.currency,
-          date: initial.date,
-          paymentMethod: initial.paymentMethod,
-          paidBy: initial.paidBy,
+          paidBy: payerValue(initial.paidBy) ?? "소희",
+          dayIndex: initial.dayIndex,
         }
-      : {
-          title: "",
-          category: "식비",
-          amount: 0,
-          currency,
-          date: "",
-          paymentMethod: "카드",
-          paidBy: "나",
-        },
+      : emptyValues(),
   });
 
+  useEffect(() => {
+    if (!open || initial) return;
+    form.reset(emptyValues());
+    // Defaults are captured when the sheet opens; `form` identity changes every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   function onSubmit(values: FormValues) {
+    const selectedDay = days.find((d) => d.dayIndex === values.dayIndex);
+    const date = initial?.date || selectedDay?.date || startDate || todayIsoSeoul();
+    const paymentMethod = initial?.paymentMethod ?? "카드";
+    const dayIndex = values.dayIndex ?? null;
     if (initial) {
       updateExpense.mutate(
-        { id: initial.id, patch: { ...values, dayIndex, isManual: true } },
-        { onSuccess: () => setOpen(false) },
+        {
+          id: initial.id,
+          patch: { ...values, date, paymentMethod, dayIndex, isManual: true },
+        },
+        {
+          onSuccess: () => {
+            onSaved?.({ dayIndex, category: values.category });
+            setOpen(false);
+          },
+        },
       );
       return;
     }
     const input: CreateExpenseInput = {
       tripId,
-      dayIndex,
       placeId: null,
       isManual: true,
+      date,
+      paymentMethod,
+      isBlur: false,
       ...values,
+      dayIndex,
     };
-    createExpense.mutate(input, { onSuccess: () => setOpen(false) });
-    form.reset();
+    createExpense.mutate(input, {
+      onSuccess: () => {
+        onSaved?.({ dayIndex, category: values.category });
+        form.reset(emptyValues());
+        setOpen(false);
+      },
+    });
+  }
+
+  const selectedPayer = form.watch("paidBy");
+  const dayIndex = form.watch("dayIndex");
+  const errors = form.formState.errors;
+
+  function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (next && !initial) form.reset(emptyValues());
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {!initial && !hideTrigger && (
         <DialogTrigger asChild>
-          <Button size="sm" className="gap-1">
-            <Plus className="size-4" aria-hidden="true" />
-            비용 추가
-          </Button>
+          <FigmaCtaButton>+ 긁었다!</FigmaCtaButton>
         </DialogTrigger>
       )}
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{initial ? "비용 수정" : "비용 추가 💰"}</DialogTitle>
+      <DialogContent
+        showCloseButton={false}
+        className="max-h-[min(1048.05px,var(--vv-height,100dvh))] gap-4 overflow-y-auto"
+      >
+        <FigmaSheetHandle />
+        <DialogHeader className="gap-0">
+          <DialogTitle className="flex h-[26px] items-center text-[17px] leading-[26px] font-bold text-[#1A1A1A]">
+            {initial ? "비용 수정" : "오늘의 행복 값"}
+          </DialogTitle>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="exp-title">항목명</Label>
-            <Input id="exp-title" placeholder="예) 흑돼지 저녁 2인" {...form.register("title")} />
+            <FigmaFieldLabel htmlFor="exp-title">항목 이름</FigmaFieldLabel>
+            <Input
+              id="exp-title"
+              placeholder="예) 야식으로 털어온 동문시장 안주"
+              aria-required="true"
+              aria-invalid={errors.title ? true : undefined}
+              className={figmaInputClass}
+              {...form.register("title")}
+            />
+            {errors.title ? (
+              <p className="text-[12px] leading-[18px] text-destructive">{errors.title.message}</p>
+            ) : null}
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="exp-amount">금액</Label>
+            <FigmaFieldLabel htmlFor="exp-amount">금액 (원)</FigmaFieldLabel>
             <Controller
               control={form.control}
               name="amount"
               render={({ field }) => (
-                <MoneyInput id="exp-amount" value={field.value} onChange={(v) => field.onChange(v ?? 0)} />
+                <MoneyInput
+                  id="exp-amount"
+                  className={figmaInputClass}
+                  value={field.value}
+                  onChange={(v) => field.onChange(v)}
+                />
               )}
             />
+            {errors.amount ? (
+              <p className="text-[12px] leading-[18px] text-destructive">{errors.amount.message}</p>
+            ) : null}
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label>누가 냈나요?</Label>
-            <div className="flex flex-wrap gap-2">
-              {payers.map((p) => (
-                <SoftChip
-                  key={p}
-                  active={(form.watch("paidBy") || "나") === p}
-                  onClick={() => form.setValue("paidBy", p)}
-                >
-                  {p}
-                </SoftChip>
-              ))}
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label>날짜</Label>
-            <div className="flex flex-wrap gap-2">
-              <SoftChip active={dayIndex == null} onClick={() => setDayIndex(null)}>
-                여행준비
-              </SoftChip>
-              {([1, 2, 3] as const).map((d) => (
-                <SoftChip key={d} active={dayIndex === d} onClick={() => setDayIndex(d)}>
-                  Day {d}
-                </SoftChip>
-              ))}
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label>카테고리</Label>
-            <div className="flex flex-wrap gap-2">
-              {FIGMA_EXPENSE_CATS.map((c) => (
-                <SoftChip
-                  key={c.value}
-                  active={form.watch("category") === c.value}
-                  onClick={() => form.setValue("category", c.value)}
-                >
-                  {c.label}
-                </SoftChip>
-              ))}
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="exp-category" className="sr-only">
-              카테고리
-            </Label>
-            <Select
-              defaultValue={form.getValues("category")}
-              onValueChange={(v) => form.setValue("category", v as FormValues["category"])}
+          <div className="flex flex-col gap-2">
+            <p className="w-full text-xs leading-[18px] font-semibold text-[#AAAAAA]" id="exp-payer-label">
+              결제 요정은 누구?
+            </p>
+            <div
+              className="flex w-full items-stretch gap-2"
+              role="group"
+              aria-labelledby="exp-payer-label"
+              aria-required="true"
             >
-              <SelectTrigger id="exp-category" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {EXPENSE_CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="exp-date">날짜</Label>
-            <Input id="exp-date" type="date" {...form.register("date")} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="exp-method">결제수단</Label>
-              <Select
-                defaultValue={form.getValues("paymentMethod")}
-                onValueChange={(v) =>
-                  form.setValue("paymentMethod", v as FormValues["paymentMethod"])
-                }
-              >
-                <SelectTrigger id="exp-method" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PAYMENT_METHODS.map((m) => (
-                    <SelectItem key={m} value={m}>
-                      {m}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {PAYERS.map((p) => (
+                <button
+                  key={p.value}
+                  type="button"
+                  aria-pressed={selectedPayer === p.value}
+                  onClick={() => form.setValue("paidBy", p.value, { shouldDirty: true, shouldValidate: true })}
+                  className={`flex h-[41px] min-w-0 flex-1 items-center justify-center rounded-[14px] bg-white px-3 text-[14px] leading-[21px] font-bold whitespace-nowrap shadow-[0px_2px_12px_rgba(0,0,0,0.06)] ${
+                    selectedPayer === p.value ? "text-[#FF9F43]" : "text-[#555555]"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="exp-paidby">결제자</Label>
-              <Select
-                defaultValue={form.getValues("paidBy") || "나"}
-                onValueChange={(v) => form.setValue("paidBy", v)}
-              >
-                <SelectTrigger id="exp-paidby" className="w-full">
-                  <SelectValue placeholder="결제자" />
-                </SelectTrigger>
-                <SelectContent>
-                  {payers.map((p) => (
-                    <SelectItem key={p} value={p}>
-                      {p}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {errors.paidBy ? (
+              <p className="text-[12px] leading-[18px] text-destructive">{errors.paidBy.message}</p>
+            ) : null}
+          </div>
+          <div className="flex flex-col">
+            <FigmaFieldLabel>일차</FigmaFieldLabel>
+            <FigmaChipRow role="group" aria-label="일차">
+              {days.map((day) => (
+                <FigmaChip
+                  key={day.dayIndex}
+                  size="sm"
+                  active={dayIndex === day.dayIndex}
+                  onClick={() => form.setValue("dayIndex", day.dayIndex)}
+                >
+                  Day {day.dayIndex}
+                </FigmaChip>
+              ))}
+            </FigmaChipRow>
+          </div>
+          <div className="flex flex-col gap-2">
+            <FigmaFieldLabel>카테고리</FigmaFieldLabel>
+            <div className="flex w-full flex-wrap gap-2 py-1">
+              {EXPENSE_CATEGORIES.map((value) => (
+                <FigmaChip
+                  key={value}
+                  size="sm"
+                  active={form.watch("category") === value}
+                  onClick={() => form.setValue("category", value)}
+                >
+                  {EXPENSE_CATEGORY_EMOJI[value]} {value}
+                </FigmaChip>
+              ))}
             </div>
           </div>
-          <Button
+          <FigmaCtaButton
             type="submit"
-            className="h-10"
             disabled={createExpense.isPending || updateExpense.isPending}
           >
-            {initial ? "저장" : "추가"}
-          </Button>
+            영수증에 넣기
+          </FigmaCtaButton>
         </form>
       </DialogContent>
     </Dialog>

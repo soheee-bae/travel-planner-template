@@ -141,6 +141,7 @@ export async function updateChecklistItem(
   const supabase = createClient();
   const row: Record<string, unknown> = {};
   if (patch.title !== undefined) row.title = patch.title;
+  if (patch.categoryId !== undefined) row.category_id = patch.categoryId;
   if (patch.isChecked !== undefined) row.is_checked = patch.isChecked;
   if (patch.notes !== undefined) row.notes = patch.notes ?? null;
   if (patch.orderIndex !== undefined) row.order_index = patch.orderIndex;

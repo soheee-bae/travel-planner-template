@@ -29,7 +29,7 @@ function expense(overrides: Partial<Expense> = {}): Expense {
     id: "e1",
     tripId: "trip_x",
     title: "카페",
-    category: "식비",
+    category: "카페",
     amount: 800,
     currency: "JPY",
     date: "2026-01-01",
@@ -43,9 +43,11 @@ function expense(overrides: Partial<Expense> = {}): Expense {
 
 describe("mapPlaceCategoryToExpense", () => {
   it("장소 카테고리를 비용 카테고리로 대응한다", () => {
-    expect(mapPlaceCategoryToExpense("관광")).toBe("관광·입장");
+    expect(mapPlaceCategoryToExpense("관광")).toBe("놀거리");
     expect(mapPlaceCategoryToExpense("맛집")).toBe("식비");
-    expect(mapPlaceCategoryToExpense("카페")).toBe("식비");
+    expect(mapPlaceCategoryToExpense("카페")).toBe("카페");
+    expect(mapPlaceCategoryToExpense("숙소")).toBe("숙소");
+    expect(mapPlaceCategoryToExpense("교통")).toBe("교통/주유");
   });
 });
 
@@ -75,7 +77,7 @@ describe("buildAutoExpenseFromPlace", () => {
     expect(draft).toMatchObject({
       amount: 800,
       currency: "JPY",
-      category: "식비",
+      category: "카페",
       placeId: "p1",
       isManual: false,
     });

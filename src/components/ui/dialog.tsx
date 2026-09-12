@@ -6,6 +6,7 @@ import { Dialog as DialogPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
+import { useAppShellElement } from "@/components/layout/AppShell";
 
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
@@ -16,7 +17,10 @@ function DialogTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive
 }
 
 function DialogPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
+  const container = useAppShellElement();
+  return (
+    <DialogPrimitive.Portal data-slot="dialog-portal" {...props} container={container ?? undefined} />
+  );
 }
 
 function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>) {
@@ -31,7 +35,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 isolate z-50 pointer-events-auto bg-black/10 duration-200 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className,
       )}
       {...props}
@@ -43,20 +47,41 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  overlayClassName,
+  variant = "sheet",
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  overlayClassName?: string;
+  variant?: "sheet" | "center";
 }) {
   return (
     <DialogPortal>
-      <DialogOverlay />
+      <DialogOverlay className={overlayClassName} />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+        {...props}
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          const target = event.currentTarget;
+          if (target instanceof HTMLElement) target.focus({ preventScroll: true });
+        }}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+        }}
         className={cn(
-          "fixed inset-x-0 bottom-0 z-50 grid w-full max-h-[85dvh] translate-x-0 translate-y-0 gap-4 overflow-y-auto rounded-t-[2rem] rounded-b-none bg-popover p-5 pb-[max(1rem,env(safe-area-inset-bottom))] text-sm text-popover-foreground shadow-lg ring-1 ring-foreground/10 duration-100 outline-none data-open:animate-in data-open:fade-in-0 data-open:slide-in-from-bottom-4 data-closed:animate-out data-closed:fade-out-0 data-closed:slide-out-to-bottom-4 md:inset-auto md:top-1/2 md:left-1/2 md:max-h-[85vh] md:w-full md:max-w-lg md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-3xl md:pb-4 md:data-open:zoom-in-95 md:data-closed:zoom-out-95",
+          "z-50 flex flex-col items-start bg-white text-sm text-[#1A1A1A] outline-none pointer-events-auto",
+          variant === "center"
+            ? "fixed top-1/2 right-5 left-5 w-auto -translate-y-1/2 overflow-visible rounded-[20px] px-5 pt-6 pb-5 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]"
+            : cn(
+                "fixed inset-x-0 bottom-0 overflow-x-hidden overflow-y-auto",
+                "rounded-t-[24px] rounded-b-none px-5 pt-0 pb-10",
+                "shadow-[0px_-8px_40px_rgba(0,0,0,0.12)]",
+                "max-h-[min(1048.05px,var(--vv-height,100dvh))] overscroll-contain",
+                "data-open:sheet-enter data-closed:sheet-leave",
+              ),
           className,
         )}
-        {...props}
       >
         {children}
         {showCloseButton && (
@@ -74,7 +99,7 @@ function DialogContent({
 
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div data-slot="dialog-header" className={cn("flex flex-col gap-2", className)} {...props} />
+    <div data-slot="dialog-header" className={cn("flex w-full flex-col gap-2", className)} {...props} />
   );
 }
 

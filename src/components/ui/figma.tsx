@@ -1,0 +1,249 @@
+"use client";
+
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { cn } from "@/lib/utils";
+
+export const figmaShadowCard = "shadow-[0px_2px_12px_rgba(0,0,0,0.06)]";
+export const figmaShadowLift = "shadow-[0px_4px_18px_rgba(74,69,67,0.1)]";
+export const figmaShadowCta = "shadow-[0px_8px_24px_rgba(255,159,67,0.25)]";
+
+export const figmaInputClass = cn(
+  "h-11 w-full rounded-[14px] border-0 bg-white px-4 py-[13.5px]",
+  "text-[14px] leading-[17px] text-[#1A1A1A]",
+  figmaShadowCard,
+  "placeholder:text-[rgba(26,26,26,0.5)]",
+  "focus-visible:ring-0 focus-visible:ring-offset-0",
+);
+
+export const figmaTextareaClass = cn(
+  figmaInputClass,
+  "h-[127px] min-h-[127px] py-[13.5px] leading-[21px]",
+  "placeholder:text-[rgba(74,69,67,0.5)]",
+);
+
+export function FigmaPage({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex w-full flex-col items-start gap-4 p-5", className)}>{children}</div>
+  );
+}
+
+export function FigmaPageTitle({
+  children,
+  className,
+  as: Tag = "h2",
+}: {
+  children: ReactNode;
+  className?: string;
+  as?: "h1" | "h2";
+}) {
+  return (
+    <Tag
+      className={cn(
+        "flex h-[30px] w-full items-center text-[20px] leading-[30px] font-bold text-[#1A1A1A]",
+        className,
+      )}
+    >
+      {children}
+    </Tag>
+  );
+}
+
+export function FigmaPageHeader({ children }: { children: ReactNode }) {
+  return <div className="flex w-full flex-col items-start px-[22px] pt-0 pb-3">{children}</div>;
+}
+
+export function FigmaCard({
+  children,
+  className,
+  lift = false,
+}: {
+  children: ReactNode;
+  className?: string;
+  lift?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex w-full flex-col items-start rounded-[20px] bg-white",
+        lift ? figmaShadowLift : figmaShadowCard,
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function FigmaChip({
+  active,
+  tone = "orange",
+  size = "md",
+  className,
+  children,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  active?: boolean;
+  tone?: "orange" | "dark";
+  size?: "sm" | "md";
+}) {
+  const activeBg = tone === "dark" ? "bg-[#4A4543] text-white" : "bg-[#FF893B] text-white";
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      {...props}
+      className={cn(
+        "inline-flex shrink-0 items-center justify-center rounded-[99px] font-semibold",
+        figmaShadowCard,
+        size === "md"
+          ? "h-7 px-5 py-2 text-[13px] leading-5"
+          : "h-7 px-4 py-[7px] text-xs leading-[18px]",
+        active ? activeBg : "bg-white text-[#555555]",
+        "disabled:opacity-50",
+        className,
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** 칩 그림자가 overflow 스크롤에 잘리지 않게 여백을 둔다. */
+export function FigmaChipRow({
+  children,
+  className,
+  role,
+  "aria-label": ariaLabel,
+}: {
+  children: ReactNode;
+  className?: string;
+  role?: string;
+  "aria-label"?: string;
+}) {
+  return (
+    <div
+      role={role}
+      aria-label={ariaLabel}
+      className={cn("-mx-3 -my-2 w-[calc(100%+24px)] overflow-x-auto px-3 py-3.5", className)}
+    >
+      <div className="flex w-max min-w-full flex-nowrap gap-2">{children}</div>
+    </div>
+  );
+}
+
+export function FigmaCtaButton({
+  children,
+  className,
+  type = "button",
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      type={type}
+      {...props}
+      className={cn(
+        "flex h-[49px] w-full items-center justify-center rounded-[16px] bg-[#FF9F43] px-3.5 py-[13px]",
+        "text-[15px] leading-[22px] font-bold text-white",
+        figmaShadowCta,
+        "disabled:opacity-50",
+        className,
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function FigmaFieldLabel({
+  children,
+  htmlFor,
+  muted = "gray",
+}: {
+  children: ReactNode;
+  htmlFor?: string;
+  muted?: "gray" | "brown";
+}) {
+  return (
+    <label
+      htmlFor={htmlFor}
+      className={cn(
+        "flex h-[18px] w-full items-center text-xs leading-[18px] font-semibold",
+        muted === "brown" ? "text-[#8C8885]" : "text-[#AAAAAA]",
+      )}
+    >
+      {children}
+    </label>
+  );
+}
+
+export function FigmaSheetHandle({ wide = false }: { wide?: boolean }) {
+  return (
+    <div
+      className={cn(
+        "flex w-full items-start justify-center",
+        wide ? "h-[22px] pt-3.5 pb-1" : "h-6 pt-3 pb-2",
+      )}
+    >
+      <span
+        className={cn(
+          wide ? "h-1 w-10 rounded-[2px] bg-[#EAE4D8]" : "h-1 w-9 rounded-[99px] bg-[#E0E0E0]",
+        )}
+      />
+    </div>
+  );
+}
+
+export function TicketPerforation({
+  punchColor = "#FFFFFF",
+  padded = true,
+}: {
+  punchColor?: string;
+  padded?: boolean;
+}) {
+  return (
+    <div className={cn("flex w-full items-center", padded ? "h-[23px] pt-[7px]" : "h-4")}>
+      <span className="size-4 shrink-0 rounded-full" style={{ background: punchColor }} />
+      <span className="h-[1.5px] flex-1 border-t-[1.5px] border-dashed border-[#DDDDDD]" />
+      <span className="size-4 shrink-0 rounded-full" style={{ background: punchColor }} />
+    </div>
+  );
+}
+
+export function DragHandle({ label }: { label?: string }) {
+  return (
+    <div
+      className="flex h-[19px] w-[30px] flex-col items-start gap-[2.5px] px-1.5 py-1 opacity-40"
+      aria-hidden={label ? undefined : true}
+      aria-label={label}
+    >
+      <span className="h-0.5 w-[18px] rounded-[99px] bg-[#AAAAAA]" />
+      <span className="h-0.5 w-[18px] rounded-[99px] bg-[#AAAAAA]" />
+      <span className="h-0.5 w-[18px] rounded-[99px] bg-[#AAAAAA]" />
+    </div>
+  );
+}
+
+export function AssigneeBadge({ assignee }: { assignee?: string }) {
+  const tone =
+    assignee === "소희"
+      ? "bg-[#FDDFE0] text-[#F29C9F]"
+      : assignee === "준형"
+        ? "bg-[#D8EDF8] text-[#6BAED4]"
+        : "bg-[#FDF3D1] text-[#F3C65B]";
+  return (
+    <span
+      className={cn(
+        "flex h-[23px] items-center rounded-lg px-2 py-[3px] text-[11px] leading-4 font-semibold",
+        tone,
+      )}
+    >
+      {assignee === "소희" ? "소희" : assignee === "준형" ? "준형" : "공통"}
+    </span>
+  );
+}

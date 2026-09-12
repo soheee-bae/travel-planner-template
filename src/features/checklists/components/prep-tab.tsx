@@ -1,27 +1,46 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  useChecklistCategories,
-  useChecklistItems,
-  useCreateChecklistCategory,
-  useUpdateChecklistCategory,
-} from "@/features/checklists/hooks";
+import { useEffect, useMemo, useState } from "react";
+import { useChecklistCategories, useChecklistItems } from "@/features/checklists/hooks";
 import { ChecklistCategorySection } from "@/features/checklists/components/checklist-category";
-import { CHECKLIST_RECOMMENDED_CATEGORIES } from "@/mocks/fixtures/checklists";
-import { SoftChip, EndMascot } from "@/components/ui/soft-chip";
+import { FigmaChip, FigmaChipRow, FigmaPage, FigmaPageHeader, FigmaPageTitle } from "@/components/ui/figma";
 import { AddChecklistItemDialog } from "@/features/checklists/components/add-checklist-item-dialog";
+import {
+  PREP_CATEGORIES,
+  PREP_PAGE_FILTERS,
+  canonicalPrepCategory,
+  type ChecklistItem,
+  type PrepCategoryName,
+  type PrepPageFilter,
+} from "@/mocks/fixtures/checklists";
+
+function PrepProgressBar({ pct }: { pct: number }) {
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setWidth(pct));
+    return () => cancelAnimationFrame(frame);
+  }, [pct]);
+
+  return (
+    <div className="relative h-2 w-full overflow-hidden rounded-[99px] bg-[#F0F0F0]">
+      <div
+        className="absolute inset-y-0 left-0 rounded-[99px] bg-[linear-gradient(90deg,#FF9F43_0%,#FF7F2A_100%)] transition-[width] duration-700 ease-out motion-reduce:transition-none"
+        style={{ width: `${width}%` }}
+        role="progressbar"
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      />
+    </div>
+  );
+}
 
 export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boolean }) {
   const { data: categories, isLoading: loadingCategories } = useChecklistCategories(tripId);
   const { data: items, isLoading: loadingItems } = useChecklistItems(tripId);
-  const createCategory = useCreateChecklistCategory(tripId);
-  const updateCategory = useUpdateChecklistCategory(tripId);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [assignee, setAssignee] = useState<"전체" | "공통" | "소희" | "준형">("전체");
+  const [filter, setFilter] = useState<PrepPageFilter>("전체");
+  const [editing, setEditing] = useState<ChecklistItem | null>(null);
 
   const { checkedCount, totalCount, pct } = useMemo(() => {
     const total = items?.length ?? 0;
@@ -33,139 +52,119 @@ export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boole
     };
   }, [items]);
 
-  function handleAddCategory(e: React.FormEvent) {
-    e.preventDefault();
-    if (!newCategoryName.trim()) return;
-    createCategory.mutate({
-      tripId,
-      name: newCategoryName.trim(),
-      icon: "📌",
-      orderIndex: categories?.length ?? 0,
-    });
-    setNewCategoryName("");
-  }
+  const grouped = useMemo(() => {
+    const map = new Map<PrepCategoryName, ChecklistItem[]>();
+    for (const preset of PREP_CATEGORIES) map.set(preset.name, []);
+    for (const item of items ?? []) {
+      const category = categories?.find((c) => c.id === item.categoryId);
+      const name = category ? canonicalPrepCategory(category.name) : "기타";
+      map.get(name)?.push(item);
+    }
+    for (const list of map.values()) {
+      list.sort((a, b) => a.orderIndex - b.orderIndex);
+    }
+    return map;
+  }, [items, categories]);
+
+  const visibleGroups = useMemo(() => {
+    if (filter === "전체") {
+      return PREP_CATEGORIES.filter((preset) => (grouped.get(preset.name)?.length ?? 0) > 0);
+    }
+    return PREP_CATEGORIES.filter((preset) => preset.name === filter);
+  }, [filter, grouped]);
 
   if (loadingCategories || loadingItems) {
     return <p className="p-6 text-sm text-muted-foreground">불러오는 중…</p>;
   }
 
-  return (
-    <div className={embedded ? "flex flex-col gap-5" : "mx-auto flex w-full flex-col gap-5 p-4"}>
-      <div className="flex gap-2 overflow-x-auto">
-        {(["전체", "공통", "소희", "준형"] as const).map((name) => (
-          <SoftChip key={name} active={assignee === name} onClick={() => setAssignee(name)}>
+  const body = (
+    <>
+      <FigmaChipRow role="tablist" aria-label="카테고리 필터">
+        {PREP_PAGE_FILTERS.map((name) => (
+          <FigmaChip
+            key={name}
+            role="tab"
+            aria-selected={filter === name}
+            active={filter === name}
+            onClick={() => setFilter(name)}
+          >
             {name}
-          </SoftChip>
+          </FigmaChip>
         ))}
-      </div>
-      <div className="rounded-[20px] bg-[#FFF8EE] p-4 ring-1 ring-[#FFE0BC]">
-        <p className="text-sm font-bold text-[#1A1A1A]">🎒 준비 현황</p>
-        <p className="mt-1 font-heading text-2xl font-bold text-[#FF9F43]">
-          {checkedCount}/{totalCount}
-        </p>
-        <p className="text-xs text-[#8C8885]">
-          {pct}% 완료 · {checkedCount}/{totalCount} 완료
-        </p>
-        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#F0EDE8]">
-          <div
-            className="h-full rounded-full bg-[#FF9F43] transition-[width]"
-            style={{ width: `${pct}%` }}
-            role="progressbar"
-            aria-valuenow={pct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-          />
+      </FigmaChipRow>
+      <div className="flex w-full flex-col items-start gap-1.5 rounded-[20px] bg-white px-5 py-[18px] shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
+        <div className="flex h-[34px] w-full items-center justify-between pb-1">
+          <p className="flex min-h-[21px] items-center text-[14px] leading-[21px] font-bold text-[#1A1A1A]">
+            🔋 제주력 {pct}% 충전 완료
+          </p>
+          <p className="font-nunito text-[14px] leading-[21px] font-bold text-[#1A1A1A]">
+            {checkedCount}/{totalCount}
+            <span className="sr-only"> 완료</span>
+          </p>
         </div>
+        <PrepProgressBar pct={pct} />
+        <p className="flex min-h-[17px] w-full items-center text-[11px] leading-4 text-[#AAAAAA]">
+          다 안 채워도 돼, 쉬러 온 거니까
+        </p>
       </div>
 
-      {categories
-        ?.slice()
-        .sort((a, b) => a.orderIndex - b.orderIndex)
-        .map((category, index, list) => (
+      <div className="flex w-full flex-col items-start gap-2.5">
+        {visibleGroups.map((preset) => (
           <ChecklistCategorySection
-            key={category.id}
+            key={preset.name}
             tripId={tripId}
-            category={category}
-            items={(items ?? [])
-              .filter((i) => i.categoryId === category.id)
-              .filter((i) => {
-                if (assignee === "전체") return true;
-                const tag = i.notes ?? "공통";
-                return tag === assignee;
-              })
-              .sort((a, b) => a.orderIndex - b.orderIndex)}
-            onMoveUp={
-              index > 0
-                ? () => {
-                    const prev = list[index - 1];
-                    updateCategory.mutate({
-                      id: category.id,
-                      patch: { orderIndex: prev.orderIndex },
-                    });
-                    updateCategory.mutate({
-                      id: prev.id,
-                      patch: { orderIndex: category.orderIndex },
-                    });
-                  }
-                : undefined
-            }
-            onMoveDown={
-              index < list.length - 1
-                ? () => {
-                    const next = list[index + 1];
-                    updateCategory.mutate({
-                      id: category.id,
-                      patch: { orderIndex: next.orderIndex },
-                    });
-                    updateCategory.mutate({
-                      id: next.id,
-                      patch: { orderIndex: category.orderIndex },
-                    });
-                  }
-                : undefined
-            }
+            category={{
+              id: preset.name,
+              tripId,
+              name: preset.name,
+              icon: preset.icon,
+              orderIndex: 0,
+            }}
+            items={grouped.get(preset.name) ?? []}
+            manageable={false}
+            showHeading={filter === "전체"}
+            onEdit={setEditing}
           />
         ))}
-
-      <AddChecklistItemDialog tripId={tripId} categories={categories ?? []} />
-
-      <form onSubmit={handleAddCategory} className="flex gap-2">
-        <Input
-          value={newCategoryName}
-          onChange={(e) => setNewCategoryName(e.target.value)}
-          placeholder="새 카테고리 이름"
-          aria-label="새 카테고리 이름"
-          className="h-9"
-        />
-        <Button type="submit" size="sm" className="gap-1">
-          <Plus className="size-4" aria-hidden="true" />
-          추가
-        </Button>
-      </form>
-
-      <div className="flex flex-col gap-2">
-        <p className="text-xs text-muted-foreground">💡 기본 카테고리 추가하기</p>
-        <div className="flex flex-wrap gap-2">
-          {CHECKLIST_RECOMMENDED_CATEGORIES.map((preset) => (
-            <button
-              key={preset.name}
-              type="button"
-              onClick={() =>
-                createCategory.mutate({
-                  tripId,
-                  name: preset.name,
-                  icon: preset.icon,
-                  orderIndex: categories?.length ?? 0,
-                })
-              }
-              className="rounded-md border border-border px-2.5 py-1 text-xs text-muted-foreground"
-            >
-              {preset.icon} {preset.name}
-            </button>
-          ))}
-        </div>
       </div>
-      <EndMascot />
+
+      <AddChecklistItemDialog
+        tripId={tripId}
+        categories={categories ?? []}
+        defaultCategory={filter === "전체" ? "맛집/카페" : filter}
+        onSaved={(saved) => {
+          setFilter(saved.category);
+        }}
+      />
+      {editing ? (
+        <AddChecklistItemDialog
+          tripId={tripId}
+          categories={categories ?? []}
+          initial={editing}
+          hideTrigger
+          open
+          onOpenChange={(next) => {
+            if (!next) setEditing(null);
+          }}
+          onSaved={(saved) => {
+            setFilter(saved.category);
+            setEditing(null);
+          }}
+        />
+      ) : null}
+    </>
+  );
+
+  if (embedded) {
+    return <div className="flex w-full flex-col items-start gap-4">{body}</div>;
+  }
+
+  return (
+    <div className="flex flex-col bg-white">
+      <FigmaPageHeader>
+        <FigmaPageTitle>제주에서 슬쩍 하고 싶은 것들</FigmaPageTitle>
+      </FigmaPageHeader>
+      <FigmaPage>{body}</FigmaPage>
     </div>
   );
 }

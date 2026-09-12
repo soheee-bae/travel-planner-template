@@ -5,9 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-heading: var(--font-serif);
+  --font-heading: var(--font-nunito);
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
+  --font-nunito: var(--font-nunito);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -70,7 +71,7 @@
 
 :root {
   /* Notion 실측값 기반 (DESIGN.md §색상 토큰). 웜 미니멀리즘 — 쿨톤이 아니다. */
-  --background: oklch(0.985 0.004 90); /* #FBFBFB 시안 페이지 배경 */
+  --background: #ffffff;
   --foreground: oklch(0.28 0.03 50); /* #3D2B1F */
   --card: oklch(0.995 0.006 90);
   --card-foreground: oklch(0.28 0.03 50);
@@ -127,8 +128,8 @@
   --category-stay-bg: oklch(0.9596 0.0161 206.44); /* #E6F5F7 */
   --category-stay-fg: oklch(0.5198 0.0936 223.13); /* #0E7490 */
 
-  /* 셸 바깥(아주 넓은 모니터)에 보이는 배경. */
-  --shell-outer: oklch(0.93 0.03 75);
+  /* 셸 바깥 Html→Body. 피그마 프레임이 흰색이라 베젤도 흰색으로 둔다. */
+  --shell-outer: #ffffff;
 }
 
 /*
@@ -179,17 +180,37 @@
   }
 
   html {
-    @apply font-sans;
+    @apply font-sans overflow-x-clip overflow-y-hidden bg-shell-outer;
     /* iOS 텍스트 자동 확대 방지. 뷰포트 meta의 maximumScale과 함께 더블탭 줌도 막는다. */
     -webkit-text-size-adjust: 100%;
+    overscroll-behavior-x: none;
+    scrollbar-gutter: auto;
   }
 
   body {
-    @apply min-h-dvh bg-shell-outer text-foreground;
+    @apply min-h-dvh overflow-x-clip overflow-y-hidden bg-shell-outer text-foreground;
     /* 모바일 웹 필수 리셋 (docs/04-design-system.md §4.7) */
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: contain;
+    overscroll-behavior-x: none;
+  }
+
+  /* 탭 전환·칩 가로 스크롤에서 스크롤바가 깜빡이지 않게 한다. */
+  .overflow-x-auto,
+  .overflow-x-scroll,
+  .overflow-y-auto,
+  .overflow-y-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .overflow-x-auto::-webkit-scrollbar,
+  .overflow-x-scroll::-webkit-scrollbar,
+  .overflow-y-auto::-webkit-scrollbar,
+  .overflow-y-scroll::-webkit-scrollbar {
+    display: none;
+    height: 0;
+    width: 0;
   }
 
   /* 롱프레스 드래그 대상에서 시스템 컨텍스트 메뉴가 뜨는 것을 막는다.
@@ -198,8 +219,42 @@
     -webkit-touch-callout: none;
   }
 
-  /* 네이버 지도 타일이 Tailwind img max-width에 잘리지 않게 한다. */
-  .naver-map-root img {
+  /* 지도 타일이 Tailwind img max-width에 잘리지 않게 한다. */
+  .naver-map-root img,
+  .osm-map-root img {
     max-width: none;
+  }
+}
+
+@keyframes sheet-enter {
+  from {
+    transform: translate3d(0, 100%, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes sheet-leave {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 100%, 0);
+  }
+}
+
+@utility sheet-enter {
+  animation: sheet-enter 280ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+@utility sheet-leave {
+  animation: sheet-leave 200ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-enter,
+  .sheet-leave {
+    animation: none;
   }
 }

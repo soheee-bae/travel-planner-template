@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { todayIsoSeoul } from "@/lib/date";
 
 export type JejuWeather = {
   region: string;
@@ -13,8 +14,9 @@ export type JejuWeather = {
 };
 
 export function useJejuWeather() {
+  const today = todayIsoSeoul();
   return useQuery({
-    queryKey: ["weather", "jeju"],
+    queryKey: ["weather", "jeju", today],
     queryFn: async (): Promise<JejuWeather> => {
       const res = await fetch("/api/weather");
       if (!res.ok) throw new Error("weather");

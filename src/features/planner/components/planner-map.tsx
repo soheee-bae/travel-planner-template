@@ -13,7 +13,7 @@ export function PlannerMap({
   onSelectPlace,
 }: {
   places: Place[];
-  activeDayIndex: number | "all";
+  activeDayIndex: number;
   selectedPlaceId?: string;
   onSelectPlace?: (placeId: string) => void;
 }) {

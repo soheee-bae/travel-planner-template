@@ -6,17 +6,19 @@ const CATEGORY_ICON: Record<Place["category"], string> = {
   맛집: "🍽️",
   카페: "☕",
   쇼핑: "🛍️",
-  액티비티: "🎢",
+  숙소: "🏨",
+  교통: "🚗",
   기타: "📍",
 };
 
-const CATEGORY_TINT: Record<Place["category"], string> = {
-  관광: "bg-[#E8F4FF]",
-  맛집: "bg-[#FFE8EE]",
-  카페: "bg-[#FFF1D6]",
-  쇼핑: "bg-[#F3E9FE]",
-  액티비티: "bg-[#E2FBE9]",
-  기타: "bg-muted",
+const CATEGORY_CHIP: Record<Place["category"], string> = {
+  관광: "bg-[#E3F4FA]",
+  맛집: "bg-[#FFE8EF]",
+  카페: "bg-[#FFE0BC]",
+  쇼핑: "bg-[#F5F5F5]",
+  숙소: "bg-[#E6F5F7]",
+  교통: "bg-[#E9F0FE]",
+  기타: "bg-[#F5F5F5]",
 };
 
 export function PlaceCard({
@@ -38,7 +40,7 @@ export function PlaceCard({
 }) {
   return (
     <div
-      className="flex items-center gap-3 rounded-3xl bg-card p-4 shadow-sm ring-1 ring-border"
+      className="flex w-full flex-col items-start rounded-[20px] bg-white px-4 py-3.5 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]"
       onClick={selectionMode ? onToggleSelect : undefined}
       onPointerDown={(e) => {
         if (selectionMode || !onLongPress) return;
@@ -48,47 +50,49 @@ export function PlaceCard({
         e.currentTarget.addEventListener("pointerleave", clear, { once: true });
       }}
     >
-      {selectionMode && (
-        <input
-          type="checkbox"
-          checked={!!selected}
-          onChange={onToggleSelect}
-          onClick={(e) => e.stopPropagation()}
-          className="size-5 shrink-0"
-          aria-label={`${place.name} 선택`}
-        />
-      )}
-      <div
-        className={`flex size-12 shrink-0 items-center justify-center rounded-2xl text-xl ${CATEGORY_TINT[place.category]}`}
-      >
-        {CATEGORY_ICON[place.category]}
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <p className="truncate text-sm font-bold text-foreground">{place.name}</p>
-          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
-            {place.category}
-          </span>
+      <div className="flex h-[67px] w-full items-center gap-3">
+        {selectionMode && (
+          <input
+            type="checkbox"
+            checked={!!selected}
+            onChange={onToggleSelect}
+            onClick={(e) => e.stopPropagation()}
+            className="size-5 shrink-0"
+            aria-label={`${place.name} 선택`}
+          />
+        )}
+        <div className="flex size-[46px] shrink-0 items-center justify-center rounded-2xl bg-[#FFF8EE] text-xl">
+          {CATEGORY_ICON[place.category]}
         </div>
-        {place.address ? (
-          <p className="mt-0.5 truncate text-xs text-muted-foreground">📍 {place.address}</p>
-        ) : null}
-        {place.tags.length > 0 ? (
-          <div className="mt-1 flex flex-wrap gap-1">
-            {place.tags.map((tag) => (
-              <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
-                #{tag}
+        <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
+          <p className="block h-[23px] w-full truncate text-[15px] leading-[22px] font-bold text-[#1A1A1A]">
+            {place.name}
+          </p>
+          {place.address ? (
+            <p className="flex h-[17px] w-full items-center truncate text-[11px] leading-4 font-normal text-[#AAAAAA]">
+              📍 {place.address}
+            </p>
+          ) : null}
+          <div className="flex h-[23px] w-full items-start gap-1 pt-1">
+            <span
+              className={`flex h-[19px] items-center rounded-[99px] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555] ${CATEGORY_CHIP[place.category]}`}
+            >
+              {place.category}
+            </span>
+            {place.tags[0] ? (
+              <span className="flex h-[19px] items-center rounded-[99px] bg-[#F5F5F5] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555]">
+                {place.tags[0]}
               </span>
-            ))}
+            ) : null}
           </div>
-        ) : null}
-      </div>
-      {!selectionMode && (
-        <div className="flex shrink-0 flex-col gap-0.5">
-          {onEdit && <IconAction action="edit" label={`${place.name} 수정`} onClick={onEdit} />}
-          {onDelete && <IconAction action="delete" label={`${place.name} 삭제`} onClick={onDelete} />}
         </div>
-      )}
+        {!selectionMode && (
+          <div className="flex h-[50px] w-[41px] shrink-0 flex-col items-center justify-center gap-[7px]">
+            {onEdit && <IconAction action="edit" label={`${place.name} 수정`} onClick={onEdit} />}
+            {onDelete && <IconAction action="delete" label={`${place.name} 삭제`} onClick={onDelete} />}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

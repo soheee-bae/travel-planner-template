@@ -1,19 +1,10 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -21,12 +12,25 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  FigmaCtaButton,
+  FigmaFieldLabel,
+  FigmaSheetHandle,
+  figmaInputClass,
+  figmaTextareaClass,
+} from "@/components/ui/figma";
 import { createWishlistItemInputSchema, type WishlistItem } from "@/mocks/fixtures/wishlist";
 import { z } from "zod";
 
 const ICONS = ["📝", "🍜", "📸", "🛒", "🎁", "🏨", "💡", "❤️"] as const;
 
-const formSchema = createWishlistItemInputSchema.omit({ tripId: true, orderIndex: true });
+const formSchema = createWishlistItemInputSchema.omit({ tripId: true, orderIndex: true }).extend({
+  title: z
+    .string()
+    .trim()
+    .min(1, "어떤걸 남겨볼래?")
+    .max(2000, "제목이 너무 길어. 조금만 줄여줘!"),
+});
 type FormValues = z.infer<typeof formSchema>;
 
 export function WishlistItemDialog({
@@ -36,9 +40,12 @@ export function WishlistItemDialog({
 }: {
   trigger: ReactNode;
   initial?: WishlistItem;
-  onSubmit: (values: FormValues) => void;
+  onSubmit: (values: FormValues) => void | Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -47,61 +54,116 @@ export function WishlistItemDialog({
       content: initial?.content ?? "",
     },
   });
+  const selectedIcon = form.watch("icon");
+  const titleError = form.formState.errors.title;
 
-  function handleSubmit(values: FormValues) {
-    onSubmit(values);
-    setOpen(false);
-    if (!initial) form.reset();
+  useEffect(() => {
+    if (!open) {
+      setIconPickerOpen(false);
+      setSubmitError(null);
+      setSaving(false);
+      return;
+    }
+    form.reset({
+      icon: initial?.icon ?? "📝",
+      title: initial?.title ?? "",
+      content: initial?.content ?? "",
+    });
+    // Defaults are captured when the sheet opens; `form` identity changes every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  async function handleSubmit(values: FormValues) {
+    setSubmitError(null);
+    setSaving(true);
+    try {
+      await onSubmit(values);
+      setOpen(false);
+      if (!initial) form.reset({ icon: "📝", title: "", content: "" });
+    } catch {
+      setSubmitError("저장이 안 됐어. 다시 한 번 해볼래?");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{initial ? "메모 편집" : "새 메모 추가"}</DialogTitle>
+      <DialogContent showCloseButton={false} className="w-full max-w-none items-stretch gap-0">
+        <FigmaSheetHandle wide />
+        <DialogHeader className="w-full gap-0">
+          <DialogTitle className="flex h-[27px] w-full items-center text-[18px] leading-[27px] font-bold text-[#4A4543]">
+            끄적끄적 남기기
+          </DialogTitle>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
-          <div className="flex gap-3">
-            <div className="flex w-24 flex-col gap-1.5">
-              <Label htmlFor="wish-icon">아이콘</Label>
-              <Select
-                defaultValue={form.getValues("icon")}
-                onValueChange={(v) => form.setValue("icon", v)}
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="flex w-full flex-col gap-4 pt-4">
+          <div className="flex w-full flex-col gap-1.5">
+            <FigmaFieldLabel htmlFor="wish-title" muted="brown">
+              제목
+            </FigmaFieldLabel>
+            <div className="flex w-full items-center gap-2">
+              <button
+                type="button"
+                aria-label="아이콘 고르기"
+                aria-expanded={iconPickerOpen}
+                onClick={() => setIconPickerOpen((prev) => !prev)}
+                className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-white text-xl shadow-[0px_2px_12px_rgba(0,0,0,0.06)]"
               >
-                <SelectTrigger id="wish-icon" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ICONS.map((icon) => (
-                    <SelectItem key={icon} value={icon}>
-                      {icon}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-1 flex-col gap-1.5">
-              <Label htmlFor="wish-title">제목</Label>
+                {selectedIcon}
+              </button>
               <Input
                 id="wish-title"
-                placeholder="메모 제목"
+                placeholder="비 올 때 갈 실내 스팟"
+                aria-required="true"
+                aria-invalid={titleError ? true : undefined}
+                className={figmaInputClass}
                 {...form.register("title")}
               />
             </div>
+            {iconPickerOpen ? (
+              <div className="flex w-full flex-wrap gap-2" role="listbox" aria-label="아이콘">
+                {ICONS.map((icon) => (
+                  <button
+                    key={icon}
+                    type="button"
+                    role="option"
+                    aria-selected={selectedIcon === icon}
+                    onClick={() => {
+                      form.setValue("icon", icon, { shouldDirty: true });
+                      setIconPickerOpen(false);
+                    }}
+                    className={`flex size-11 items-center justify-center rounded-[14px] bg-white text-xl shadow-[0px_2px_12px_rgba(0,0,0,0.06)] ${
+                      selectedIcon === icon ? "ring-2 ring-[#FF9F43]" : ""
+                    }`}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            {titleError ? (
+              <p className="text-[12px] leading-[18px] text-destructive">{titleError.message}</p>
+            ) : null}
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="wish-content">내용</Label>
+          <div className="flex w-full flex-col gap-1.5 pb-3.5">
+            <FigmaFieldLabel htmlFor="wish-content" muted="brown">
+              내용
+            </FigmaFieldLabel>
             <Textarea
               id="wish-content"
               rows={5}
-              placeholder="메모 내용을 입력하세요"
+              placeholder="자유롭게 낙서하듯 끄적여줘!"
+              className={figmaTextareaClass}
               {...form.register("content")}
             />
           </div>
-          <Button type="submit" className="h-10">
-            {initial ? "저장" : "추가"}
-          </Button>
+          {submitError ? (
+            <p className="text-[12px] leading-[18px] text-destructive">{submitError}</p>
+          ) : null}
+          <FigmaCtaButton type="submit" disabled={saving} className="rounded-[16px] py-[13px]">
+            {saving ? "기억하는 중…" : "기억해두기"}
+          </FigmaCtaButton>
         </form>
       </DialogContent>
     </Dialog>

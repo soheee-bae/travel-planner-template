@@ -4,7 +4,7 @@ export const wishlistItemSchema = z.object({
   id: z.string(),
   tripId: z.string(),
   icon: z.string(),
-  title: z.string().min(1).max(60),
+  title: z.string().min(1).max(2000),
   content: z.string().optional(),
   orderIndex: z.number(),
 });

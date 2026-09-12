@@ -41,21 +41,21 @@ describe("groupByCategory", () => {
   it("카테고리별로 합산하고 퍼센트를 계산한다", () => {
     const expenses = [
       makeExpense({ category: "식비", amount: 6000 }),
-      makeExpense({ category: "교통", amount: 4000 }),
+      makeExpense({ category: "기타", amount: 4000 }),
     ];
     const result = groupByCategory(expenses);
     expect(result).toEqual([
       { category: "식비", total: 6000, pct: 60 },
-      { category: "교통", total: 4000, pct: 40 },
+      { category: "기타", total: 4000, pct: 40 },
     ]);
   });
 
   it("합계가 큰 순서로 정렬된다", () => {
     const expenses = [
-      makeExpense({ category: "쇼핑", amount: 100 }),
+      makeExpense({ category: "쇼핑/선물", amount: 100 }),
       makeExpense({ category: "식비", amount: 900 }),
     ];
-    expect(groupByCategory(expenses).map((g) => g.category)).toEqual(["식비", "쇼핑"]);
+    expect(groupByCategory(expenses).map((g) => g.category)).toEqual(["식비", "쇼핑/선물"]);
   });
 });
 

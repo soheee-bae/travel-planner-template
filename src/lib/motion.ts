@@ -14,6 +14,8 @@ export const duration = {
   exit: 0.16,
   /** 들어오는 콘텐츠. */
   enter: 0.25,
+  /** 탭 가로 슬라이드. 페이드 없이 짧게. */
+  slide: 0.2,
   /** 공유 요소 모프, 리스트 재정렬 FLIP. */
   move: 0.4,
 } as const;

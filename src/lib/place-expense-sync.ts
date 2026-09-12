@@ -2,11 +2,12 @@ import type { Expense, ExpenseCategory } from "@/mocks/fixtures/expenses";
 import type { Place, PlaceCategory } from "@/mocks/fixtures/places";
 
 const CATEGORY_MAP: Record<PlaceCategory, ExpenseCategory> = {
-  관광: "관광·입장",
+  관광: "놀거리",
   맛집: "식비",
-  카페: "식비",
-  쇼핑: "쇼핑",
-  액티비티: "액티비티",
+  카페: "카페",
+  쇼핑: "쇼핑/선물",
+  숙소: "숙소",
+  교통: "교통/주유",
   기타: "기타",
 };
 
@@ -49,7 +50,7 @@ export function buildAutoExpenseFromPlace(
     date: fallbackDate,
     dayIndex: place.dayIndex,
     paymentMethod: "카드",
-    paidBy: "나",
+    paidBy: "소희",
     placeId: place.id,
     isManual: false,
   };

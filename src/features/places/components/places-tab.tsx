@@ -2,13 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { usePlaces, useDeletePlace, useUpdatePlace } from "@/features/places/hooks";
+import { FigmaPage, FigmaPageHeader, FigmaPageTitle, figmaShadowCard } from "@/components/ui/figma";
+import { useConfirmDelete } from "@/components/ui/confirm-delete-dialog";
+import { usePlaces, useDeletePlace } from "@/features/places/hooks";
 import { PlaceCard } from "@/features/places/components/place-card";
 import { PlaceFilterBar, type PlaceFilter } from "@/features/places/components/place-filter-bar";
 import { AddPlaceDialog } from "@/features/places/components/add-place-dialog";
-import { getTripDays } from "@/lib/trip-days";
-import { nextOrderIndexForDay } from "@/lib/visit-order";
+import { cn } from "@/lib/utils";
 import type { Trip } from "@/mocks/fixtures/trips";
 import type { Place } from "@/mocks/fixtures/places";
 
@@ -16,17 +16,12 @@ export function PlacesTab({ trip }: { trip: Trip }) {
   const tripId = trip.id;
   const { data: places, isLoading, isError } = usePlaces(tripId);
   const deletePlace = useDeletePlace(tripId);
-  const updatePlace = useUpdatePlace(tripId);
+  const { request: askDelete, dialog: confirmDialog } = useConfirmDelete();
   const [filter, setFilter] = useState<PlaceFilter>("전체");
   const [selectionMode, setSelectionMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState<Place | null>(null);
   const [query, setQuery] = useState("");
-
-  const days = useMemo(
-    () => getTripDays(trip.startDate, trip.endDate),
-    [trip.startDate, trip.endDate],
-  );
 
   const counts = useMemo(() => {
     const base: Record<PlaceFilter, number> = {
@@ -35,7 +30,8 @@ export function PlacesTab({ trip }: { trip: Trip }) {
       맛집: 0,
       카페: 0,
       쇼핑: 0,
-      액티비티: 0,
+      숙소: 0,
+      교통: 0,
       기타: 0,
     };
     for (const p of places ?? []) base[p.category] += 1;
@@ -68,139 +64,110 @@ export function PlacesTab({ trip }: { trip: Trip }) {
     exitSelectionMode();
   }
 
-  function handleBulkAssign(dayIndex: number | null) {
-    if (dayIndex == null) {
-      selected.forEach((id) => updatePlace.mutate({ id, patch: { dayIndex: null } }));
-    } else {
-      let next = nextOrderIndexForDay(places ?? [], dayIndex);
-      selected.forEach((id) => {
-        updatePlace.mutate({ id, patch: { dayIndex, orderIndex: next } });
-        next += 1;
-      });
-    }
-    exitSelectionMode();
-  }
-
   if (isLoading) return <p className="p-6 text-sm text-muted-foreground">불러오는 중…</p>;
   if (isError)
-    return <p className="p-6 text-sm text-destructive">장소 목록을 불러오지 못했습니다.</p>;
+    return <p className="p-6 text-sm text-destructive">장소 목록을 다시 불러와 주세요.</p>;
 
   return (
-    <div className="mx-auto flex w-full flex-col gap-3 p-4">
-      <h2 className="font-heading text-xl font-bold">장소 리스트</h2>
-      <div className="flex gap-2">
-        <label className="relative flex-1">
-          <Search
-            className="pointer-events-none absolute top-1/2 left-3 size-[21px] -translate-y-1/2 text-[#B0AAA6]"
-            aria-hidden
-          />
+    <div className="flex min-h-full flex-col bg-white">
+      <FigmaPageHeader>
+        <div className="flex w-full items-center justify-between">
+          <FigmaPageTitle className="w-auto flex-1">가보고 싶은 스팟 모음</FigmaPageTitle>
+          <button
+            type="button"
+            className="shrink-0 text-[13px] leading-5 font-semibold text-[#8C8885]"
+            aria-pressed={selectionMode}
+            onClick={() => {
+              if (selectionMode) exitSelectionMode();
+              else setSelectionMode(true);
+            }}
+          >
+            {selectionMode ? "취소" : "선택"}
+          </button>
+        </div>
+      </FigmaPageHeader>
+      <FigmaPage>
+        <div
+          className={cn(
+            "flex h-10 w-full items-center gap-2.5 rounded-[20px] bg-white px-4 py-[11px]",
+            figmaShadowCard,
+          )}
+        >
+          <Search className="size-[21px] shrink-0 opacity-40" aria-hidden />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="장소 검색..."
             aria-label="장소 검색"
-            className="h-11 w-full rounded-full bg-card pr-4 pl-9 text-sm ring-1 ring-border outline-none"
+            className="h-[18px] min-w-0 flex-1 bg-transparent text-[14px] leading-[17px] text-[#1A1A1A] outline-none placeholder:text-[rgba(26,26,26,0.5)]"
           />
-        </label>
-        <Button size="sm" variant="outline" className="h-11 rounded-full" onClick={() => setSelectionMode(true)}>
-          선택
-        </Button>
-      </div>
-      <PlaceFilterBar active={filter} onChange={setFilter} counts={counts} />
+        </div>
+        <PlaceFilterBar active={filter} onChange={setFilter} counts={counts} />
 
-      <div className="flex items-center justify-between">
         {selectionMode ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground" aria-live="polite">
-            {selected.size}개 선택됨
-          </div>
-        ) : (
-          <span />
-        )}
-        <div className="flex gap-2">
-          {selectionMode ? (
-            <>
-              <Button size="sm" variant="ghost" onClick={exitSelectionMode}>
-                취소
-              </Button>
-              <Button
-                size="sm"
-                variant="destructive"
-                disabled={selected.size === 0}
-                onClick={handleBulkDelete}
-              >
-                삭제
-              </Button>
-            </>
-          ) : (
-            <span />
-          )}
-        </div>
-      </div>
-
-      {selectionMode && (
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="선택한 장소를 Day에 배정">
-          {days.map((day) => (
-            <Button
-              key={day.dayIndex}
-              size="sm"
-              variant="outline"
+          <div className="flex w-full items-center justify-between">
+            <span className="text-[13px] leading-5 text-[#8E8E8E]" aria-live="polite">
+              {selected.size}개 선택됨
+            </span>
+            <button
+              type="button"
               disabled={selected.size === 0}
-              onClick={() => handleBulkAssign(day.dayIndex)}
+              className="text-[13px] leading-5 font-semibold text-[#E25C5C] disabled:opacity-40"
+              onClick={() => askDelete(handleBulkDelete)}
             >
-              Day{day.dayIndex}에 추가
-            </Button>
+              삭제
+            </button>
+          </div>
+        ) : null}
+
+        {filtered.length === 0 && (
+          <p className="w-full py-6 text-center text-[13px] leading-5 text-[#8E8E8E]">
+            탐색 중... 맛있는 냄새 찾는 중 🍜
+          </p>
+        )}
+
+        <div className="flex w-full flex-col items-start gap-2.5">
+          {filtered.map((place) => (
+            <PlaceCard
+              key={place.id}
+              place={place}
+              selectionMode={selectionMode}
+              selected={selected.has(place.id)}
+              onToggleSelect={() => toggleSelect(place.id)}
+              onDelete={() => askDelete(() => deletePlace.mutate(place.id))}
+              onEdit={() => setEditing(place)}
+              onLongPress={() => {
+                setSelectionMode(true);
+                toggleSelect(place.id);
+              }}
+            />
           ))}
-          <Button
-            size="sm"
-            variant="ghost"
-            disabled={selected.size === 0}
-            onClick={() => handleBulkAssign(null)}
-          >
-            미배정으로
-          </Button>
         </div>
-      )}
-
-      {filtered.length === 0 && (
-        <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          가고 싶은 곳을 모아두면 여기에 쌓여요
-        </p>
-      )}
-
-      <div className="flex flex-col gap-2">
-        {filtered.map((place) => (
-          <PlaceCard
-            key={place.id}
-            place={place}
-            selectionMode={selectionMode}
-            selected={selected.has(place.id)}
-            onToggleSelect={() => toggleSelect(place.id)}
-            onDelete={() => deletePlace.mutate(place.id)}
-            onEdit={() => setEditing(place)}
-            onLongPress={() => {
-              setSelectionMode(true);
-              toggleSelect(place.id);
-            }}
-          />
-        ))}
-      </div>
-      <AddPlaceDialog
-        tripId={tripId}
-        existingTags={places?.flatMap((p) => p.tags) ?? []}
-        existingPlaces={places ?? []}
-      />
-      {editing && (
         <AddPlaceDialog
           tripId={tripId}
-          initial={editing}
-          existingTags={places?.flatMap((p) => p.tags) ?? []}
+          startDate={trip.startDate}
+          endDate={trip.endDate}
           existingPlaces={places ?? []}
-          open
-          onOpenChange={(next) => {
-            if (!next) setEditing(null);
+          defaultCategory={filter === "전체" ? undefined : filter}
+          onSaved={(saved) => {
+            setFilter(saved.category);
           }}
         />
-      )}
+        {editing && (
+          <AddPlaceDialog
+            tripId={tripId}
+            startDate={trip.startDate}
+            endDate={trip.endDate}
+            initial={editing}
+            existingPlaces={places ?? []}
+            open
+            onOpenChange={(next) => {
+              if (!next) setEditing(null);
+            }}
+          />
+        )}
+        {confirmDialog}
+      </FigmaPage>
     </div>
   );
 }

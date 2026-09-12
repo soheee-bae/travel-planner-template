@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { driveWithNaver } from "@/lib/naver-maps";
 import {
-  estimateWalkLeg,
   latLngSchema,
   legCacheKey,
+  resolveDisplayedLeg,
   travelLegSchema,
   type LatLng,
   type TravelLeg,
@@ -34,8 +34,8 @@ async function resolveLeg(start: LatLng, end: LatLng): Promise<TravelLeg> {
   } catch {
     naver = null;
   }
-  const leg = naver ?? estimateWalkLeg(start, end);
-  if (leg.source === "naver") cache.set(key, leg);
+  const leg = resolveDisplayedLeg(naver, start, end);
+  cache.set(key, leg);
   return leg;
 }
 
