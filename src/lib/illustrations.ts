@@ -31,7 +31,7 @@ export const CAPSULE_UNLOCK_ICON: Partial<Record<number, string>> = {
 export const PLACE_CATEGORY_ICON: Record<PlaceCategory, string> = {
   관광: "/illustrations/cat-sight.png",
   맛집: "/illustrations/cat-food.png",
-  카페: "/illustrations/cat-cafe.png",
+  카페: "/illustrations/cat-cafee.png",
   숙소: "/illustrations/cat-stay.png",
   교통: "/illustrations/cat-transport.png",
   쇼핑: "/illustrations/cat-shop.png",
@@ -40,7 +40,7 @@ export const PLACE_CATEGORY_ICON: Record<PlaceCategory, string> = {
 
 export const EXPENSE_CATEGORY_ICON: Record<ExpenseCategory, string> = {
   식비: "/illustrations/cat-food.png",
-  카페: "/illustrations/cat-cafe.png",
+  카페: "/illustrations/cat-cafee.png",
   "교통/주유": "/illustrations/cat-transport.png",
   숙소: "/illustrations/cat-stay.png",
   "쇼핑/선물": "/illustrations/cat-shop.png",
