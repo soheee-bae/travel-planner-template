@@ -49,6 +49,7 @@ function PlaceCardBody({
   onToggleSelect,
   onEdit,
   onDelete,
+  dragBind,
 }: {
   place: Place;
   selectionMode?: boolean;
@@ -57,6 +58,7 @@ function PlaceCardBody({
   onToggleSelect?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  dragBind?: Pick<ReturnType<typeof useSortable>, "attributes" | "listeners">;
 }) {
   const hours = formatStayDuration(place.durationMin);
   return (
@@ -72,9 +74,16 @@ function PlaceCardBody({
           aria-label={`${place.name} 선택`}
         />
       ) : sortable ? (
-        <span aria-hidden="true" className="shrink-0">
+        <button
+          type="button"
+          className="flex size-8 shrink-0 cursor-grab touch-none touch-callout-none items-center justify-center rounded-lg active:cursor-grabbing"
+          {...dragBind?.attributes}
+          {...dragBind?.listeners}
+          aria-label={`${place.name} 순서 변경`}
+          onClick={(event) => event.stopPropagation()}
+        >
           <DragHandle label="" />
-        </span>
+        </button>
       ) : null}
       <span
         className={cn(
@@ -157,7 +166,6 @@ function SortableItem({
   const { attributes, listeners, setNodeRef, transform, isDragging } = useSortable({
     id: place.id,
     disabled: !canDrag,
-    attributes: { role: "group" },
     animateLayoutChanges: () => false,
   });
 
@@ -169,7 +177,6 @@ function SortableItem({
           transform && isDragging ? { ...transform, scaleX: 1.03, scaleY: 1.03 } : transform,
         ),
         transition: undefined,
-        touchAction: canDrag ? "none" : undefined,
         zIndex: isDragging ? 20 : undefined,
       }}
       className="flex w-full flex-col gap-2.5"
@@ -177,12 +184,9 @@ function SortableItem({
       <div
         className={cn(
           "relative w-full rounded-[20px] bg-white py-3 pr-3 pl-3.5 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]",
-          canDrag && "cursor-grab touch-callout-none",
-          isDragging && "cursor-grabbing shadow-[0px_12px_28px_rgba(0,0,0,0.18)] ring-2 ring-[#FF9F43]",
+          isDragging && "shadow-[0px_12px_28px_rgba(0,0,0,0.18)] ring-2 ring-[#FF9F43]",
           highlighted && !isDragging && "ring-2 ring-[#FF9F43]",
         )}
-        {...(canDrag ? { ...attributes, ...listeners } : {})}
-        aria-label={canDrag ? `${place.name} 순서 변경 (드래그)` : undefined}
         onClick={selectionMode ? onToggleSelect : onActivate}
       >
         <PlaceCardBody
@@ -193,6 +197,7 @@ function SortableItem({
           onToggleSelect={onToggleSelect}
           onEdit={onEdit}
           onDelete={onDelete}
+          dragBind={canDrag ? { attributes, listeners } : undefined}
         />
       </div>
       {children}
@@ -256,7 +261,7 @@ export function DayItineraryList({
   const travelLegs = useTravelLegs(items);
   const resolvedLegs = travelLegs.data;
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 

@@ -1,11 +1,12 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export const TRIP_TABS = ["overview", "planner", "places", "budget", "prep", "memo"] as const;
 export const NAV_SWIPE_TABS = ["overview", "planner", "places", "budget", "prep"] as const;
 export type TripTab = (typeof TRIP_TABS)[number];
+export type TripPanel = (typeof NAV_SWIPE_TABS)[number];
 
 const DEFAULT_TAB: TripTab = "overview";
 
@@ -24,10 +25,16 @@ export function useTripTab() {
   const searchParams = useSearchParams();
 
   const tabParam = searchParams.get("tab");
-  const tab: TripTab = isTripTab(tabParam) ? tabParam : DEFAULT_TAB;
+  const urlTab: TripTab = isTripTab(tabParam) ? tabParam : DEFAULT_TAB;
+  const [tab, setTabState] = useState<TripTab>(urlTab);
+
+  useEffect(() => {
+    setTabState(urlTab);
+  }, [urlTab]);
 
   const setTab = useCallback(
     (next: TripTab) => {
+      setTabState(next);
       const params = new URLSearchParams(searchParams.toString());
       if (next === DEFAULT_TAB) {
         params.delete("tab");

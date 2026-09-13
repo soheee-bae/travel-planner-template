@@ -92,35 +92,35 @@ export function BudgetTab({ trip }: { trip: Trip }) {
         >
           <h2
             id="dutch-pay-heading"
-            className="flex h-[18px] w-full items-center text-xs leading-[18px] font-bold tracking-[1px] text-[#B0AAA6] uppercase"
+            className="w-full text-xs leading-[18px] font-bold tracking-[1px] text-[#B0AAA6] uppercase"
           >
-            <span aria-hidden="true">정산 💸</span>
+            <span aria-hidden="true">정산</span>
             <span className="sr-only">더치페이 정산</span>
           </h2>
-          <div className="flex h-10 w-full items-start justify-around gap-[50.5px]">
-            <div className="flex h-10 flex-1 flex-col items-center">
-              <p className="flex h-[17px] items-center text-center text-[11px] leading-4 text-[#8C8885]">소희</p>
-              <p className="flex h-[23px] items-center font-nunito text-[15px] leading-[22px] font-bold text-[#4A4543]">
+          <div className="grid w-full grid-cols-3 gap-2">
+            <div className="flex min-w-0 flex-col items-center gap-0.5">
+              <p className="text-center text-[11px] leading-4 text-[#8C8885]">소희</p>
+              <p className="w-full break-all text-center font-nunito text-[13px] leading-[18px] font-bold text-[#4A4543] tabular-nums">
                 {paid.me.toLocaleString()}원
               </p>
             </div>
-            <div className="flex h-10 flex-1 flex-col items-center">
-              <p className="flex h-[17px] items-center text-center text-[11px] leading-4 text-[#8C8885]">준형</p>
-              <p className="flex h-[23px] items-center font-nunito text-[15px] leading-[22px] font-bold text-[#4A4543]">
+            <div className="flex min-w-0 flex-col items-center gap-0.5">
+              <p className="text-center text-[11px] leading-4 text-[#8C8885]">준형</p>
+              <p className="w-full break-all text-center font-nunito text-[13px] leading-[18px] font-bold text-[#4A4543] tabular-nums">
                 {paid.jun.toLocaleString()}원
               </p>
             </div>
-            <div className="flex h-10 flex-1 flex-col items-center">
-              <p className="flex h-[17px] items-center text-center text-[11px] leading-4 text-[#8C8885]">🎁</p>
+            <div className="flex min-w-0 flex-col items-center gap-0.5">
+              <p className="text-center text-[11px] leading-4 text-[#8C8885]">🎁</p>
               <SecretAmount
                 amount={paid.together}
                 hidden
-                className="flex h-[23px] w-[72px] items-center justify-center font-nunito text-[15px] leading-[22px] font-bold text-[#4A4543]"
+                className="w-full break-all text-center font-nunito text-[13px] leading-[18px] font-bold text-[#4A4543] tabular-nums"
               />
             </div>
           </div>
-          <div className="flex h-6 w-full items-center justify-center pt-1">
-            <p className="flex h-5 items-center font-nunito text-[13px] leading-5 font-bold text-[#F09040]">
+          <div className="flex w-full items-center justify-center pt-1">
+            <p className="break-keep text-center font-nunito text-[13px] leading-5 font-bold text-[#F09040]">
               {paid.owe > 0
                 ? `소희 → 준형 ${paid.owe.toLocaleString()}원`
                 : paid.owe < 0

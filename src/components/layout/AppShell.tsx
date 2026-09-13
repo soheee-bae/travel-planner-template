@@ -22,7 +22,7 @@ export function AppShell({ children, className }: { children: ReactNode; classNa
       className={cn(
         "relative isolate mx-auto flex w-full max-w-md flex-col bg-white",
         "h-[var(--vv-height,100dvh)] min-h-0 overflow-visible",
-        "[transform:translateZ(0)]",
+        "[transform:translateZ(0)] [--trip-nav-height:56px]",
         "md:border-x md:border-border",
         className,
       )}

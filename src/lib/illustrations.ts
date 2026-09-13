@@ -4,9 +4,10 @@ import type { PlaceCategory } from "@/mocks/fixtures/places";
 export const ILLUSTRATION = {
   gift: "/illustrations/fab-gift.png",
   memo: "/illustrations/memo.png",
+  splash: "/illustrations/loading-illustration.png",
   giftFab: {
     bg: "bg-[#EBA89C]",
-    shadow: "shadow-[0px_8px_24px_rgba(192,112,96,0.28)]",
+    shadow: "shadow-[0px_10px_28px_rgba(192,112,96,0.42)]",
   },
   weather: {
     맑음: "/illustrations/weather-sun.png",
@@ -18,6 +19,14 @@ export const ILLUSTRATION = {
     뇌우: "/illustrations/weather-thunder.png",
   },
 } as const;
+
+/** 시크릿 노트 노드. 잠금 해제 시 sortOrder별 아이콘. 4번은 아직 없음. */
+export const CAPSULE_UNLOCK_ICON: Partial<Record<number, string>> = {
+  1: "/illustrations/한라봉.png",
+  2: "/illustrations/flower.png",
+  3: "/illustrations/rock.png",
+  5: "/illustrations/돌하르방.png",
+};
 
 export const PLACE_CATEGORY_ICON: Record<PlaceCategory, string> = {
   관광: "/illustrations/cat-sight.png",

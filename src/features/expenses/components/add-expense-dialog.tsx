@@ -213,7 +213,7 @@ export function AddExpenseDialog({
       )}
       <DialogContent
         showCloseButton={false}
-        className="max-h-[min(1048.05px,var(--vv-height,100dvh))] gap-4 overflow-y-auto"
+        className="max-h-[calc(100%-48px)] gap-4 overflow-y-auto"
       >
         <FigmaSheetHandle />
         <DialogHeader className="gap-0">

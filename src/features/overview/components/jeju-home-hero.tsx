@@ -82,7 +82,7 @@ export function JejuHomeHero({
   const weatherDate = weather?.date ?? todayIsoSeoul();
 
   return (
-    <section className="flex w-full flex-col pb-12">
+    <section className="flex w-full flex-col pb-8">
       <header className="flex min-h-11 w-full items-center px-5">
         <div className="flex min-w-0 flex-col items-start">
           <h1 className="flex w-full items-center font-nunito text-[20px] leading-[30px] font-bold text-[#1A1A1A]">
@@ -141,7 +141,7 @@ export function JejuHomeHero({
             </div>
             </LayoutGroup>
 
-            <SegmentedSwap activeKey={activeFlight.id} direction={flightDirRef.current}>
+            <SegmentedSwap activeKey={activeFlight.id} direction={flightDirRef.current} durationKey="micro">
               <FlightTicketBody flight={activeFlight} />
             </SegmentedSwap>
           </article>
@@ -174,7 +174,7 @@ export function JejuHomeHero({
               ))}
             </div>
             </LayoutGroup>
-            <SegmentedSwap activeKey={activeStay.id} direction={stayDirRef.current}>
+            <SegmentedSwap activeKey={activeStay.id} direction={stayDirRef.current} durationKey="micro">
               <StayTicketBody stay={activeStay} />
             </SegmentedSwap>
           </article>

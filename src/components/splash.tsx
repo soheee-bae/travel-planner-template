@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useReducedMotion } from "@/hooks/use-motion-safe";
+import { ILLUSTRATION } from "@/lib/illustrations";
 import { easing } from "@/lib/motion";
 
 const SPLASH_MS = 2500;
 const EXIT_S = 0.5;
+const JEJU_SUFFIX = "in JEJU...";
 
 export function Splash() {
   const [visible, setVisible] = useState(true);
@@ -23,25 +25,25 @@ export function Splash() {
         <motion.div
           role="status"
           aria-live="polite"
-          aria-label="소희 & 준형 in JEJU"
+          aria-label={`소희 & 준형 ${JEJU_SUFFIX}`}
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: reduce ? 0 : EXIT_S, ease: easing.standard }}
-          className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-[30px] bg-[#F5F4F2] shadow-[0px_0px_80px_rgba(0,0,0,0.12)]"
+          className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-[15px] bg-white shadow-[0px_0px_80px_rgba(0,0,0,0.12)]"
         >
           <motion.img
-            src="/assets/duck-airport.svg"
+            src={ILLUSTRATION.splash}
             alt=""
-            width={91}
-            height={88}
-            animate={reduce ? undefined : { y: [0, -10, 0] }}
+            width={212}
+            height={124}
+            animate={reduce ? undefined : { y: [0, -8, 0] }}
             transition={
               reduce ? undefined : { duration: 2.4, repeat: Infinity, ease: "easeInOut" }
             }
-            className="h-[88px] w-[91px] object-contain"
+            className="h-[124px] w-[212px] object-contain"
           />
-          <p className="flex h-[33px] items-center text-center font-nunito text-[16px] leading-[33px] font-extrabold text-[#F09040]">
+          <p className="flex h-[33px] items-center justify-center text-center font-nunito text-[14px] leading-[33px] font-extrabold text-[#4A4A4A]">
             <span>소희 & 준형&nbsp;</span>
             <JejuTypewriter reduce={!!reduce} />
           </p>
@@ -50,8 +52,6 @@ export function Splash() {
     </AnimatePresence>
   );
 }
-
-const JEJU_SUFFIX = "in JEJU";
 
 function JejuTypewriter({ reduce }: { reduce: boolean }) {
   const [count, setCount] = useState(reduce ? JEJU_SUFFIX.length : 0);
@@ -72,7 +72,7 @@ function JejuTypewriter({ reduce }: { reduce: boolean }) {
   }, [reduce]);
 
   return (
-    <span className="inline-flex min-w-[4.6em] items-center text-left" aria-hidden>
+    <span className="inline-flex min-w-[6.2em] items-center text-left" aria-hidden>
       {JEJU_SUFFIX.slice(0, Math.min(count, JEJU_SUFFIX.length))}
       <span className={cursorOn && !reduce ? "opacity-100" : "opacity-0"}>|</span>
     </span>

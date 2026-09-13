@@ -1,12 +1,37 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getNaverMapClientId } from "@/lib/naver-maps-script";
 import { MockMap } from "@/features/planner/components/mock-map";
 import { NaverPlannerMap } from "@/features/planner/components/naver-planner-map";
 import { MapPlacePopup } from "@/features/planner/components/map-place-popup";
 import { cn } from "@/lib/utils";
 import type { Place } from "@/mocks/fixtures/places";
+
+function isClientIdPayload(value: unknown): value is { clientId: string | null } {
+  return typeof value === "object" && value !== null && "clientId" in value;
+}
+
+function useNaverMapClientId() {
+  const builtIn = getNaverMapClientId();
+  const remote = useQuery({
+    queryKey: ["naver-map-client-id"],
+    queryFn: async (): Promise<string | null> => {
+      const res = await fetch("/api/maps/ncp-client-id");
+      if (!res.ok) return null;
+      const data: unknown = await res.json();
+      if (!isClientIdPayload(data)) return null;
+      return typeof data.clientId === "string" && data.clientId.length > 0 ? data.clientId : null;
+    },
+    enabled: !builtIn,
+    staleTime: Infinity,
+  });
+  return {
+    clientId: builtIn ?? remote.data ?? undefined,
+    pending: !builtIn && remote.isPending,
+  };
+}
 
 export function PlannerMap({
   places,
@@ -25,14 +50,17 @@ export function PlannerMap({
   expanded?: boolean;
   showPopup?: boolean;
 }) {
-  const clientId = getNaverMapClientId();
-  const [useMock, setUseMock] = useState(!clientId);
-  const onFatalError = useCallback(() => setUseMock(true), []);
+  const { clientId, pending } = useNaverMapClientId();
+  const [loadFailed, setLoadFailed] = useState(false);
+  const onFatalError = useCallback(() => setLoadFailed(true), []);
   const selectedPlace = places.find((p) => p.id === selectedPlaceId);
+  const showMock = !pending && (loadFailed || !clientId);
 
   return (
     <div className="relative h-full min-h-[180px] w-full">
-      {useMock || !clientId ? (
+      {pending ? (
+        <div className="h-full w-full bg-[#dbe4d8]" aria-hidden="true" />
+      ) : showMock || !clientId ? (
         <MockMap
           places={places}
           activeDayIndex={activeDayIndex}
@@ -49,7 +77,7 @@ export function PlannerMap({
           onFatalError={onFatalError}
         />
       )}
-      {useMock || !clientId ? (
+      {showMock ? (
         <p className="pointer-events-none absolute top-2 left-2 z-20 max-w-[68%] rounded-[10px] bg-white/95 px-2 py-1 text-[10px] leading-[14px] font-medium text-[#6B6560] shadow-[0px_2px_8px_rgba(0,0,0,0.08)]">
           네이버 지도 키가 없어 임시 지도야
         </p>

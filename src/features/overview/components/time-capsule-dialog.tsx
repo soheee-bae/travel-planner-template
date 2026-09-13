@@ -10,6 +10,8 @@ import { useMotionSafeDuration, useReducedMotion } from "@/hooks/use-motion-safe
 import { formatSeoulDateTime } from "@/lib/date";
 import { easing } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+import { IllustrationIcon } from "@/components/ui/illustration-icon";
+import { CAPSULE_UNLOCK_ICON } from "@/lib/illustrations";
 import { capsulePopupView, isCapsuleUnlocked, type TimeCapsule } from "@/mocks/fixtures/time-capsules";
 
 const NODE_SIZE = 48;
@@ -161,6 +163,7 @@ export function TimeCapsuleDialog({
             </svg>
             {capsules.map((item, index) => {
               const unlocked = isCapsuleUnlocked(item.unlockAt, nowMs);
+              const unlockIcon = CAPSULE_UNLOCK_ICON[item.sortOrder];
               const layout = LAYOUT[index] ?? LAYOUT[0];
               const cardTop = cardTopFor(layout.nodeTop);
               const tailOnLeft = layout.side === "right";
@@ -183,12 +186,16 @@ export function TimeCapsuleDialog({
                     style={{ left: layout.nodeLeft, top: layout.nodeTop }}
                   >
                     <span
-                      className="relative z-20 flex size-12 items-center justify-center rounded-full border-[3px] border-[#FF9F43] bg-white text-[20px] leading-4"
+                      className="relative z-20 flex size-12 items-center justify-center overflow-hidden rounded-full border-[3px] border-[#FF9F43] bg-white"
                       aria-hidden
                     >
-                      <span className={unlocked ? "text-[#8C8885]" : "text-[#B0AAA6]"}>
-                        {unlocked ? "🍊" : "🔒"}
-                      </span>
+                      {unlocked && unlockIcon ? (
+                        <IllustrationIcon src={unlockIcon} className="size-8" />
+                      ) : (
+                        <span className={unlocked ? "text-[20px] leading-4 text-[#8C8885]" : "text-[20px] leading-4 text-[#B0AAA6]"}>
+                          {unlocked ? "🍊" : "🔒"}
+                        </span>
+                      )}
                     </span>
                     <span
                       className="absolute z-10 box-border flex w-max max-w-[168px] flex-col items-start gap-0.5 overflow-visible rounded-[14px] border border-[#EAE4D8] bg-white px-3 py-2.5 text-left shadow-[0px_2px_12px_rgba(0,0,0,0.06)]"

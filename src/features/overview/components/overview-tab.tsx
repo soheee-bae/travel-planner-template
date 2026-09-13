@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import {
   useAccommodations,
   useDeleteAccommodation,
@@ -14,6 +15,7 @@ import { AddTransportDialog } from "@/features/overview/components/add-transport
 import { JejuHomeHero } from "@/features/overview/components/jeju-home-hero";
 import { TimeCapsuleDialog } from "@/features/overview/components/time-capsule-dialog";
 import { IllustrationIcon } from "@/components/ui/illustration-icon";
+import { useAppShellElement } from "@/components/layout/AppShell";
 import { ILLUSTRATION } from "@/lib/illustrations";
 import { useConfirmDelete } from "@/components/ui/confirm-delete-dialog";
 import { SummaryStats } from "@/features/overview/components/summary-stats";
@@ -21,9 +23,10 @@ import { usePlaces } from "@/features/places/hooks";
 import { useExpenses } from "@/features/expenses/hooks";
 import { useTrip } from "@/features/trips/hooks";
 import { JEJU_TRIP_ID } from "@/lib/jeju-trip";
+import { cn } from "@/lib/utils";
 import type { Accommodation, Transport } from "@/mocks/fixtures/overview";
 
-export function OverviewTab({ tripId }: { tripId: string }) {
+export function OverviewTab({ tripId, active = true }: { tripId: string; active?: boolean }) {
   const { data: trip } = useTrip(tripId);
   const { data: accommodations, isLoading: loadingAcc } = useAccommodations(tripId);
   const { data: transports, isLoading: loadingTr } = useTransports(tripId);
@@ -35,20 +38,29 @@ export function OverviewTab({ tripId }: { tripId: string }) {
   const [editingAcc, setEditingAcc] = useState<Accommodation | null>(null);
   const [editingTr, setEditingTr] = useState<Transport | null>(null);
   const [capsuleOpen, setCapsuleOpen] = useState(false);
+  const shell = useAppShellElement();
 
   if (trip && tripId === JEJU_TRIP_ID) {
     const flights = (transports ?? []).filter((item) => item.type === "비행기");
+    const fab = (
+      <button
+        type="button"
+        aria-label="타임캡슐 열기"
+        onClick={() => setCapsuleOpen(true)}
+        className={cn(
+          "pointer-events-auto absolute right-5 z-20 flex size-[60px] items-center justify-center rounded-full",
+          "bottom-[calc(var(--trip-nav-height,56px)+16px)]",
+          ILLUSTRATION.giftFab.bg,
+          ILLUSTRATION.giftFab.shadow,
+        )}
+      >
+        <IllustrationIcon src={ILLUSTRATION.gift} className="size-9" />
+      </button>
+    );
     return (
       <div className="relative mx-auto flex w-full flex-col bg-white">
         <JejuHomeHero trip={trip} flights={flights} stays={accommodations ?? []} />
-        <button
-          type="button"
-          aria-label="타임캡슐 열기"
-          onClick={() => setCapsuleOpen(true)}
-          className={`fixed right-5 bottom-[86px] z-20 flex size-[60px] items-center justify-center rounded-full ${ILLUSTRATION.giftFab.bg} ${ILLUSTRATION.giftFab.shadow}`}
-        >
-          <IllustrationIcon src={ILLUSTRATION.gift} className="size-9" />
-        </button>
+        {active && shell ? createPortal(fab, shell) : null}
         <TimeCapsuleDialog tripId={tripId} open={capsuleOpen} onOpenChange={setCapsuleOpen} />
       </div>
     );

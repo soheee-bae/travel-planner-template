@@ -120,16 +120,16 @@ export function PlannerTab({ trip }: { trip: Trip }) {
             aria-modal="true"
             aria-label="큰 지도"
           >
-            <div className="flex items-center justify-between px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
+            <button
+              type="button"
+              className="flex items-center justify-between px-4 pt-[max(20px,env(safe-area-inset-top))] pb-2"
+              onClick={() => setMapExpanded(false)}
+            >
               <p className="text-[15px] font-bold text-[#1A1A1A]">Day {activeDay} 동선</p>
-              <button
-                type="button"
-                className="text-[13px] font-semibold text-[#8C8885]"
-                onClick={() => setMapExpanded(false)}
-              >
+              <span className="rounded-full bg-[#F5F5F5] px-3 py-1.5 text-[13px] font-semibold text-[#4A4543]">
                 접기
-              </button>
-            </div>
+              </span>
+            </button>
             <div className="px-4 pb-2">
               <PlannerDayTabs
                 startDate={trip.startDate}

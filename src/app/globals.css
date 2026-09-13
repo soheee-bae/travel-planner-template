@@ -181,6 +181,8 @@
 
   html {
     @apply font-sans overflow-x-clip overflow-y-hidden bg-shell-outer;
+    height: var(--vv-height, 100dvh);
+    max-height: var(--vv-height, 100dvh);
     /* iOS 텍스트 자동 확대 방지. 뷰포트 meta의 maximumScale과 함께 더블탭 줌도 막는다. */
     -webkit-text-size-adjust: 100%;
     overscroll-behavior-x: none;
@@ -188,7 +190,9 @@
   }
 
   body {
-    @apply min-h-dvh overflow-x-clip overflow-y-hidden bg-shell-outer text-foreground;
+    @apply overflow-x-clip overflow-y-hidden bg-shell-outer text-foreground;
+    height: var(--vv-height, 100dvh);
+    max-height: var(--vv-height, 100dvh);
     /* 모바일 웹 필수 리셋 (docs/04-design-system.md §4.7) */
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;

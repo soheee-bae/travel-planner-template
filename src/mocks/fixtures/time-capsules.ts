@@ -99,9 +99,16 @@ export const initialTimeCapsules: TimeCapsule[] = COPY.map((item, index) => ({
   playsConfetti: item.playsConfetti,
 }));
 
-export function isCapsuleUnlocked(unlockAt: string, nowMs = Date.now()): boolean {
+/** 아이콘 확인용. 여행 전에 false로 되돌린다. */
+export const PREVIEW_UNLOCK_ALL_CAPSULES = true;
+
+export function isUnlockTimeReached(unlockAt: string, nowMs = Date.now()): boolean {
   const at = new Date(unlockAt).getTime();
   return Number.isFinite(at) && nowMs >= at;
+}
+
+export function isCapsuleUnlocked(unlockAt: string, nowMs = Date.now()): boolean {
+  return PREVIEW_UNLOCK_ALL_CAPSULES || isUnlockTimeReached(unlockAt, nowMs);
 }
 
 export function capsulePopupView(item: TimeCapsule): { title: string; text: string; cta: string } {

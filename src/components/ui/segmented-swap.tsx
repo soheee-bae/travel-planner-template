@@ -12,14 +12,16 @@ export function SegmentedSwap({
   children,
   className,
   contentClassName,
+  durationKey = "slide",
 }: {
   activeKey: string;
   direction: number;
   children: ReactNode;
   className?: string;
   contentClassName?: string;
+  durationKey?: "micro" | "slide";
 }) {
-  const slide = useMotionSafeDuration("slide");
+  const slide = useMotionSafeDuration(durationKey);
   const reduce = useReducedMotion();
   const shift = reduce ? 0 : offset.segment;
 

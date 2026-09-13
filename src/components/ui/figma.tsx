@@ -1,6 +1,7 @@
 "use client";
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { DialogClose } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 export const figmaShadowCard = "shadow-[0px_2px_12px_rgba(0,0,0,0.06)]";
@@ -184,18 +185,22 @@ export function FigmaFieldLabel({
 
 export function FigmaSheetHandle({ wide = false }: { wide?: boolean }) {
   return (
-    <div
-      className={cn(
-        "flex w-full items-start justify-center",
-        wide ? "h-[22px] pt-3.5 pb-1" : "h-6 pt-3 pb-2",
-      )}
-    >
-      <span
+    <DialogClose asChild>
+      <button
+        type="button"
+        aria-label="닫기"
         className={cn(
-          wide ? "h-1 w-10 rounded-[2px] bg-[#EAE4D8]" : "h-1 w-9 rounded-[99px] bg-[#E0E0E0]",
+          "flex w-full items-start justify-center",
+          wide ? "h-[22px] pt-3.5 pb-1" : "h-6 pt-3 pb-2",
         )}
-      />
-    </div>
+      >
+        <span
+          className={cn(
+            wide ? "h-1 w-10 rounded-[2px] bg-[#EAE4D8]" : "h-1 w-9 rounded-[99px] bg-[#E0E0E0]",
+          )}
+        />
+      </button>
+    </DialogClose>
   );
 }
 

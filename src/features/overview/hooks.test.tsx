@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import type { ReactNode } from "react";
 import { server } from "@/mocks/server";
-import { isCapsuleUnlocked } from "@/mocks/fixtures/time-capsules";
+import { isUnlockTimeReached } from "@/mocks/fixtures/time-capsules";
 import {
   useAccommodations,
   useCreateAccommodation,
@@ -93,8 +93,8 @@ describe("transports", () => {
 describe("time capsules", () => {
   it("unlockAt 시각을 기준으로 잠금 여부를 가른다", () => {
     const at = "2026-10-14T15:00:00+09:00";
-    expect(isCapsuleUnlocked(at, Date.parse("2026-10-14T14:59:59+09:00"))).toBe(false);
-    expect(isCapsuleUnlocked(at, Date.parse("2026-10-14T15:00:00+09:00"))).toBe(true);
+    expect(isUnlockTimeReached(at, Date.parse("2026-10-14T14:59:59+09:00"))).toBe(false);
+    expect(isUnlockTimeReached(at, Date.parse("2026-10-14T15:00:00+09:00"))).toBe(true);
   });
 
   it("제주 타임캡슐 5개를 조회하고 3번은 폭죽 플래그가 있다", async () => {

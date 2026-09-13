@@ -35,7 +35,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 pointer-events-auto bg-black/10 duration-200 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "absolute inset-0 isolate z-50 pointer-events-auto bg-black/10 duration-200 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className,
       )}
       {...props}
@@ -72,12 +72,12 @@ function DialogContent({
         className={cn(
           "z-50 flex flex-col items-start bg-white text-sm text-[#1A1A1A] outline-none pointer-events-auto",
           variant === "center"
-            ? "fixed top-1/2 right-5 left-5 w-auto -translate-y-1/2 overflow-visible rounded-[20px] px-5 pt-6 pb-5 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]"
+            ? "absolute top-1/2 right-5 left-5 w-auto -translate-y-1/2 overflow-visible rounded-[20px] px-5 pt-6 pb-5 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]"
             : cn(
-                "fixed inset-x-0 bottom-0 overflow-x-hidden overflow-y-auto",
-                "rounded-t-[24px] rounded-b-none px-5 pt-0 pb-10",
+                "absolute inset-x-0 bottom-0 overflow-x-hidden overflow-y-auto",
+                "rounded-t-[24px] rounded-b-none px-5 pt-0 pb-[max(24px,env(safe-area-inset-bottom,0px))]",
                 "shadow-[0px_-8px_40px_rgba(0,0,0,0.12)]",
-                "max-h-[min(1048.05px,var(--vv-height,100dvh))] overscroll-contain",
+                "max-h-[calc(100%-48px)] overscroll-contain",
                 "data-open:sheet-enter data-closed:sheet-leave",
               ),
           className,
