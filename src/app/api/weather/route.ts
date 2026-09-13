@@ -1,19 +1,7 @@
 import { NextResponse } from "next/server";
+import { describeWeather } from "@/lib/weather";
 
 const JEJU = { lat: 33.4996, lng: 126.5312 };
-
-type WeatherCode = number;
-
-function describeWeather(code: WeatherCode): { label: string; emoji: string } {
-  if (code === 0) return { label: "맑음", emoji: "☀️" };
-  if (code <= 3) return { label: "구름 조금", emoji: "⛅" };
-  if (code <= 48) return { label: "흐림", emoji: "☁️" };
-  if (code <= 67) return { label: "비", emoji: "🌧️" };
-  if (code <= 77) return { label: "눈", emoji: "🌨️" };
-  if (code <= 82) return { label: "소나기", emoji: "🌦️" };
-  if (code >= 95) return { label: "뇌우", emoji: "⛈️" };
-  return { label: "구름 조금", emoji: "⛅" };
-}
 
 export async function GET() {
   const url = new URL("https://api.open-meteo.com/v1/forecast");
@@ -45,5 +33,6 @@ export async function GET() {
     low: Math.round(data.daily?.temperature_2m_min?.[0] ?? 16),
     label: desc.label,
     emoji: desc.emoji,
+    icon: desc.icon,
   });
 }

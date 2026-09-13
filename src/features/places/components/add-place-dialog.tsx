@@ -21,6 +21,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useCreatePlace, useUpdatePlace } from "@/features/places/hooks";
+import { IllustrationIcon } from "@/components/ui/illustration-icon";
+import { PLACE_CATEGORY_ICON } from "@/lib/illustrations";
 import {
   PLACE_CATEGORIES,
   type CreatePlaceInput,
@@ -45,16 +47,6 @@ const formSchema = z.object({
   memo: z.string().optional(),
 });
 type FormValues = z.infer<typeof formSchema>;
-
-const PLACE_CATEGORY_EMOJI: Record<PlaceCategory, string> = {
-  관광: "🏝️",
-  맛집: "🍜",
-  카페: "☕",
-  숙소: "🏨",
-  교통: "🚗",
-  쇼핑: "🛍️",
-  기타: "📌",
-};
 
 async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
   const res = await fetch(`/api/geocode?q=${encodeURIComponent(address)}`);
@@ -300,10 +292,12 @@ export function AddPlaceDialog({
                 <FigmaChip
                   key={value}
                   size="sm"
+                  className="h-8 gap-1.5 px-3"
                   active={category === value}
                   onClick={() => form.setValue("category", value, { shouldDirty: true })}
                 >
-                  {PLACE_CATEGORY_EMOJI[value]} {value}
+                  <IllustrationIcon src={PLACE_CATEGORY_ICON[value]} className="size-5" />
+                  {value}
                 </FigmaChip>
               ))}
             </div>

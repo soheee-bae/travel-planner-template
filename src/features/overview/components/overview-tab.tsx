@@ -13,7 +13,8 @@ import { AddAccommodationDialog } from "@/features/overview/components/add-accom
 import { AddTransportDialog } from "@/features/overview/components/add-transport-dialog";
 import { JejuHomeHero } from "@/features/overview/components/jeju-home-hero";
 import { TimeCapsuleDialog } from "@/features/overview/components/time-capsule-dialog";
-import { figmaShadowCta } from "@/components/ui/figma";
+import { IllustrationIcon } from "@/components/ui/illustration-icon";
+import { ILLUSTRATION } from "@/lib/illustrations";
 import { useConfirmDelete } from "@/components/ui/confirm-delete-dialog";
 import { SummaryStats } from "@/features/overview/components/summary-stats";
 import { usePlaces } from "@/features/places/hooks";
@@ -44,9 +45,9 @@ export function OverviewTab({ tripId }: { tripId: string }) {
           type="button"
           aria-label="타임캡슐 열기"
           onClick={() => setCapsuleOpen(true)}
-          className={`fixed right-5 bottom-[86px] z-20 flex size-[60px] items-center justify-center rounded-full bg-[#FF9F43] text-2xl text-white ${figmaShadowCta}`}
+          className={`fixed right-5 bottom-[86px] z-20 flex size-[60px] items-center justify-center rounded-full ${ILLUSTRATION.giftFab.bg} ${ILLUSTRATION.giftFab.shadow}`}
         >
-          🎁
+          <IllustrationIcon src={ILLUSTRATION.gift} className="size-9" />
         </button>
         <TimeCapsuleDialog tripId={tripId} open={capsuleOpen} onOpenChange={setCapsuleOpen} />
       </div>

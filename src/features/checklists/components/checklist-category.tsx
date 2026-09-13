@@ -16,7 +16,9 @@ import {
   useUpdateChecklistItem,
 } from "@/features/checklists/hooks";
 import type { ChecklistCategory, ChecklistItem } from "@/mocks/fixtures/checklists";
-import { parseChecklistNotes } from "@/mocks/fixtures/checklists";
+import { canonicalPrepCategory, parseChecklistNotes } from "@/mocks/fixtures/checklists";
+import { IllustrationIcon } from "@/components/ui/illustration-icon";
+import { PREP_CATEGORY_ICON } from "@/lib/illustrations";
 
 export function ChecklistCategorySection({
   tripId,
@@ -85,8 +87,12 @@ export function ChecklistCategorySection({
             </Button>
           </form>
         ) : showHeading ? (
-          <h2 className="flex h-5 items-center text-[13px] leading-5 font-bold tracking-[0.26px] text-[#AAAAAA]">
-            {manageable ? `${category.icon} ${category.name}` : category.name}
+          <h2 className="flex h-5 items-center gap-1.5 text-[13px] leading-5 font-bold tracking-[0.26px] text-[#AAAAAA]">
+            <IllustrationIcon
+              src={PREP_CATEGORY_ICON[canonicalPrepCategory(category.name)]}
+              className="size-4"
+            />
+            {category.name}
           </h2>
         ) : (
           <span />

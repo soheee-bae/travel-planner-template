@@ -1,7 +1,8 @@
 import { IconAction } from "@/components/ui/icon-action";
 import { cn } from "@/lib/utils";
+import { IllustrationIcon } from "@/components/ui/illustration-icon";
+import { EXPENSE_CATEGORY_ICON, EXPENSE_CATEGORY_TONE } from "@/lib/illustrations";
 import {
-  EXPENSE_CATEGORY_EMOJI,
   paidByTagLabel,
   shouldBlurExpense,
   type Expense,
@@ -41,9 +42,14 @@ export function ExpenseCard({
   const blurred = shouldBlurExpense(expense);
   return (
     <div className="flex w-full flex-col items-start rounded-[20px] bg-white px-4 py-3.5 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
-      <div className="flex h-[50px] w-full items-center gap-3">
-        <div className="flex size-[46px] shrink-0 items-center justify-center rounded-2xl bg-[#FFF8EE] text-xl">
-          {EXPENSE_CATEGORY_EMOJI[expense.category]}
+      <div className="flex min-h-[58px] w-full items-center gap-3">
+        <div
+          className={cn(
+            "flex size-[46px] shrink-0 items-center justify-center overflow-hidden rounded-2xl p-1.5",
+            EXPENSE_CATEGORY_TONE[expense.category].iconBg,
+          )}
+        >
+          <IllustrationIcon src={EXPENSE_CATEGORY_ICON[expense.category]} className="size-full" />
         </div>
         <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
           <p
@@ -55,7 +61,12 @@ export function ExpenseCard({
             {expense.title}
           </p>
           <div className="flex h-[23px] w-full items-start gap-1 pt-1">
-            <span className="flex h-[19px] items-center rounded-[99px] bg-[#E3F4FA] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555]">
+            <span
+              className={cn(
+                "flex h-[19px] items-center rounded-[99px] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555]",
+                EXPENSE_CATEGORY_TONE[expense.category].chip,
+              )}
+            >
               {expense.category}
             </span>
             {expense.paidBy ? (

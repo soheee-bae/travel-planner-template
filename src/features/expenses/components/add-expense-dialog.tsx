@@ -21,11 +21,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useCreateExpense, useUpdateExpense } from "@/features/expenses/hooks";
+import { IllustrationIcon } from "@/components/ui/illustration-icon";
+import { EXPENSE_CATEGORY_ICON } from "@/lib/illustrations";
 import { MoneyInput } from "@/components/ui/money-input";
 import {
   createExpenseInputSchema,
   EXPENSE_CATEGORIES,
-  EXPENSE_CATEGORY_EMOJI,
   isGiftPayer,
   type CreateExpenseInput,
   type Expense,
@@ -321,10 +322,12 @@ export function AddExpenseDialog({
                 <FigmaChip
                   key={value}
                   size="sm"
+                  className="h-8 gap-1.5 px-3"
                   active={form.watch("category") === value}
                   onClick={() => form.setValue("category", value)}
                 >
-                  {EXPENSE_CATEGORY_EMOJI[value]} {value}
+                  <IllustrationIcon src={EXPENSE_CATEGORY_ICON[value]} className="size-5" />
+                  {value}
                 </FigmaChip>
               ))}
             </div>

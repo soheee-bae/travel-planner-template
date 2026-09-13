@@ -22,7 +22,7 @@ export const initialWishlistItems: WishlistItem[] = [
   {
     id: "wish_nagoya_1",
     tripId: "trip_nagoya",
-    icon: "🍜",
+    icon: "/illustrations/cat-food.png",
     title: "현지인 추천 맛집들",
     content: "- 인스타에서 본 그 라멘집\n- 호텔 근처 이자카야",
     orderIndex: 0,
@@ -30,7 +30,7 @@ export const initialWishlistItems: WishlistItem[] = [
   {
     id: "wish_nagoya_2",
     tripId: "trip_nagoya",
-    icon: "📸",
+    icon: "/illustrations/cat-sight.png",
     title: "포토스팟",
     content: "- 일몰 시간 확인하기\n- 나고야성 야경",
     orderIndex: 1,
@@ -38,7 +38,7 @@ export const initialWishlistItems: WishlistItem[] = [
   {
     id: "wish_nagoya_3",
     tripId: "trip_nagoya",
-    icon: "🛒",
+    icon: "/illustrations/cat-shop.png",
     title: "쇼핑 메모",
     content: "- 돈키호테 쿠폰 다운받기",
     orderIndex: 2,

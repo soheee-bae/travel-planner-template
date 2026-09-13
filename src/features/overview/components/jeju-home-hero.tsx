@@ -5,6 +5,8 @@ import { LayoutGroup, motion } from "motion/react";
 import { airportCodeFromName, cityLabelFromName } from "@/lib/airport";
 import { formatDday, formatDdayCaption, formatDuration, todayIsoSeoul } from "@/lib/date";
 import { useJejuWeather } from "@/features/overview/hooks/use-jeju-weather";
+import { IllustrationIcon } from "@/components/ui/illustration-icon";
+import { ILLUSTRATION } from "@/lib/illustrations";
 import { TicketPerforation } from "@/components/ui/figma";
 import { SegmentedSwap } from "@/components/ui/segmented-swap";
 import { useReducedMotion } from "@/hooks/use-motion-safe";
@@ -178,13 +180,16 @@ export function JejuHomeHero({
           </article>
         ) : null}
 
-        <article className="relative flex h-[85px] w-full items-center rounded-[20px] bg-white px-[18px] py-3.5 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
-          <div className="flex h-[57px] w-full min-w-0 items-center gap-3.5">
+        <article className="relative flex min-h-[96px] w-full items-center rounded-[20px] bg-white px-[18px] py-3.5 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
+          <div className="flex w-full min-w-0 items-center gap-3.5">
             <span
-              className="flex h-[57px] w-[38px] shrink-0 items-center font-nunito text-[38px] leading-[57px] font-normal text-black"
+              className="flex size-[58px] shrink-0 items-center justify-center"
               aria-hidden
             >
-              {weather?.emoji ?? "⛅"}
+              <IllustrationIcon
+                src={weather?.icon ?? ILLUSTRATION.weather["구름 조금"]}
+                className="size-[58px]"
+              />
             </span>
             <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
               <p className="flex h-[17px] w-full items-center font-nunito text-[11px] leading-4 font-normal text-[#8E8E8E]">

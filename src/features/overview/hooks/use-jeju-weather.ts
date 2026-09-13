@@ -11,6 +11,7 @@ export type JejuWeather = {
   low: number;
   label: string;
   emoji: string;
+  icon: string;
 };
 
 export function useJejuWeather() {

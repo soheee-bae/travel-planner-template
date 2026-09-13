@@ -7,8 +7,7 @@ test("준비 탭에 카테고리 태그와 프로그레스 바가 보인다", as
   await expect(filters.getByRole("tab", { name: "전체" })).toBeVisible();
   await expect(filters.getByRole("tab", { name: "맛집/카페" })).toBeVisible();
   await expect(filters.getByRole("tab", { name: "관광" })).toBeVisible();
-  await expect(filters.getByRole("tab", { name: "쇼핑" })).toBeVisible();
-  await expect(filters.getByRole("tab", { name: "선물/기념품" })).toBeVisible();
+  await expect(filters.getByRole("tab", { name: "쇼핑/선물" })).toBeVisible();
   await expect(filters.getByRole("tab", { name: "기타" })).toBeVisible();
   await expect(page.getByRole("progressbar")).toBeVisible();
 });

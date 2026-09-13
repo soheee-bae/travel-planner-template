@@ -1,25 +1,8 @@
 import { IconAction } from "@/components/ui/icon-action";
+import { IllustrationIcon } from "@/components/ui/illustration-icon";
+import { cn } from "@/lib/utils";
+import { PLACE_CATEGORY_ICON, PLACE_CATEGORY_TONE } from "@/lib/illustrations";
 import type { Place } from "@/mocks/fixtures/places";
-
-const CATEGORY_ICON: Record<Place["category"], string> = {
-  관광: "🏛️",
-  맛집: "🍽️",
-  카페: "☕",
-  쇼핑: "🛍️",
-  숙소: "🏨",
-  교통: "🚗",
-  기타: "📍",
-};
-
-const CATEGORY_CHIP: Record<Place["category"], string> = {
-  관광: "bg-[#E3F4FA]",
-  맛집: "bg-[#FFE8EF]",
-  카페: "bg-[#FFE0BC]",
-  쇼핑: "bg-[#F5F5F5]",
-  숙소: "bg-[#E6F5F7]",
-  교통: "bg-[#E9F0FE]",
-  기타: "bg-[#F5F5F5]",
-};
 
 export function PlaceCard({
   place,
@@ -50,7 +33,7 @@ export function PlaceCard({
         e.currentTarget.addEventListener("pointerleave", clear, { once: true });
       }}
     >
-      <div className="flex h-[67px] w-full items-center gap-3">
+      <div className="flex min-h-[67px] w-full items-center gap-3">
         {selectionMode && (
           <input
             type="checkbox"
@@ -61,8 +44,13 @@ export function PlaceCard({
             aria-label={`${place.name} 선택`}
           />
         )}
-        <div className="flex size-[46px] shrink-0 items-center justify-center rounded-2xl bg-[#FFF8EE] text-xl">
-          {CATEGORY_ICON[place.category]}
+        <div
+          className={cn(
+            "flex size-[46px] shrink-0 items-center justify-center overflow-hidden rounded-2xl p-1.5",
+            PLACE_CATEGORY_TONE[place.category].iconBg,
+          )}
+        >
+          <IllustrationIcon src={PLACE_CATEGORY_ICON[place.category]} className="size-full" />
         </div>
         <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
           <p className="block h-[23px] w-full truncate text-[15px] leading-[22px] font-bold text-[#1A1A1A]">
@@ -75,7 +63,10 @@ export function PlaceCard({
           ) : null}
           <div className="flex h-[23px] w-full items-start gap-1 pt-1">
             <span
-              className={`flex h-[19px] items-center rounded-[99px] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555] ${CATEGORY_CHIP[place.category]}`}
+              className={cn(
+                "flex h-[19px] items-center rounded-[99px] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555]",
+                PLACE_CATEGORY_TONE[place.category].chip,
+              )}
             >
               {place.category}
             </span>

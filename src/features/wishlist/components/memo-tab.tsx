@@ -1,6 +1,8 @@
 "use client";
 
 import { IconAction } from "@/components/ui/icon-action";
+import { Glyph } from "@/components/ui/illustration-icon";
+import { memoIconBg, resolveMemoIcon } from "@/lib/illustrations";
 import { ExpandableCardBody } from "@/components/ui/expandable-card-body";
 import { cn } from "@/lib/utils";
 import {
@@ -35,7 +37,17 @@ function WishlistCard({
                   expanded ? "whitespace-pre-wrap" : "line-clamp-2",
                 )}
               >
-                {item.icon} {item.title}
+                <span className="inline-flex items-center gap-1.5">
+                  <span
+                    className={cn(
+                      "flex size-7 shrink-0 items-center justify-center rounded-lg p-0.5",
+                      memoIconBg(resolveMemoIcon(item.icon)),
+                    )}
+                  >
+                    <Glyph value={item.icon} className="size-5" />
+                  </span>
+                  {item.title}
+                </span>
               </p>
               {item.content ? (
                 <p

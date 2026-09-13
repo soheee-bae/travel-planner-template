@@ -19,10 +19,13 @@ import {
   figmaInputClass,
   figmaTextareaClass,
 } from "@/components/ui/figma";
+import { Glyph } from "@/components/ui/illustration-icon";
+import { ILLUSTRATION, MEMO_ICONS, memoIconBg, resolveMemoIcon } from "@/lib/illustrations";
+import { cn } from "@/lib/utils";
 import { createWishlistItemInputSchema, type WishlistItem } from "@/mocks/fixtures/wishlist";
 import { z } from "zod";
 
-const ICONS = ["📝", "🍜", "📸", "🛒", "🎁", "🏨", "💡", "❤️"] as const;
+const DEFAULT_MEMO_ICON = ILLUSTRATION.memo;
 
 const formSchema = createWishlistItemInputSchema.omit({ tripId: true, orderIndex: true }).extend({
   title: z
@@ -49,7 +52,7 @@ export function WishlistItemDialog({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      icon: initial?.icon ?? "📝",
+      icon: resolveMemoIcon(initial?.icon ?? DEFAULT_MEMO_ICON),
       title: initial?.title ?? "",
       content: initial?.content ?? "",
     },
@@ -65,7 +68,7 @@ export function WishlistItemDialog({
       return;
     }
     form.reset({
-      icon: initial?.icon ?? "📝",
+      icon: resolveMemoIcon(initial?.icon ?? DEFAULT_MEMO_ICON),
       title: initial?.title ?? "",
       content: initial?.content ?? "",
     });
@@ -79,7 +82,7 @@ export function WishlistItemDialog({
     try {
       await onSubmit(values);
       setOpen(false);
-      if (!initial) form.reset({ icon: "📝", title: "", content: "" });
+      if (!initial) form.reset({ icon: DEFAULT_MEMO_ICON, title: "", content: "" });
     } catch {
       setSubmitError("저장이 안 됐어. 다시 한 번 해볼래?");
     } finally {
@@ -108,9 +111,12 @@ export function WishlistItemDialog({
                 aria-label="아이콘 고르기"
                 aria-expanded={iconPickerOpen}
                 onClick={() => setIconPickerOpen((prev) => !prev)}
-                className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-white text-xl shadow-[0px_2px_12px_rgba(0,0,0,0.06)]"
+                className={cn(
+                  "flex size-12 shrink-0 items-center justify-center rounded-[14px] shadow-[0px_2px_12px_rgba(0,0,0,0.06)]",
+                  memoIconBg(resolveMemoIcon(selectedIcon)),
+                )}
               >
-                {selectedIcon}
+                <Glyph value={selectedIcon} className="size-7" />
               </button>
               <Input
                 id="wish-title"
@@ -123,21 +129,23 @@ export function WishlistItemDialog({
             </div>
             {iconPickerOpen ? (
               <div className="flex w-full flex-wrap gap-2" role="listbox" aria-label="아이콘">
-                {ICONS.map((icon) => (
+                {MEMO_ICONS.map((icon) => (
                   <button
                     key={icon}
                     type="button"
                     role="option"
-                    aria-selected={selectedIcon === icon}
+                    aria-selected={resolveMemoIcon(selectedIcon) === icon}
                     onClick={() => {
                       form.setValue("icon", icon, { shouldDirty: true });
                       setIconPickerOpen(false);
                     }}
-                    className={`flex size-11 items-center justify-center rounded-[14px] bg-white text-xl shadow-[0px_2px_12px_rgba(0,0,0,0.06)] ${
-                      selectedIcon === icon ? "ring-2 ring-[#FF9F43]" : ""
-                    }`}
+                    className={cn(
+                      "flex size-12 items-center justify-center rounded-[14px] shadow-[0px_2px_12px_rgba(0,0,0,0.06)]",
+                      memoIconBg(icon),
+                      resolveMemoIcon(selectedIcon) === icon ? "ring-2 ring-[#FF9F43]" : "",
+                    )}
                   >
-                    {icon}
+                    <Glyph value={icon} className="size-7" />
                   </button>
                 ))}
               </div>

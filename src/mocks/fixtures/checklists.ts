@@ -1,3 +1,4 @@
+import { PREP_CATEGORY_ICON } from "@/lib/illustrations";
 import { z } from "zod";
 
 export const checklistCategorySchema = z.object({
@@ -33,14 +34,17 @@ export const updateChecklistItemInputSchema = checklistItemSchema
 export type UpdateChecklistItemInput = z.infer<typeof updateChecklistItemInputSchema>;
 
 export const PREP_CATEGORIES = [
-  { name: "맛집/카페", icon: "☕", aliases: ["맛집/카페", "맛집", "카페", "음식"] },
-  { name: "관광", icon: "🌊", aliases: ["관광"] },
-  { name: "선물/기념품", icon: "🍊", aliases: ["선물/기념품", "선물리스트", "선물"] },
-  { name: "쇼핑", icon: "🛍️", aliases: ["쇼핑", "쇼핑리스트"] },
-  { name: "기타", icon: "🎸", aliases: ["기타"] },
+  { name: "맛집/카페", icon: PREP_CATEGORY_ICON["맛집/카페"], aliases: ["맛집/카페", "맛집", "카페", "음식"] },
+  { name: "관광", icon: PREP_CATEGORY_ICON.관광, aliases: ["관광"] },
+  {
+    name: "쇼핑/선물",
+    icon: PREP_CATEGORY_ICON["쇼핑/선물"],
+    aliases: ["쇼핑/선물", "선물/기념품", "선물리스트", "선물", "쇼핑", "쇼핑리스트"],
+  },
+  { name: "기타", icon: PREP_CATEGORY_ICON.기타, aliases: ["기타"] },
 ] as const;
 export type PrepCategoryName = (typeof PREP_CATEGORIES)[number]["name"];
-export const PREP_PAGE_FILTERS = ["전체", "맛집/카페", "관광", "선물/기념품", "쇼핑", "기타"] as const;
+export const PREP_PAGE_FILTERS = ["전체", "맛집/카페", "관광", "쇼핑/선물", "기타"] as const;
 export type PrepPageFilter = (typeof PREP_PAGE_FILTERS)[number];
 
 const PREP_ASSIGNEES = ["공통", "소희", "준형"] as const;

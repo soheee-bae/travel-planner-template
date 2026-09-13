@@ -27,28 +27,10 @@ import { legCacheKey } from "@/lib/travel-leg";
 import { formatTravelDuration } from "@/lib/duration-text";
 import { useReorderDayPlaces } from "@/features/places/hooks";
 import { useTravelLegs } from "@/features/planner/hooks";
-import { PLACE_CATEGORY_EMOJI, type Place } from "@/mocks/fixtures/places";
+import { IllustrationIcon } from "@/components/ui/illustration-icon";
+import { PLACE_CATEGORY_ICON, PLACE_CATEGORY_TONE } from "@/lib/illustrations";
+import type { Place } from "@/mocks/fixtures/places";
 import type { TravelLeg } from "@/lib/travel-leg";
-
-const CATEGORY_ICON_BG: Record<Place["category"], string> = {
-  관광: "bg-[#E3F4FA]",
-  맛집: "bg-[#FFE8EF]",
-  카페: "bg-[#FFE0BC]",
-  쇼핑: "bg-[#F3E9FE]",
-  숙소: "bg-[#E6F5F7]",
-  교통: "bg-[#E9F0FE]",
-  기타: "bg-[#F0F0F0]",
-};
-
-const CATEGORY_CHIP_BG: Record<Place["category"], string> = {
-  관광: "bg-[#E3F4FA]",
-  맛집: "bg-[#FFE8EF]",
-  카페: "bg-[#FFE0BC]",
-  쇼핑: "bg-[#F3E9FE]",
-  숙소: "bg-[#E6F5F7]",
-  교통: "bg-[#E9F0FE]",
-  기타: "bg-[#F0F0F0]",
-};
 
 function samePlaceOrder(a: Place[], b: Place[]): boolean {
   return a.length === b.length && a.every((place, index) => place.id === b[index]?.id);
@@ -96,11 +78,11 @@ function PlaceCardBody({
       ) : null}
       <span
         className={cn(
-          "flex size-[34px] shrink-0 items-center justify-center rounded-xl text-base",
-          CATEGORY_ICON_BG[place.category],
+          "flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl p-1",
+          PLACE_CATEGORY_TONE[place.category].iconBg,
         )}
       >
-        {PLACE_CATEGORY_EMOJI[place.category]}
+        <IllustrationIcon src={PLACE_CATEGORY_ICON[place.category]} className="size-full" />
       </span>
       <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
         <p className="w-full min-w-0 truncate text-[14px] leading-[17px] font-bold text-[#1A1A1A]">
@@ -110,7 +92,7 @@ function PlaceCardBody({
           <span
             className={cn(
               "flex h-[19px] items-center rounded-[99px] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555]",
-              CATEGORY_CHIP_BG[place.category],
+              PLACE_CATEGORY_TONE[place.category].chip,
             )}
           >
             {place.category}

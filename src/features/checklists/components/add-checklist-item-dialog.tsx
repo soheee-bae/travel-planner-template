@@ -23,6 +23,8 @@ import {
   useCreateChecklistItem,
   useUpdateChecklistItem,
 } from "@/features/checklists/hooks";
+import { IllustrationIcon } from "@/components/ui/illustration-icon";
+import { PREP_CATEGORY_ICON } from "@/lib/illustrations";
 import {
   PREP_CATEGORIES,
   canonicalPrepCategory,
@@ -101,7 +103,7 @@ export function AddChecklistItemDialog({
       category = await createCategory.mutateAsync({
         tripId,
         name: categoryName,
-        icon: preset?.icon ?? "🎸",
+        icon: preset?.icon ?? PREP_CATEGORY_ICON.기타,
         orderIndex: categories.length,
       });
     }
@@ -198,10 +200,12 @@ export function AddChecklistItemDialog({
                 <FigmaChip
                   key={c.name}
                   size="sm"
+                  className="h-8 gap-1.5 px-3"
                   active={categoryName === c.name}
                   onClick={() => setCategoryName(c.name)}
                 >
-                  {c.icon} {c.name}
+                  <IllustrationIcon src={PREP_CATEGORY_ICON[c.name]} className="size-4" />
+                  {c.name}
                 </FigmaChip>
               ))}
             </div>
