@@ -201,15 +201,13 @@ export function FigmaSheetHandle({ wide = false }: { wide?: boolean }) {
 
 export function TicketPerforation({
   punchColor = "#FFFFFF",
-  padded = true,
 }: {
   punchColor?: string;
-  padded?: boolean;
 }) {
   return (
-    <div className={cn("flex w-full items-center", padded ? "h-[23px] pt-[7px]" : "h-4")}>
+    <div className="flex h-px w-full items-center" aria-hidden>
       <span className="size-4 shrink-0 rounded-full" style={{ background: punchColor }} />
-      <span className="h-[1.5px] flex-1 border-t-[1.5px] border-dashed border-[#DDDDDD]" />
+      <span className="box-border h-[1.5px] flex-1 border-t-[1.5px] border-dashed border-[#DDDDDD]" />
       <span className="size-4 shrink-0 rounded-full" style={{ background: punchColor }} />
     </div>
   );
@@ -218,13 +216,13 @@ export function TicketPerforation({
 export function DragHandle({ label }: { label?: string }) {
   return (
     <div
-      className="flex h-[19px] w-[30px] flex-col items-start gap-[2.5px] px-1.5 py-1 opacity-40"
+      className="flex h-[14px] w-[18px] flex-col items-center justify-center gap-[2px] opacity-40"
       aria-hidden={label ? undefined : true}
       aria-label={label}
     >
-      <span className="h-0.5 w-[18px] rounded-[99px] bg-[#AAAAAA]" />
-      <span className="h-0.5 w-[18px] rounded-[99px] bg-[#AAAAAA]" />
-      <span className="h-0.5 w-[18px] rounded-[99px] bg-[#AAAAAA]" />
+      <span className="h-[1.5px] w-[12px] rounded-[99px] bg-[#AAAAAA]" />
+      <span className="h-[1.5px] w-[12px] rounded-[99px] bg-[#AAAAAA]" />
+      <span className="h-[1.5px] w-[12px] rounded-[99px] bg-[#AAAAAA]" />
     </div>
   );
 }

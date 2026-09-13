@@ -1,11 +1,9 @@
 "use client";
 
-import { PLACE_CATEGORY_EMOJI } from "@/mocks/fixtures/places";
 import { NaverPlaceLink } from "@/features/planner/components/naver-place-link";
 import type { Place } from "@/mocks/fixtures/places";
 
 export function MapPlacePopup({ place, onClose }: { place: Place; onClose: () => void }) {
-  const emoji = PLACE_CATEGORY_EMOJI[place.category];
   const lat = place.lat;
   const lng = place.lng;
 
@@ -17,7 +15,7 @@ export function MapPlacePopup({ place, onClose }: { place: Place; onClose: () =>
     >
       <div className="min-w-0 flex-1">
         <p className="truncate text-[14px] leading-[21px] font-bold text-[#1A1A1A]">
-          {place.name} {emoji}
+          {place.name}
         </p>
         {lat != null && lng != null ? (
           <NaverPlaceLink

@@ -38,6 +38,10 @@ import { z } from "zod";
 const PAYER_REQUIRED_MESSAGE = "고구마냐... 감자냐... 그것이 문제로다...";
 
 function createExpenseFormSchema(requirePayer: boolean) {
+  const paidBySchema = requirePayer
+    ? z.enum(["소희", "준형"], { error: PAYER_REQUIRED_MESSAGE })
+    : z.enum(["소희", "준형"]).optional();
+
   return createExpenseInputSchema
     .omit({
       tripId: true,
@@ -50,16 +54,7 @@ function createExpenseFormSchema(requirePayer: boolean) {
     .extend({
       title: z.string().trim().min(1, "어디다 긁었는지 까먹으면 안 돼!"),
       amount: z.number({ error: "행복 값 입력 필수!" }).positive("행복 값 입력 필수!"),
-      paidBy: z.enum(["소희", "준형"]).optional(),
-    })
-    .superRefine((value, ctx) => {
-      if (!requirePayer) return;
-      if (value.paidBy === "소희" || value.paidBy === "준형") return;
-      ctx.addIssue({
-        code: "custom",
-        path: ["paidBy"],
-        message: PAYER_REQUIRED_MESSAGE,
-      });
+      paidBy: paidBySchema,
     });
 }
 
@@ -124,6 +119,7 @@ export function AddExpenseDialog({
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    criteriaMode: "all",
     defaultValues: initial
       ? {
           title: initial.title,
@@ -150,7 +146,10 @@ export function AddExpenseDialog({
     const dayIndex = values.dayIndex ?? null;
     const paidBy =
       values.paidBy ?? (initial && isGiftPayer(initial.paidBy) ? initial.paidBy : undefined);
-    if (!paidBy) return;
+    if (!paidBy) {
+      form.setError("paidBy", { type: "required", message: PAYER_REQUIRED_MESSAGE });
+      return;
+    }
     if (initial) {
       updateExpense.mutate(
         {
@@ -187,7 +186,17 @@ export function AddExpenseDialog({
   }
 
   const dayIndex = form.watch("dayIndex");
-  const errors = form.formState.errors;
+  const paidBy = form.watch("paidBy");
+  const { errors, isSubmitted } = form.formState;
+  const showPayerError =
+    Boolean(errors.paidBy) || (requirePayer && isSubmitted && paidBy !== "소희" && paidBy !== "준형");
+
+  function setMissingPayerError() {
+    if (!requirePayer) return;
+    const current = form.getValues("paidBy");
+    if (current === "소희" || current === "준형") return;
+    form.setError("paidBy", { type: "required", message: PAYER_REQUIRED_MESSAGE });
+  }
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
@@ -211,7 +220,12 @@ export function AddExpenseDialog({
             {initial ? "비용 수정" : "오늘의 행복 값"}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit, () => {
+            setMissingPayerError();
+          })}
+          className="flex w-full flex-col gap-4"
+        >
           <div className="flex flex-col gap-1.5">
             <FigmaFieldLabel htmlFor="exp-title">항목 이름</FigmaFieldLabel>
             <Input
@@ -223,7 +237,7 @@ export function AddExpenseDialog({
               {...form.register("title")}
             />
             {errors.title ? (
-              <p className="text-[12px] leading-[18px] text-destructive">{errors.title.message}</p>
+              <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">{errors.title.message}</p>
             ) : null}
           </div>
           <div className="flex flex-col gap-1.5">
@@ -241,7 +255,7 @@ export function AddExpenseDialog({
               )}
             />
             {errors.amount ? (
-              <p className="text-[12px] leading-[18px] text-destructive">{errors.amount.message}</p>
+              <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">{errors.amount.message}</p>
             ) : null}
           </div>
           <div className="flex flex-col gap-2">
@@ -257,8 +271,8 @@ export function AddExpenseDialog({
                   role="group"
                   aria-labelledby="exp-payer-label"
                   aria-required={requirePayer ? "true" : undefined}
-                  aria-invalid={errors.paidBy ? true : undefined}
-                  aria-describedby={errors.paidBy ? "exp-payer-error" : undefined}
+                  aria-invalid={showPayerError ? true : undefined}
+                  aria-describedby={showPayerError ? "exp-payer-error" : undefined}
                 >
                   {PAYERS.map((p) => (
                     <button
@@ -279,9 +293,9 @@ export function AddExpenseDialog({
                 </div>
               )}
             />
-            {errors.paidBy ? (
-              <p id="exp-payer-error" role="alert" className="text-[12px] leading-[18px] text-destructive">
-                {errors.paidBy.message}
+            {showPayerError ? (
+              <p id="exp-payer-error" role="alert" className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">
+                {PAYER_REQUIRED_MESSAGE}
               </p>
             ) : null}
           </div>

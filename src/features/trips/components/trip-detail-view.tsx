@@ -38,7 +38,7 @@ export function TripDetailView({ tripId }: { tripId: string }) {
   }
   if (isError || !trip) {
     return (
-      <p className="p-6 pt-[env(safe-area-inset-top,0px)] text-sm text-destructive">
+      <p className="p-6 pt-[env(safe-area-inset-top,0px)] text-[12px] leading-[18px] font-semibold text-[#E85D4C]">
         여행을 다시 불러와 주세요.
       </p>
     );

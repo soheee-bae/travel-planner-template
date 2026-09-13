@@ -90,7 +90,9 @@ export function LoginForm({ nextPath }: { nextPath?: string }) {
         <p
           role="status"
           className={
-            status === "error" ? "text-sm text-destructive" : "text-sm text-muted-foreground"
+            status === "error"
+              ? "text-[12px] leading-[18px] font-semibold text-[#E85D4C]"
+              : "text-sm text-muted-foreground"
           }
         >
           {message}

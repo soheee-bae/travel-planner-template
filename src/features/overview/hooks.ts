@@ -10,6 +10,7 @@ import {
 import {
   accommodationsQueryOptions,
   overviewKeys,
+  timeCapsulesQueryOptions,
   transportsQueryOptions,
 } from "@/features/overview/queries";
 import { randomUUID } from "@/lib/id";
@@ -150,4 +151,8 @@ export function useDeleteTransport(tripId: string) {
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
   });
+}
+
+export function useTimeCapsules(tripId: string, enabled = true) {
+  return useQuery({ ...timeCapsulesQueryOptions(tripId), enabled: Boolean(tripId) && enabled });
 }

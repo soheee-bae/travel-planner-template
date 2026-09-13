@@ -45,7 +45,11 @@ export function TripsLanding() {
 
         {isLoading && <TripListSkeleton />}
 
-        {isError && <p className="text-sm text-destructive">여행 목록을 다시 불러와 주세요.</p>}
+        {isError && (
+          <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">
+            여행 목록을 다시 불러와 주세요.
+          </p>
+        )}
 
         {!isLoading && !isError && visible.length === 0 && (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-8 text-center">

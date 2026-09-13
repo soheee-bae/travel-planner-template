@@ -270,7 +270,7 @@ export function AddPlaceDialog({
               {...form.register("name")}
             />
             {form.formState.errors.name ? (
-              <p className="text-[12px] leading-[18px] text-destructive">
+              <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">
                 {form.formState.errors.name.message}
               </p>
             ) : null}
@@ -285,12 +285,12 @@ export function AddPlaceDialog({
               {...form.register("address")}
             />
             {form.formState.errors.address ? (
-              <p className="text-[12px] leading-[18px] text-destructive">
+              <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">
                 {form.formState.errors.address.message}
               </p>
             ) : null}
             {geoError ? (
-              <p className="text-[12px] leading-[18px] text-destructive">{geoError}</p>
+              <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">{geoError}</p>
             ) : null}
           </div>
           <div className="flex flex-col gap-2 pt-3.5">
@@ -340,7 +340,7 @@ export function AddPlaceDialog({
               {...form.register("durationText")}
             />
             {form.formState.errors.durationText ? (
-              <p className="text-[12px] leading-[18px] text-destructive">
+              <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">
                 {form.formState.errors.durationText.message}
               </p>
             ) : null}

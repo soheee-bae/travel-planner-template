@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200" fill="none">
+  <rect width="320" height="200" rx="24" fill="#D8EDF8"/>
+  <rect x="70" y="108" width="180" height="54" rx="12" fill="#4A4543"/>
+  <circle cx="160" cy="78" r="32" fill="#FFD36A" stroke="#4A4543" stroke-width="3"/>
+  <ellipse cx="150" cy="72" rx="4" ry="5" fill="#4A4543"/>
+  <ellipse cx="170" cy="72" rx="4" ry="5" fill="#4A4543"/>
+  <path d="M152 90c5 5 11 5 16 0" stroke="#4A4543" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="88" cy="78" r="10" fill="#FFF8EE"/>
+  <circle cx="232" cy="78" r="10" fill="#FFF8EE"/>
+  <text x="160" y="142" text-anchor="middle" fill="#FFF8EE" font-size="16" font-family="system-ui,sans-serif" font-weight="700">Àm</text>
+</svg>

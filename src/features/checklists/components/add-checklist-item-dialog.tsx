@@ -176,7 +176,7 @@ export function AddChecklistItemDialog({
               }}
             />
             {titleError ? (
-              <p className="text-[12px] leading-[18px] text-destructive">{titleError}</p>
+              <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">{titleError}</p>
             ) : null}
           </div>
           <div className="flex w-full flex-col gap-1.5">

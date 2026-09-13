@@ -4,6 +4,7 @@ import { placesHandlers } from "@/mocks/handlers/places";
 import { expensesHandlers } from "@/mocks/handlers/expenses";
 import { checklistsHandlers } from "@/mocks/handlers/checklists";
 import { wishlistHandlers } from "@/mocks/handlers/wishlist";
+import { timeCapsuleHandlers } from "@/mocks/handlers/time-capsules";
 
 export const handlers = [
   ...tripHandlers,
@@ -12,4 +13,5 @@ export const handlers = [
   ...expensesHandlers,
   ...checklistsHandlers,
   ...wishlistHandlers,
+  ...timeCapsuleHandlers,
 ];

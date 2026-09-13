@@ -77,7 +77,13 @@ export function MemoTab({ tripId, embedded }: { tripId: string; embedded?: boole
   const items = (data ?? []).slice().sort((a, b) => a.orderIndex - b.orderIndex);
 
   if (isLoading) return <p className="p-6 text-sm text-muted-foreground">불러오는 중…</p>;
-  if (isError) return <p className="p-6 text-sm text-destructive">메모를 다시 불러와 주세요.</p>;
+  if (isError) {
+    return (
+      <p className="p-6 text-[12px] leading-[18px] font-semibold text-[#E85D4C]">
+        메모를 다시 불러와 주세요.
+      </p>
+    );
+  }
 
   const body = (
     <>

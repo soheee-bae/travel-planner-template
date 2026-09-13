@@ -8,6 +8,7 @@ import type {
   UpdateAccommodationInput,
   UpdateTransportInput,
 } from "@/mocks/fixtures/overview";
+import type { TimeCapsule } from "@/mocks/fixtures/time-capsules";
 
 async function parseJsonOrThrow<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -87,4 +88,10 @@ export async function deleteTransport(tripId: string, id: string): Promise<void>
   if (!isMockData()) return supabaseApi.deleteTransport(tripId, id);
   const res = await fetch(`/api/trips/${tripId}/transports/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error(`삭제 실패 (${res.status})`);
+}
+
+export async function fetchTimeCapsules(tripId: string): Promise<TimeCapsule[]> {
+  if (!isMockData()) return supabaseApi.fetchTimeCapsules(tripId);
+  const res = await fetch(`/api/trips/${tripId}/time-capsules`);
+  return parseJsonOrThrow<TimeCapsule[]>(res);
 }

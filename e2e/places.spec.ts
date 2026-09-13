@@ -54,7 +54,7 @@ test("선택 모드로 여러 장소를 한 번에 삭제할 수 있다", async 
   await expect(page.getByText("1개 선택됨")).toBeVisible();
 
   await page.getByRole("button", { name: "삭제" }).click();
-  await expect(page.getByText("삭제하시겠습니까?")).toBeVisible();
-  await page.getByRole("button", { name: "삭제" }).last().click();
+  await expect(page.getByText("이 항목을 정말 지울까?")).toBeVisible();
+  await page.getByRole("button", { name: "과감하게 삭제" }).click();
   await expect(page.getByText("도요타 박물관")).not.toBeVisible();
 });

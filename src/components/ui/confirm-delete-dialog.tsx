@@ -22,26 +22,26 @@ export function ConfirmDeleteDialog({
       <DialogContent showCloseButton={false} variant="center" className="gap-5 overflow-visible p-5">
         <DialogHeader className="items-center">
           <DialogTitle className="w-full text-center text-[17px] leading-[26px] font-bold text-[#1A1A1A]">
-            삭제하시겠습니까?
+            이 항목을 정말 지울까? 👀
           </DialogTitle>
         </DialogHeader>
         <div className="flex w-full flex-row gap-2">
           <button
             type="button"
-            className="flex h-11 flex-1 items-center justify-center rounded-2xl bg-[#F5F5F5] text-[14px] font-semibold text-[#555555]"
+            className="flex h-11 flex-1 items-center justify-center rounded-2xl bg-[#F5F5F5] px-2 text-[13px] font-semibold text-[#555555]"
             onClick={() => onOpenChange(false)}
           >
-            취소
+            그대로 두기
           </button>
           <button
             type="button"
-            className="flex h-11 flex-1 items-center justify-center rounded-2xl bg-[#FF9F43] text-[14px] font-semibold text-white"
+            className="flex h-11 flex-1 items-center justify-center rounded-2xl bg-[#FF9F43] px-2 text-[13px] font-semibold text-white"
             onClick={() => {
               onConfirm();
               onOpenChange(false);
             }}
           >
-            삭제
+            과감하게 삭제
           </button>
         </div>
       </DialogContent>

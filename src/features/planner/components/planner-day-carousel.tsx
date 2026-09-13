@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { PLACE_CATEGORY_EMOJI } from "@/mocks/fixtures/places";
 import { visitNumbers } from "@/lib/visit-order";
 import type { Place } from "@/mocks/fixtures/places";
 
@@ -59,7 +58,7 @@ export function PlannerDayCarousel({
           >
             <p className="w-full truncate text-[14px] leading-[21px] font-bold text-[#1A1A1A]">
               {number != null ? `${number}. ` : ""}
-              {place.name} {PLACE_CATEGORY_EMOJI[place.category]}
+              {place.name}
             </p>
             {place.address ? (
               <p className="mt-0.5 w-full truncate text-[12px] leading-[18px] text-[#8C8885]">

@@ -93,6 +93,14 @@ export function PlaceCard({
           </div>
         )}
       </div>
+      {place.memo ? (
+        <p
+          title={place.memo}
+          className="mt-2 w-full min-w-0 truncate text-[12px] leading-[18px] font-normal text-[#8C8885]"
+        >
+          {place.memo}
+        </p>
+      ) : null}
     </div>
   );
 }

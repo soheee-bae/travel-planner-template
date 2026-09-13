@@ -38,7 +38,7 @@ export function PrepWorkspace({
       <FigmaPage>
         <LayoutGroup id="prep-sub-tabs">
         <div
-          className="flex h-10 w-full items-start justify-center rounded-[14px] bg-[#FFF8EE] p-1"
+          className="flex h-10 w-full items-start justify-center rounded-[14px] bg-[#FDF9F1] p-1"
           role="tablist"
           aria-label="준비 하위 탭"
         >
@@ -69,7 +69,12 @@ export function PrepWorkspace({
           ))}
         </div>
         </LayoutGroup>
-        <SegmentedSwap activeKey={sub} direction={dirRef.current}>
+        <SegmentedSwap
+          activeKey={sub}
+          direction={dirRef.current}
+          className="-mx-5 w-[calc(100%+2.5rem)] px-5"
+          contentClassName="pb-4"
+        >
           {sub === "prep" ? <PrepTab tripId={tripId} embedded /> : <MemoTab tripId={tripId} embedded />}
         </SegmentedSwap>
       </FigmaPage>

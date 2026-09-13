@@ -116,10 +116,10 @@ export function AddAccommodationDialog({
               }}
             />
             {checkoutDate && checkinDate && checkoutDate < checkinDate && (
-              <p className="text-xs text-destructive">체크아웃은 체크인 이후여야 해.</p>
+              <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">체크아웃은 체크인 이후여야 해.</p>
             )}
             {outsideTrip && (
-              <p className="text-xs text-destructive">여행 기간 밖 숙소입니다. 날짜를 확인해 주세요.</p>
+              <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">여행 기간 밖 숙소입니다. 날짜를 확인해 주세요.</p>
             )}
           </div>
           <div className="grid grid-cols-2 gap-3">

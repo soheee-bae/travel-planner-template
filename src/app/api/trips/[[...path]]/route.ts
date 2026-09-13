@@ -40,6 +40,9 @@ export async function GET(
       return NextResponse.json(memory.listChecklistItems(tripId));
     }
     if (resource === "wishlist" && !id) return NextResponse.json(memory.listWishlist(tripId));
+    if (resource === "time-capsules" && !id) {
+      return NextResponse.json(memory.listTimeCapsules(tripId));
+    }
 
     return NextResponse.json({ message: "없는 경로입니다." }, { status: 404 });
   } catch (error) {

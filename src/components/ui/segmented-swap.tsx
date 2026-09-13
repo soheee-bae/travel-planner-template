@@ -11,11 +11,13 @@ export function SegmentedSwap({
   direction,
   children,
   className,
+  contentClassName,
 }: {
   activeKey: string;
   direction: number;
   children: ReactNode;
   className?: string;
+  contentClassName?: string;
 }) {
   const slide = useMotionSafeDuration("slide");
   const reduce = useReducedMotion();
@@ -36,7 +38,7 @@ export function SegmentedSwap({
           animate="center"
           exit="exit"
           transition={{ duration: slide, ease: easing.standard }}
-          className="w-full"
+          className={cn("w-full", contentClassName)}
         >
           {children}
         </motion.div>

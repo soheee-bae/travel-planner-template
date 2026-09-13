@@ -4,13 +4,12 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { CATEGORY_COLORS } from "@/features/expenses/category-colors";
 import type { CategoryShare } from "@/lib/expense-aggregation";
 
-function formatMan(amount: number): string {
-  if (amount >= 10000) return `${Math.round(amount / 10000)}만`;
-  return `${amount.toLocaleString()}`;
+function formatPrice(amount: number): string {
+  return amount.toLocaleString("ko-KR");
 }
 
 export function BudgetDonutChart({ data, total }: { data: CategoryShare[]; total?: number }) {
-  const man = total != null ? `${Math.round(total / 10000)}만원` : null;
+  const centerTotal = total != null ? formatPrice(total) : null;
   return (
     <div className="flex h-[140px] w-full items-center gap-4">
       <div className="relative size-[140px] shrink-0">
@@ -35,10 +34,10 @@ export function BudgetDonutChart({ data, total }: { data: CategoryShare[]; total
             </Pie>
           </PieChart>
         </ResponsiveContainer>
-        {man ? (
+        {centerTotal ? (
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             <p className="text-[11px] leading-[13px] font-normal text-[#8C8885]">추억 값</p>
-            <p className="font-nunito text-[13px] leading-[18px] font-bold text-[#4A4543]">{man}</p>
+            <p className="font-nunito text-[13px] leading-[18px] font-bold text-[#4A4543]">{centerTotal}</p>
           </div>
         ) : null}
       </div>
@@ -59,7 +58,7 @@ export function BudgetDonutChart({ data, total }: { data: CategoryShare[]; total
               {entry.category}
             </span>
             <span className="font-nunito text-xs leading-[18px] font-bold text-[#4A4543]">
-              {formatMan(entry.total)}
+              {formatPrice(entry.total)}
             </span>
           </li>
         ))}

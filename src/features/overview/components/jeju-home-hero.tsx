@@ -114,14 +114,14 @@ export function JejuHomeHero({
         {activeFlight ? (
           <article className="flex w-full flex-col items-start overflow-hidden rounded-[20px] bg-white shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
             <LayoutGroup id="home-flight-tabs">
-            <div className="box-border flex h-[49px] w-full items-start justify-center border-b border-[#EEEEEE] p-0">
+            <div className="box-border flex h-[45px] w-full items-start justify-center border-b border-[#EEEEEE] p-0">
               {(sortedFlights.length > 0 ? sortedFlights : [activeFlight]).map((flight, index) => (
                 <button
                   key={flight.id}
                   type="button"
                   onClick={() => setFlightIdx(index)}
                   className={cn(
-                    "relative box-border flex h-12 flex-1 flex-col items-center justify-center px-0 py-[13px] text-[13px] leading-5",
+                    "relative box-border flex h-[45px] flex-1 flex-col items-center justify-center px-0 py-4 text-[13px] leading-5",
                     index === flightIdx ? "font-bold text-[#FF9F43]" : "font-medium text-[#5D5D5D]",
                   )}
                 >
@@ -148,14 +148,14 @@ export function JejuHomeHero({
         {activeStay ? (
           <article className="relative isolate flex w-full flex-col items-start overflow-hidden rounded-[20px] bg-white shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
             <LayoutGroup id="home-stay-tabs">
-            <div className="box-border flex h-[41px] w-full items-start justify-center border-b border-[#EEEEEE] px-0 pt-0 pb-px">
+            <div className="box-border flex h-[45px] w-full items-start justify-center border-b border-[#EEEEEE] p-0">
               {sortedStays.map((stay, index) => (
                 <button
                   key={stay.id}
                   type="button"
                   onClick={() => setStayIdx(index)}
                   className={cn(
-                    "relative box-border flex h-[41px] flex-1 flex-col items-center justify-center px-0 py-[13px] text-[13px] leading-5",
+                    "relative box-border flex h-[45px] flex-1 flex-col items-center justify-center px-0 py-4 text-[13px] leading-5",
                     index === stayIdx ? "font-bold text-[#FF9F43]" : "font-medium text-[#5D5D5D]",
                   )}
                 >
@@ -217,8 +217,8 @@ export function JejuHomeHero({
 function FlightTicketBody({ flight }: { flight: Transport }) {
   return (
     <>
-      <div className="flex h-[71px] w-full items-center justify-between px-[22px] pt-[18px] pb-0">
-        <div className="flex h-[53px] w-[51px] flex-col items-start gap-[3px]">
+      <div className="flex h-[85px] w-full items-center justify-between px-[22px] py-4">
+        <div className="flex h-[53px] w-[51px] shrink-0 flex-col items-start gap-[3px]">
           <p className="flex h-[33px] w-full items-center font-nunito text-[22px] leading-[33px] font-extrabold text-black">
             {airportCode(flight, "from")}
           </p>
@@ -231,10 +231,10 @@ function FlightTicketBody({ flight }: { flight: Transport }) {
             <p className="flex h-[15px] items-center text-[10px] leading-[15px] text-[#8E8E8E]">
               {flightDuration(flight.departureAt, flight.arrivalAt)}
             </p>
-            <span className="h-px w-full bg-[#FF9F43]" aria-hidden />
+            <span className="h-px w-full self-stretch bg-[#FF9F43]" aria-hidden />
           </div>
         </div>
-        <div className="flex h-[53px] w-10 flex-col items-start gap-[3px]">
+        <div className="flex h-[53px] w-10 shrink-0 flex-col items-end gap-[3px]">
           <p className="flex h-[33px] w-full items-center justify-end font-nunito text-[22px] leading-[33px] font-extrabold text-black">
             {airportCode(flight, "to")}
           </p>
@@ -246,62 +246,62 @@ function FlightTicketBody({ flight }: { flight: Transport }) {
 
       <TicketPerforation />
 
-      <div className="flex w-full items-start justify-between px-[22px] pt-3.5 pb-[18px]">
-        <div className="flex flex-col items-start gap-[3px]">
-          <p className="text-[10px] leading-[15px] text-[#8E8E8E]">날짜</p>
-          <p className="font-nunito text-[13px] leading-5 font-bold whitespace-nowrap text-[#4A4543]">
+      <div className="flex h-[70px] w-full items-start justify-between gap-[44.3px] px-[22px] py-4">
+        <div className="flex h-[38px] flex-col items-start gap-[3px]">
+          <p className="flex h-[15px] items-center text-[10px] leading-[15px] text-[#8E8E8E]">날짜</p>
+          <p className="flex h-5 items-center font-nunito text-[13px] leading-5 font-bold whitespace-nowrap text-[#4A4543]">
             {flight.departureAt.slice(0, 10).replaceAll("-", ".")}
           </p>
         </div>
-        <div className="flex flex-col items-start gap-[3px]">
-          <p className="text-[10px] leading-[15px] text-[#8E8E8E]">출발</p>
-          <p className="text-xs leading-[18px] font-bold whitespace-nowrap text-[#1A1A1A]">
+        <div className="flex h-[38px] flex-col items-start gap-[3px]">
+          <p className="flex h-[15px] items-center text-[10px] leading-[15px] text-[#8E8E8E]">출발</p>
+          <p className="flex h-[18px] items-center text-xs leading-[18px] font-bold whitespace-nowrap text-[#1A1A1A]">
             {timeOf(flight.departureAt)}
           </p>
         </div>
-        <div className="flex flex-col items-start gap-[3px]">
-          <p className="text-[10px] leading-[15px] text-[#8E8E8E]">도착</p>
-          <p className="text-xs leading-[18px] font-bold whitespace-nowrap text-[#1A1A1A]">
+        <div className="flex h-[38px] flex-col items-start gap-[3px]">
+          <p className="flex h-[15px] items-center text-[10px] leading-[15px] text-[#8E8E8E]">도착</p>
+          <p className="flex h-[18px] items-center text-xs leading-[18px] font-bold whitespace-nowrap text-[#1A1A1A]">
             {timeOf(flight.arrivalAt)}
           </p>
         </div>
-        <div className="flex flex-col items-start gap-[3px]">
-          <p className="text-[10px] leading-[15px] text-[#8E8E8E]">항공사</p>
-          <p className="text-xs leading-[18px] font-bold whitespace-nowrap text-[#1A1A1A]">
+        <div className="flex h-[38px] flex-col items-start gap-[3px]">
+          <p className="flex h-[15px] items-center text-[10px] leading-[15px] text-[#8E8E8E]">항공사</p>
+          <p className="flex h-[18px] items-center text-xs leading-[18px] font-bold whitespace-nowrap text-[#1A1A1A]">
             {flight.bookingRef ?? ""}
           </p>
         </div>
       </div>
 
-      <TicketPerforation padded={false} />
+      <TicketPerforation />
 
-      {flight.memo || flight.type === "비행기" ? (
-        <div className="flex min-h-[52px] w-full items-center justify-between gap-4 rounded-b-[20px] bg-white px-[22px] pt-2 pb-3">
-          {flight.memo ? (
-            <p className="flex h-[17px] min-w-0 items-center text-[11px] leading-4 font-bold tracking-[0.66px] text-[#FF9F43]">
-              {flight.memo}
-            </p>
-          ) : (
-            <span />
-          )}
-          {flight.type === "비행기" ? (
-            <div className="flex shrink-0 items-start gap-4">
-              <div className="flex flex-col items-start gap-[3px]">
-                <p className="flex h-[15px] items-center text-[10px] leading-[15px] text-[#8E8E8E]">좌석1</p>
-                <p className="flex h-[18px] items-center text-xs leading-[18px] font-bold text-[#FF9F43]">
-                  {flight.seat1 ?? ""}
-                </p>
-              </div>
-              <div className="flex flex-col items-start gap-[3px]">
-                <p className="flex h-[15px] items-center text-[10px] leading-[15px] text-[#8E8E8E]">좌석2</p>
-                <p className="flex h-[18px] items-center text-xs leading-[18px] font-bold text-[#FF9F43]">
-                  {flight.seat2 ?? ""}
-                </p>
-              </div>
+      <div className="flex h-16 w-full items-center justify-between gap-[100.6px] rounded-b-[20px] bg-white px-[22px] py-4">
+        {flight.memo ? (
+          <p className="flex h-[17px] min-w-0 items-center truncate text-[11px] leading-4 font-bold tracking-[0.66px] text-[#FF9F43]">
+            {flight.memo}
+          </p>
+        ) : (
+          <span />
+        )}
+        {flight.type === "비행기" ? (
+          <div className="flex shrink-0 items-start gap-3">
+            <div className="flex h-8 flex-col items-center gap-px">
+              <p className="flex h-[14px] items-center text-center text-[9px] leading-[14px] text-[#8E8E8E]">좌석1</p>
+              <p className="flex h-[17px] items-center text-center text-[11px] leading-4 font-bold text-[#FF9F43]">
+                {flight.seat1 ?? ""}
+              </p>
             </div>
-          ) : null}
-        </div>
-      ) : null}
+            <div className="flex h-8 flex-col items-center gap-px">
+              <p className="flex h-[14px] items-center text-center text-[9px] leading-[14px] text-[#8E8E8E]">좌석2</p>
+              <p className="flex h-[17px] items-center text-center text-[11px] leading-4 font-bold text-[#FF9F43]">
+                {flight.seat2 ?? ""}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <span />
+        )}
+      </div>
     </>
   );
 }
@@ -309,7 +309,7 @@ function FlightTicketBody({ flight }: { flight: Transport }) {
 function StayTicketBody({ stay }: { stay: Accommodation }) {
   return (
     <>
-      <div className="flex w-full items-center justify-start gap-3 px-[22px] pt-4 pb-0">
+      <div className="flex h-[76px] w-full items-center gap-3 px-[22px] py-4">
         <span
           className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-[#FFD6BB] text-xl"
           aria-hidden
@@ -317,25 +317,25 @@ function StayTicketBody({ stay }: { stay: Accommodation }) {
           {stay.icon ?? "🏨"}
         </span>
         <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-          <p className="flex h-[23px] items-center text-[15px] leading-[22px] font-bold text-[#1A1A1A]">
+          <p className="flex h-[23px] w-full items-center truncate text-[15px] leading-[22px] font-bold text-[#1A1A1A]">
             {stay.name}
           </p>
-          <p className="flex h-[18px] items-center text-xs leading-[18px] font-normal text-black">
-            {stay.memo ?? stay.address}
+          <p className="flex h-[18px] w-full min-w-0 items-center truncate text-xs leading-[18px] font-normal text-black">
+            {stay.address ?? ""}
           </p>
         </div>
       </div>
       <TicketPerforation />
-      <div className="flex w-full items-start justify-start gap-12 px-[22px] pt-px pb-[13px]">
-        <div className="flex h-[38px] w-auto flex-col items-start gap-[3px]">
-          <p className="flex h-[15px] items-center text-[10px] leading-[15px] text-[#8E8E8E]">체크인</p>
-          <p className="flex h-5 items-center font-nunito text-[13px] leading-5 font-bold text-[#4A4543]">
+      <div className="flex h-[70px] w-full items-start px-[22px] py-4">
+        <div className="flex h-[38px] min-w-0 flex-1 flex-col items-start gap-[3px]">
+          <p className="flex h-[15px] w-full items-center text-[10px] leading-[15px] text-[#8E8E8E]">체크인</p>
+          <p className="flex h-5 w-full items-center font-nunito text-[13px] leading-5 font-bold text-[#4A4543]">
             {formatMd(stay.checkinDate)} {stay.checkinTime}
           </p>
         </div>
-        <div className="flex h-[38px] w-auto flex-col items-start gap-[3px]">
-          <p className="flex h-[15px] items-center text-[10px] leading-[15px] text-[#8E8E8E]">체크아웃</p>
-          <p className="flex h-5 items-center font-nunito text-[13px] leading-5 font-bold text-[#4A4543]">
+        <div className="flex h-[38px] min-w-0 flex-1 flex-col items-start gap-[3px]">
+          <p className="flex h-[15px] w-full items-center text-[10px] leading-[15px] text-[#8E8E8E]">체크아웃</p>
+          <p className="flex h-5 w-full items-center font-nunito text-[13px] leading-5 font-bold text-[#4A4543]">
             {formatMd(stay.checkoutDate)} {stay.checkoutTime}
           </p>
         </div>

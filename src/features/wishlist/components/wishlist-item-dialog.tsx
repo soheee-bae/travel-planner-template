@@ -143,7 +143,7 @@ export function WishlistItemDialog({
               </div>
             ) : null}
             {titleError ? (
-              <p className="text-[12px] leading-[18px] text-destructive">{titleError.message}</p>
+              <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">{titleError.message}</p>
             ) : null}
           </div>
           <div className="flex w-full flex-col gap-1.5 pb-3.5">
@@ -159,7 +159,7 @@ export function WishlistItemDialog({
             />
           </div>
           {submitError ? (
-            <p className="text-[12px] leading-[18px] text-destructive">{submitError}</p>
+            <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">{submitError}</p>
           ) : null}
           <FigmaCtaButton type="submit" disabled={saving} className="rounded-[16px] py-[13px]">
             {saving ? "기억하는 중…" : "기억해두기"}

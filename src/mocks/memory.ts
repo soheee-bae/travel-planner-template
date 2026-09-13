@@ -44,6 +44,7 @@ import {
   updateWishlistItemInputSchema,
   type WishlistItem,
 } from "@/mocks/fixtures/wishlist";
+import { initialTimeCapsules, type TimeCapsule } from "@/mocks/fixtures/time-capsules";
 
 export class MockHttpError extends Error {
   constructor(
@@ -63,6 +64,7 @@ let transports: Transport[] = [...initialTransports];
 let checklistCategories: ChecklistCategory[] = [...initialChecklistCategories];
 let checklistItems: ChecklistItem[] = [...initialChecklistItems];
 let wishlistItems: WishlistItem[] = [...initialWishlistItems];
+let timeCapsules: TimeCapsule[] = [...initialTimeCapsules];
 
 function parseOrThrow<T>(
   parsed: { success: true; data: T } | { success: false; error: { issues: unknown } },
@@ -232,4 +234,7 @@ export const memory = {
   deleteWishlist: (tripId: string, id: string) => {
     wishlistItems = wishlistItems.filter((i) => !(i.id === id && i.tripId === tripId));
   },
+
+  listTimeCapsules: (tripId: string) =>
+    timeCapsules.filter((item) => item.tripId === tripId).sort((a, b) => a.sortOrder - b.sortOrder),
 };

@@ -93,7 +93,11 @@ export function PlannerTab({ trip }: { trip: Trip }) {
 
   if (isLoading) return <p className="p-6 text-sm text-muted-foreground">불러오는 중…</p>;
   if (isError)
-    return <p className="p-6 text-sm text-destructive">장소 목록을 다시 불러와 주세요.</p>;
+    return (
+      <p className="p-6 text-[12px] leading-[18px] font-semibold text-[#E85D4C]">
+        장소 목록을 다시 불러와 주세요.
+      </p>
+    );
 
   const map = (
     <PlannerMap

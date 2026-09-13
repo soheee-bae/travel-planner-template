@@ -59,7 +59,7 @@ export function CreateTripForm() {
         <Label htmlFor="title">여행 이름</Label>
         <Input id="title" placeholder="예: 제주도 여행" {...form.register("title")} />
         {form.formState.errors.title && (
-          <p className="text-xs text-destructive">이름은 공백 제외 2~30자로 입력해 주세요.</p>
+          <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">이름은 공백 제외 2~30자로 입력해 주세요.</p>
         )}
       </div>
 
@@ -84,7 +84,7 @@ export function CreateTripForm() {
           <p className="text-sm text-muted-foreground">{formatDuration(startDate, endDate)}</p>
         )}
         {(form.formState.errors.startDate || form.formState.errors.endDate) && (
-          <p className="text-xs text-destructive">시작일과 종료일을 선택해 주세요.</p>
+          <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">시작일과 종료일을 선택해 주세요.</p>
         )}
       </div>
 

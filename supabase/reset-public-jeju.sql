@@ -40,6 +40,23 @@ alter table transports add column if not exists departure_code text;
 alter table transports add column if not exists arrival_code text;
 alter table accommodations add column if not exists icon text;
 
+create table if not exists time_capsules (
+  id              uuid primary key default gen_random_uuid(),
+  trip_id         uuid not null references trips(id) on delete cascade,
+  sort_order      smallint not null check (sort_order between 1 and 20),
+  unlock_at       timestamptz not null,
+  title           text not null check (char_length(title) between 1 and 80),
+  summary         text not null check (char_length(summary) between 1 and 200),
+  locked_toast    text not null check (char_length(locked_toast) between 1 and 200),
+  popup_title     text not null check (char_length(popup_title) between 1 and 80),
+  popup_text      text not null check (char_length(popup_text) between 1 and 2000),
+  img_src         text not null check (char_length(img_src) between 1 and 300),
+  plays_confetti  boolean not null default false,
+  created_at      timestamptz not null default now(),
+  unique (trip_id, sort_order)
+);
+create index if not exists time_capsules_trip_id_idx on time_capsules (trip_id, sort_order);
+
 -- ---------------------------------------------------------------------------
 -- 3) 기존 행 삭제 후 enum을 앱 라벨만 남긴다
 -- ---------------------------------------------------------------------------
@@ -84,6 +101,7 @@ drop policy if exists "owner full access to checklist_items" on checklist_items;
 drop policy if exists "public all checklist_items" on checklist_items;
 drop policy if exists "owner full access to wishlist_items" on wishlist_items;
 drop policy if exists "public all wishlist_items" on wishlist_items;
+drop policy if exists "public all time_capsules" on time_capsules;
 
 create policy "public all trips" on trips
   for all using (true) with check (true);
@@ -101,11 +119,14 @@ create policy "public all checklist_items" on checklist_items
   for all using (true) with check (true);
 create policy "public all wishlist_items" on wishlist_items
   for all using (true) with check (true);
+alter table time_capsules enable row level security;
+create policy "public all time_capsules" on time_capsules
+  for all using (true) with check (true);
 
 grant usage on schema public to anon, authenticated;
 grant select, insert, update, delete on
   trips, accommodations, transports, places, expenses,
-  checklist_categories, checklist_items, wishlist_items
+  checklist_categories, checklist_items, wishlist_items, time_capsules
   to anon, authenticated;
 
 create view trip_totals with (security_invoker = on) as
@@ -289,6 +310,61 @@ insert into checklist_categories (id, trip_id, name, icon, order_index) values
   ('00000000-0000-0000-0006-000000000103', '00000000-0000-0000-0001-000000000001', '선물/기념품', '🍊', 2),
   ('00000000-0000-0000-0006-000000000104', '00000000-0000-0000-0001-000000000001', '쇼핑', '🛍️', 3),
   ('00000000-0000-0000-0006-000000000105', '00000000-0000-0000-0001-000000000001', '기타', '🎸', 4);
+
+insert into time_capsules (
+  id, trip_id, sort_order, unlock_at,
+  title, summary, locked_toast, popup_title, popup_text, img_src, plays_confetti
+) values
+  (
+    '00000000-0000-0000-0009-000000000001',
+    '00000000-0000-0000-0001-000000000001',
+    1, '2026-10-14 15:00:00+09',
+    '설레는 출발 ✈️', '탑승구 앞에서 열어봐!',
+    '이 메시지는 10월 14일 오후 3시에 열려!',
+    '출발 1시간 전!',
+    '이번 제주도 여행의 전속 가이드, 배소희 인사드립니다! (꾸벅) VVIP 준형 고객님, 탑승 준비되셨나요? ✈️ 첫 번째 투어 미션: 비행기 이륙 전 가이드랑 세상에서 제일 신난 표정으로 예쁘게 셀카 1장 찍기! 📸 자, 그럼 만족도 200% 보장 ''소희 투어'' 지금 바로 출발합니다아~ 🍊 꽉 잡으십쇼!',
+    '/assets/duck-airport.svg', false
+  ),
+  (
+    '00000000-0000-0000-0009-000000000002',
+    '00000000-0000-0000-0001-000000000001',
+    2, '2026-10-15 12:00:00+09',
+    '둘째 날 점심 🍽️', '맛있는 점심 먹으면서 열어봐!',
+    '이 메시지는 10월 15일 낮 12시에 열려!',
+    '든든하게 먹고 놀자',
+    '어제 일정 소화하느라 고생했어! 오늘 밥도 꿀맛이지? 다 먹고 오후 일정도 신나게 달려보자구 🐷',
+    '/assets/duck-lunch.svg', false
+  ),
+  (
+    '00000000-0000-0000-0009-000000000003',
+    '00000000-0000-0000-0001-000000000001',
+    3, '2026-10-15 18:00:00+09',
+    '생일 파티 타임 🎂', '케이크에 불 붙이고 열어봐!',
+    '이 메시지는 10월 15일 저녁 6시에 열려!',
+    '미리 해피 벌스데이!',
+    '서프라이즈! 🎉 소희 가이드가 준비한 선물 교환권입니다. 지금 바로 뽀뽀 3번 해주시면 실물 ''버즈 케이스''와 ''손편지''로 교환해 드립니다 🎁',
+    '/assets/duck-gift.svg', true
+  ),
+  (
+    '00000000-0000-0000-0009-000000000004',
+    '00000000-0000-0000-0001-000000000001',
+    4, '2026-10-16 12:00:00+09',
+    '진짜 생일 당일! 🎉', '준형아 생일 축하해!',
+    '이 메시지는 10월 16일 낮 12시에 열려!',
+    '태어나줘서 고마워',
+    '드디어 진짜 생일 당일! 네가 있어서 이번 제주도 여행이 훨씬 더 빛나고 행복해. 오늘 하루도 최고로 만들어줄게 💖',
+    '/assets/duck-party.svg', false
+  ),
+  (
+    '00000000-0000-0000-0009-000000000005',
+    '00000000-0000-0000-0001-000000000001',
+    5, '2026-10-16 20:00:00+09',
+    '아쉬운 귀국길 🌙', '비행기 타기 전 마지막 편지',
+    '이 메시지는 10월 16일 저녁 8시에 열려!',
+    '우리의 다음 여행은?',
+    '시간 진짜 빠르다 ㅠㅠ 이번 여행 내내 나 챙겨주고 운전하느라 너무 고생 많았어! 우리 다음엔 어디로 놀러 갈까? 사랑해 🥰',
+    '/assets/duck-home.svg', false
+  );
 
 insert into wishlist_items (id, trip_id, icon, title, content, order_index) values
   (

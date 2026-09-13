@@ -1,6 +1,6 @@
 import { airportCodeFromName } from "@/lib/airport";
 import { createClient } from "@/lib/supabase/client";
-import { asNumber, asTime, throwIfError, throwIfWriteError } from "@/lib/supabase/throw";
+import { asNumber, asRequiredNumber, asTime, throwIfError, throwIfWriteError } from "@/lib/supabase/throw";
 import { toClientTripId, toDbTripId } from "@/lib/trip-ids";
 import type {
   Accommodation,
@@ -8,6 +8,7 @@ import type {
   CreateTransportInput,
   Transport,
 } from "@/mocks/fixtures/overview";
+import { initialTimeCapsules, type TimeCapsule } from "@/mocks/fixtures/time-capsules";
 
 interface AccommodationRow {
   id: string;
@@ -213,4 +214,47 @@ export async function deleteTransport(tripId: string, id: string): Promise<void>
   const supabase = createClient();
   const { error } = await supabase.from("transports").delete().eq("trip_id", toDbTripId(tripId)).eq("id", id);
   throwIfWriteError(error);
+}
+
+interface TimeCapsuleRow {
+  id: string;
+  trip_id: string;
+  sort_order: number | string;
+  unlock_at: string;
+  title: string;
+  summary: string;
+  locked_toast: string;
+  popup_title: string;
+  popup_text: string;
+  img_src: string;
+  plays_confetti: boolean | null;
+}
+
+function toTimeCapsule(row: TimeCapsuleRow): TimeCapsule {
+  return {
+    id: row.id,
+    tripId: toClientTripId(row.trip_id),
+    sortOrder: asRequiredNumber(row.sort_order),
+    unlockAt: row.unlock_at,
+    title: row.title,
+    summary: row.summary,
+    lockedToast: row.locked_toast,
+    popupTitle: row.popup_title,
+    popupText: row.popup_text,
+    imgSrc: row.img_src,
+    playsConfetti: row.plays_confetti === true,
+  };
+}
+
+export async function fetchTimeCapsules(tripId: string): Promise<TimeCapsule[]> {
+  const supabase = createClient();
+  const result = await supabase
+    .from("time_capsules")
+    .select("*")
+    .eq("trip_id", toDbTripId(tripId))
+    .order("sort_order");
+  if (result.error?.code === "PGRST205") {
+    return initialTimeCapsules.filter((item) => item.tripId === tripId);
+  }
+  return throwIfError(result).map(toTimeCapsule);
 }

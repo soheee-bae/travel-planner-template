@@ -48,3 +48,17 @@ export function formatDdayCaption(startDate: string, endDate: string, todayIso?:
   if (today <= endDate) return "여행 중";
   return "지난 여행";
 }
+
+/** 타임캡슐 카드용. 예: 10월 14일 오후 3:00 */
+export function formatSeoulDateTime(iso: string): string {
+  const date = new Date(iso);
+  if (!Number.isFinite(date.getTime())) return "";
+  return date.toLocaleString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}

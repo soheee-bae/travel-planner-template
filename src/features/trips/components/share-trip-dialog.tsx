@@ -150,7 +150,11 @@ export function ShareTripDialog({
         {message && (
           <p
             role="status"
-            className={status === "error" ? "text-sm text-destructive" : "text-sm text-muted-foreground"}
+            className={
+              status === "error"
+                ? "text-[12px] leading-[18px] font-semibold text-[#E85D4C]"
+                : "text-sm text-muted-foreground"
+            }
           >
             {message}
           </p>
