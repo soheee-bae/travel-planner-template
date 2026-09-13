@@ -244,7 +244,7 @@ export function TimeCapsuleDialog({
         </AnimatePresence>
 
         <AnimatePresence>
-          {selected && selectedUnlocked ? (
+          {selected && selectedUnlocked && popup ? (
             <motion.div
               className="absolute inset-0 z-[80] flex items-center justify-center rounded-[28px] bg-black/45 px-5 pb-16"
               initial={{ opacity: 0 }}
