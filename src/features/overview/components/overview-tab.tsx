@@ -18,6 +18,7 @@ import { IllustrationIcon } from "@/components/ui/illustration-icon";
 import { useAppShellElement } from "@/components/layout/AppShell";
 import { ILLUSTRATION } from "@/lib/illustrations";
 import { useConfirmDelete } from "@/components/ui/confirm-delete-dialog";
+import { HomePageSkeleton } from "@/components/ui/page-skeleton";
 import { SummaryStats } from "@/features/overview/components/summary-stats";
 import { usePlaces } from "@/features/places/hooks";
 import { useExpenses } from "@/features/expenses/hooks";
@@ -26,7 +27,7 @@ import { JEJU_TRIP_ID } from "@/lib/jeju-trip";
 import { cn } from "@/lib/utils";
 import type { Accommodation, Transport } from "@/mocks/fixtures/overview";
 
-export function OverviewTab({ tripId, active = true }: { tripId: string; active?: boolean }) {
+export function OverviewTab({ tripId }: { tripId: string }) {
   const { data: trip } = useTrip(tripId);
   const { data: accommodations, isLoading: loadingAcc } = useAccommodations(tripId);
   const { data: transports, isLoading: loadingTr } = useTransports(tripId);
@@ -41,6 +42,7 @@ export function OverviewTab({ tripId, active = true }: { tripId: string; active?
   const shell = useAppShellElement();
 
   if (trip && tripId === JEJU_TRIP_ID) {
+    if (loadingAcc || loadingTr) return <HomePageSkeleton />;
     const flights = (transports ?? []).filter((item) => item.type === "비행기");
     const fab = (
       <button
@@ -49,7 +51,7 @@ export function OverviewTab({ tripId, active = true }: { tripId: string; active?
         onClick={() => setCapsuleOpen(true)}
         className={cn(
           "pointer-events-auto absolute right-5 z-20 flex size-[60px] items-center justify-center rounded-full",
-          "bottom-[calc(var(--trip-nav-height,56px)+16px)]",
+          "bottom-[calc(var(--trip-nav-height,64px)+16px)]",
           ILLUSTRATION.giftFab.bg,
           ILLUSTRATION.giftFab.shadow,
         )}
@@ -58,9 +60,9 @@ export function OverviewTab({ tripId, active = true }: { tripId: string; active?
       </button>
     );
     return (
-      <div className="relative mx-auto flex w-full flex-col bg-white">
+      <div className="relative mx-auto flex h-full min-h-0 w-full flex-col bg-white">
         <JejuHomeHero trip={trip} flights={flights} stays={accommodations ?? []} />
-        {active && shell ? createPortal(fab, shell) : null}
+        {shell ? createPortal(fab, shell) : null}
         <TimeCapsuleDialog tripId={tripId} open={capsuleOpen} onOpenChange={setCapsuleOpen} />
       </div>
     );

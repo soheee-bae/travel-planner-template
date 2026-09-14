@@ -11,17 +11,25 @@ function isEditable(target: EventTarget | null): target is HTMLElement {
 function applyVisualViewportVars() {
   const root = document.documentElement;
   const vv = window.visualViewport;
-  const height = vv?.height ?? window.innerHeight;
+  const layoutHeight = window.innerHeight;
+  const height = vv?.height ?? layoutHeight;
   const offsetTop = vv?.offsetTop ?? 0;
-  const inset = Math.max(0, window.innerHeight - height - offsetTop);
-  root.style.setProperty("--vv-height", `${height}px`);
-  root.style.setProperty("--keyboard-inset", `${inset}px`);
+  const inset = Math.max(0, layoutHeight - height - offsetTop);
+  const keyboardOpen = inset > 80;
+  if (keyboardOpen) {
+    root.dataset.keyboard = "open";
+    root.style.setProperty("--vv-height", `${height}px`);
+    root.style.setProperty("--keyboard-inset", `${inset}px`);
+  } else {
+    delete root.dataset.keyboard;
+    root.style.removeProperty("--vv-height");
+    root.style.setProperty("--keyboard-inset", "0px");
+  }
 }
 
 /**
- * iOS는 `interactive-widget=resizes-content`여도 키보드가 레이아웃을
- * 안 줄이는 경우가 많다. visualViewport 높이로 셸을 맞추고, 포커스된
- * 필드는 보이는 영역 안으로 스크롤한다.
+ * 키보드는 열렸을 때만 셸 높이를 visualViewport에 맞춘다.
+ * 카카오 인앱에서 평소 `--vv-height`를 계속 넣으면 하단에 흰 공백이 생긴다.
  */
 export function useKeyboardInset() {
   useLayoutEffect(() => {
@@ -35,18 +43,21 @@ export function useKeyboardInset() {
       window.setTimeout(() => {
         applyVisualViewportVars();
         el.scrollIntoView({ block: "center", inline: "nearest" });
-      }, 50);
+      }, 80);
+    };
+    const onFocusOut = () => {
+      window.setTimeout(applyVisualViewportVars, 80);
     };
 
     vv?.addEventListener("resize", onViewport);
-    vv?.addEventListener("scroll", onViewport);
     window.addEventListener("resize", onViewport);
     window.addEventListener("focusin", onFocusIn);
+    window.addEventListener("focusout", onFocusOut);
     return () => {
       vv?.removeEventListener("resize", onViewport);
-      vv?.removeEventListener("scroll", onViewport);
       window.removeEventListener("resize", onViewport);
       window.removeEventListener("focusin", onFocusIn);
+      window.removeEventListener("focusout", onFocusOut);
     };
   }, []);
 }

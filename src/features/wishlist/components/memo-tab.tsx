@@ -14,6 +14,7 @@ import {
 import { WishlistItemDialog } from "@/features/wishlist/components/wishlist-item-dialog";
 import { FigmaPage, FigmaPageHeader, FigmaPageTitle } from "@/components/ui/figma";
 import { useConfirmDelete } from "@/components/ui/confirm-delete-dialog";
+import { PrepBodySkeleton, PrepPageSkeleton } from "@/components/ui/page-skeleton";
 import type { WishlistItem } from "@/mocks/fixtures/wishlist";
 
 function WishlistCard({
@@ -88,7 +89,7 @@ export function MemoTab({ tripId, embedded }: { tripId: string; embedded?: boole
   const { request: askDelete, dialog: confirmDialog } = useConfirmDelete();
   const items = (data ?? []).slice().sort((a, b) => a.orderIndex - b.orderIndex);
 
-  if (isLoading) return <p className="p-6 text-sm text-muted-foreground">불러오는 중…</p>;
+  if (isLoading) return embedded ? <PrepBodySkeleton /> : <PrepPageSkeleton />;
   if (isError) {
     return (
       <p className="p-6 text-[12px] leading-[18px] font-semibold text-[#E85D4C]">
@@ -106,7 +107,7 @@ export function MemoTab({ tripId, embedded }: { tripId: string; embedded?: boole
           trigger={
             <button
               type="button"
-              className="flex h-[38px] items-center justify-center rounded-[16px] bg-[#FF9F43] px-4 py-[9px] text-[13px] leading-5 font-bold text-white"
+              className="flex h-[38px] items-center justify-center rounded-[16px] bg-[#FF9F43] px-4 py-[9px] text-[13px] leading-5 font-bold text-white shadow-[0px_8px_24px_rgba(255,159,67,0.25)]"
             >
               + 끄적이기
             </button>

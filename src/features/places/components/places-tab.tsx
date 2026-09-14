@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import { FigmaPage, FigmaPageHeader, FigmaPageTitle, figmaShadowCard } from "@/components/ui/figma";
+import { FigmaPage, FigmaPageHeader, FigmaPageScroll, FigmaPageTitle, figmaShadowCard } from "@/components/ui/figma";
 import { useConfirmDelete } from "@/components/ui/confirm-delete-dialog";
+import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { usePlaces, useDeletePlace } from "@/features/places/hooks";
 import { PlaceCard } from "@/features/places/components/place-card";
 import { PlaceFilterBar, type PlaceFilter } from "@/features/places/components/place-filter-bar";
@@ -64,7 +65,7 @@ export function PlacesTab({ trip }: { trip: Trip }) {
     exitSelectionMode();
   }
 
-  if (isLoading) return <p className="p-6 text-sm text-muted-foreground">불러오는 중…</p>;
+  if (isLoading) return <ListPageSkeleton />;
   if (isError)
     return (
       <p className="p-6 text-[12px] leading-[18px] font-semibold text-[#E85D4C]">
@@ -73,7 +74,7 @@ export function PlacesTab({ trip }: { trip: Trip }) {
     );
 
   return (
-    <div className="flex min-h-full flex-col bg-white">
+    <div className="flex h-full min-h-0 flex-col bg-white">
       <FigmaPageHeader>
         <div className="flex w-full items-center justify-between">
           <FigmaPageTitle className="w-auto flex-1">가보고 싶은 스팟 모음</FigmaPageTitle>
@@ -90,6 +91,7 @@ export function PlacesTab({ trip }: { trip: Trip }) {
           </button>
         </div>
       </FigmaPageHeader>
+      <FigmaPageScroll>
       <FigmaPage>
         <div
           className={cn(
@@ -172,6 +174,7 @@ export function PlacesTab({ trip }: { trip: Trip }) {
         )}
         {confirmDialog}
       </FigmaPage>
+      </FigmaPageScroll>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { LayoutGroup, motion } from "motion/react";
 import { PrepTab } from "@/features/checklists/components/prep-tab";
 import { MemoTab } from "@/features/wishlist/components/memo-tab";
-import { FigmaPage, FigmaPageHeader, FigmaPageTitle } from "@/components/ui/figma";
+import { FigmaPage, FigmaPageHeader, FigmaPageScroll, FigmaPageTitle } from "@/components/ui/figma";
 import { SegmentedSwap } from "@/components/ui/segmented-swap";
 import { useReducedMotion } from "@/hooks/use-motion-safe";
 import { cn } from "@/lib/utils";
@@ -31,14 +31,15 @@ export function PrepWorkspace({
   const reduce = useReducedMotion();
 
   return (
-    <div className="flex min-h-full flex-col bg-white">
+    <div className="flex h-full min-h-0 flex-col bg-white">
       <FigmaPageHeader>
         <FigmaPageTitle>제주에서 슬쩍 하고 싶은 것들</FigmaPageTitle>
       </FigmaPageHeader>
+      <FigmaPageScroll>
       <FigmaPage>
         <LayoutGroup id="prep-sub-tabs">
         <div
-          className="flex h-10 w-full items-start justify-center rounded-[14px] bg-[#FDF9F1] p-1"
+          className="flex h-10 w-full items-start justify-center rounded-[14px] bg-[#FFF3E8] p-1"
           role="tablist"
           aria-label="준비 하위 탭"
         >
@@ -73,11 +74,12 @@ export function PrepWorkspace({
           activeKey={sub}
           direction={dirRef.current}
           className="-mx-5 w-[calc(100%+2.5rem)] px-5"
-          contentClassName="pb-4"
+          contentClassName="pb-8"
         >
           {sub === "prep" ? <PrepTab tripId={tripId} embedded /> : <MemoTab tripId={tripId} embedded />}
         </SegmentedSwap>
       </FigmaPage>
+      </FigmaPageScroll>
     </div>
   );
 }

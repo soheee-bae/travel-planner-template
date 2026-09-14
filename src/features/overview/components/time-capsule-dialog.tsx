@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import confetti from "canvas-confetti";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FigmaCtaButton } from "@/components/ui/figma";
+import { CapsuleSkeleton } from "@/components/ui/page-skeleton";
 import { useTimeCapsules } from "@/features/overview/hooks";
 import { useMotionSafeDuration, useReducedMotion } from "@/hooks/use-motion-safe";
 import { formatSeoulDateTime } from "@/lib/date";
@@ -128,9 +129,9 @@ export function TimeCapsuleDialog({
         showCloseButton={false}
         variant="center"
         overlayClassName="bg-[rgba(0,0,0,0.35)]"
-        className="relative left-1/2 right-auto h-[min(755px,calc(var(--vv-height,100dvh)-24px))] max-h-[1056px] w-[min(360px,calc(100%-20px))] max-w-[380px] -translate-x-1/2 items-center overflow-x-hidden overflow-y-auto rounded-[28px] bg-white px-5 pt-6 pb-7 shadow-[0px_8px_32px_rgba(74,69,67,0.13)]"
+        className="relative left-1/2 right-auto flex h-[min(755px,calc(100%-24px))] max-h-[1056px] w-[min(360px,calc(100%-20px))] max-w-[380px] -translate-x-1/2 flex-col items-center overflow-hidden rounded-[28px] bg-white px-5 pt-6 pb-7 shadow-[0px_8px_32px_rgba(74,69,67,0.13)]"
       >
-        <DialogHeader className="w-full items-center gap-1.5 text-center">
+        <DialogHeader className="w-full shrink-0 items-center gap-1.5 pb-0 text-center">
           <DialogTitle className="flex h-[30px] items-center justify-center text-center text-[20px] leading-[30px] font-extrabold text-[#4A4543]">
             소희 가이드 시크릿 노트
           </DialogTitle>
@@ -139,8 +140,14 @@ export function TimeCapsuleDialog({
           </p>
         </DialogHeader>
 
+        <div
+          className={cn(
+            "min-h-0 w-full flex-1",
+            selectedId ? "overflow-hidden" : "overflow-y-auto overscroll-contain",
+          )}
+        >
         {isLoading ? (
-          <p className="py-10 text-center text-[12px] leading-[18px] text-[#8C8885]">불러오는 중…</p>
+          <CapsuleSkeleton />
         ) : isError ? (
           <p className="py-10 text-center text-[12px] leading-[18px] font-semibold text-[#E85D4C]">
             타임캡슐을 다시 불러와 줘.
@@ -230,8 +237,9 @@ export function TimeCapsuleDialog({
             })}
           </ol>
         )}
+        </div>
 
-        <FigmaCtaButton className="mt-4" onClick={() => onOpenChange(false)}>
+        <FigmaCtaButton className="mt-4 shrink-0" onClick={() => onOpenChange(false)}>
           닫기
         </FigmaCtaButton>
 
@@ -259,6 +267,12 @@ export function TimeCapsuleDialog({
               exit={{ opacity: 0 }}
               transition={{ duration: exit, ease: easing.standard }}
               onClick={() => setSelectedId(null)}
+              onWheel={(event) => {
+                if (event.target === event.currentTarget) event.stopPropagation();
+              }}
+              onTouchMove={(event) => {
+                if (event.target === event.currentTarget) event.stopPropagation();
+              }}
             >
               <motion.div
                 role="dialog"
@@ -268,25 +282,27 @@ export function TimeCapsuleDialog({
                 animate={reduce ? { opacity: 1 } : { opacity: 1, scale: 1 }}
                 exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.92 }}
                 transition={{ duration: enter, ease: easing.standard }}
-                className="flex h-[min(490px,calc(var(--vv-height,100dvh)-8rem))] max-h-[1056px] w-[min(360px,calc(100%-8px))] max-w-[380px] shrink-0 flex-col items-start gap-2.5 overflow-y-auto rounded-[28px] bg-white p-5 shadow-[0px_8px_32px_rgba(74,69,67,0.13)]"
+                className="flex h-[min(490px,calc(100%-8rem))] max-h-[1056px] w-[min(360px,calc(100%-8px))] max-w-[380px] shrink-0 flex-col items-start gap-2.5 overflow-hidden rounded-[28px] bg-white p-5 shadow-[0px_8px_32px_rgba(74,69,67,0.13)]"
                 onClick={(event) => event.stopPropagation()}
               >
                 <h3
                   id="capsule-popup-title"
-                  className="flex h-[30px] w-full items-center justify-center text-center text-[20px] leading-[30px] font-extrabold text-[#4A4543]"
+                  className="flex h-[30px] w-full shrink-0 items-center justify-center text-center text-[20px] leading-[30px] font-extrabold text-[#4A4543]"
                 >
                   {popup.title}
                 </h3>
-                <div className="h-[231px] w-full shrink-0 overflow-hidden bg-white">
-                  <img
-                    src={selected.imgSrc}
-                    alt=""
-                    className="h-full w-full object-contain"
-                  />
+                <div className="min-h-0 w-full flex-1 overflow-y-auto overscroll-contain">
+                  <div className="h-[231px] w-full overflow-hidden bg-white">
+                    <img
+                      src={selected.imgSrc}
+                      alt=""
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                  <p className="pt-2.5 text-[12px] leading-[22px] font-normal text-black">
+                    {popup.text}
+                  </p>
                 </div>
-                <p className="h-[110px] w-full overflow-y-auto text-[12px] leading-[22px] font-normal text-black">
-                  {popup.text}
-                </p>
                 <button
                   type="button"
                   onClick={() => setSelectedId(null)}

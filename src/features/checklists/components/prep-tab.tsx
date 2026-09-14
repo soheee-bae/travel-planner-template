@@ -5,6 +5,7 @@ import { useChecklistCategories, useChecklistItems } from "@/features/checklists
 import { ChecklistCategorySection } from "@/features/checklists/components/checklist-category";
 import { FigmaChip, FigmaChipRow, FigmaPage, FigmaPageHeader, FigmaPageTitle } from "@/components/ui/figma";
 import { AddChecklistItemDialog } from "@/features/checklists/components/add-checklist-item-dialog";
+import { PrepBodySkeleton, PrepPageSkeleton } from "@/components/ui/page-skeleton";
 import {
   PREP_CATEGORIES,
   PREP_PAGE_FILTERS,
@@ -74,7 +75,7 @@ export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boole
   }, [filter, grouped]);
 
   if (loadingCategories || loadingItems) {
-    return <p className="p-6 text-sm text-muted-foreground">불러오는 중…</p>;
+    return embedded ? <PrepBodySkeleton /> : <PrepPageSkeleton />;
   }
 
   const body = (

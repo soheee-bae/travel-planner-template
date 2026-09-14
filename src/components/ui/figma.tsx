@@ -1,6 +1,6 @@
 "use client";
 
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { useRef, type ButtonHTMLAttributes, type PointerEvent, type ReactNode } from "react";
 import { DialogClose } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +30,7 @@ export function FigmaPage({
   className?: string;
 }) {
   return (
-    <div className={cn("flex w-full flex-col items-start gap-4 p-5", className)}>{children}</div>
+    <div className={cn("flex w-full flex-col items-start gap-4 px-5 pt-1 pb-6", className)}>{children}</div>
   );
 }
 
@@ -56,7 +56,23 @@ export function FigmaPageTitle({
 }
 
 export function FigmaPageHeader({ children }: { children: ReactNode }) {
-  return <div className="flex w-full flex-col items-start px-[22px] pt-0 pb-3">{children}</div>;
+  return (
+    <div className="flex w-full shrink-0 flex-col items-start bg-white px-[22px] pt-[calc(20px+env(safe-area-inset-top,0px))] pb-1">
+      {children}
+    </div>
+  );
+}
+
+export function FigmaPageScroll({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("min-h-0 flex-1 overflow-y-auto overscroll-contain", className)}>{children}</div>
+  );
 }
 
 export function FigmaCard({
@@ -184,14 +200,47 @@ export function FigmaFieldLabel({
 }
 
 export function FigmaSheetHandle({ wide = false }: { wide?: boolean }) {
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const startY = useRef(0);
+  const dragged = useRef(false);
+  const closed = useRef(false);
+
+  function closeSheet() {
+    if (closed.current) return;
+    closed.current = true;
+    closeRef.current?.click();
+  }
+
+  function onPointerDown(event: PointerEvent<HTMLButtonElement>) {
+    closed.current = false;
+    dragged.current = false;
+    startY.current = event.clientY;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function onPointerMove(event: PointerEvent<HTMLButtonElement>) {
+    const dy = event.clientY - startY.current;
+    if (dy > 10) dragged.current = true;
+    if (dy > 56) closeSheet();
+  }
+
+  function onPointerUp() {
+    if (!dragged.current) closeSheet();
+  }
+
   return (
-    <DialogClose asChild>
+    <>
+      <DialogClose ref={closeRef} className="sr-only" aria-hidden tabIndex={-1} />
       <button
         type="button"
+        data-slot="sheet-handle"
         aria-label="닫기"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
         className={cn(
-          "flex w-full items-start justify-center",
-          wide ? "h-[22px] pt-3.5 pb-1" : "h-6 pt-3 pb-2",
+          "sticky top-0 z-20 flex h-6 w-full shrink-0 items-start justify-center bg-white",
+          wide ? "pt-3.5 pb-1" : "pt-3 pb-2",
         )}
       >
         <span
@@ -200,7 +249,7 @@ export function FigmaSheetHandle({ wide = false }: { wide?: boolean }) {
           )}
         />
       </button>
-    </DialogClose>
+    </>
   );
 }
 

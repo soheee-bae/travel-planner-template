@@ -20,6 +20,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { ExpandableText } from "@/components/ui/expandable-text";
 import { cn } from "@/lib/utils";
 import { DragHandle } from "@/components/ui/figma";
 import { IconAction } from "@/components/ui/icon-action";
@@ -62,7 +63,7 @@ function PlaceCardBody({
 }) {
   const hours = formatStayDuration(place.durationMin);
   return (
-    <div className="flex w-full items-center gap-2">
+    <div className="flex w-full items-start gap-2.5">
       {selectionMode ? (
         <input
           type="checkbox"
@@ -70,13 +71,13 @@ function PlaceCardBody({
           onChange={onToggleSelect}
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
-          className="size-5 shrink-0"
+          className="mt-1.5 size-5 shrink-0"
           aria-label={`${place.name} 선택`}
         />
       ) : sortable ? (
         <button
           type="button"
-          className="flex size-8 shrink-0 cursor-grab touch-none touch-callout-none items-center justify-center rounded-lg active:cursor-grabbing"
+          className="mt-0.5 flex size-8 shrink-0 cursor-grab touch-none touch-callout-none items-center justify-center rounded-lg active:cursor-grabbing"
           {...dragBind?.attributes}
           {...dragBind?.listeners}
           aria-label={`${place.name} 순서 변경`}
@@ -97,35 +98,32 @@ function PlaceCardBody({
         <p className="w-full min-w-0 truncate text-[14px] leading-[17px] font-bold text-[#1A1A1A]">
           {place.name}
         </p>
-        <div className="flex h-[19px] w-full items-center gap-[5px]">
+        <div className="flex w-full flex-wrap items-center gap-[5px]">
           <span
             className={cn(
-              "flex h-[19px] items-center rounded-[99px] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555]",
+              "inline-flex h-[19px] items-center rounded-[99px] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555]",
               PLACE_CATEGORY_TONE[place.category].chip,
             )}
           >
             {place.category}
           </span>
           {hours ? (
-            <span className="flex h-[17px] items-center font-nunito text-[11px] leading-4 font-normal text-[#B0AAA6]">
-              {hours}
-            </span>
+            <span className="font-nunito text-[11px] leading-4 font-normal text-[#B0AAA6]">{hours}</span>
           ) : null}
         </div>
         {place.address ? (
-          <p className="flex h-[19px] items-center text-[11px] leading-4 font-normal text-[#B0AAA6]">
-            {place.address}
-          </p>
+          <p className="w-full truncate text-[11px] leading-4 font-normal text-[#B0AAA6]">{place.address}</p>
         ) : null}
         {place.memo ? (
-          <p className="flex h-[17px] w-full items-center text-[11px] leading-4 font-medium text-[#FF9F43]">
-            {place.memo}
-          </p>
+          <ExpandableText
+            text={place.memo}
+            className="text-[11px] leading-4 font-medium text-[#FF9F43]"
+          />
         ) : null}
       </div>
       {!selectionMode ? (
         <div
-          className="flex h-[50px] w-[41px] shrink-0 flex-col items-center justify-center gap-[7px]"
+          className="flex shrink-0 flex-col items-center gap-[7px]"
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
         >

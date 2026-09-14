@@ -6,8 +6,9 @@ import { useDeleteExpense, useExpenses } from "@/features/expenses/hooks";
 import { BudgetDonutChart } from "@/features/expenses/components/budget-donut-chart";
 import { ExpenseCard, SecretAmount } from "@/features/expenses/components/expense-card";
 import { AddExpenseDialog } from "@/features/expenses/components/add-expense-dialog";
-import { FigmaChip, FigmaChipRow, FigmaCtaButton, FigmaPage, FigmaPageHeader, FigmaPageTitle, figmaShadowLift } from "@/components/ui/figma";
+import { FigmaChip, FigmaChipRow, FigmaCtaButton, FigmaPage, FigmaPageHeader, FigmaPageScroll, FigmaPageTitle, figmaShadowLift } from "@/components/ui/figma";
 import { useConfirmDelete } from "@/components/ui/confirm-delete-dialog";
+import { BudgetPageSkeleton } from "@/components/ui/page-skeleton";
 import type { Trip } from "@/mocks/fixtures/trips";
 import {
   EXPENSE_CATEGORIES,
@@ -22,7 +23,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
   const deleteExpense = useDeleteExpense(trip.id);
   const { request: askDelete, dialog: confirmDialog } = useConfirmDelete();
   const [group, setGroup] = useState<"day" | "category">("day");
-  const [dayFilter, setDayFilter] = useState<number | "all">("all");
+  const [dayFilter, setDayFilter] = useState<number | "all" | "prep">("all");
   const [categoryFilter, setCategoryFilter] = useState<ExpenseCategory | null>(null);
   const [editing, setEditing] = useState<Expense | null>(null);
   const [addOpen, setAddOpen] = useState(false);
@@ -57,12 +58,13 @@ export function BudgetTab({ trip }: { trip: Trip }) {
       return list.filter((e) => e.category === selected);
     }
     if (dayFilter === "all") return list;
+    if (dayFilter === "prep") return list.filter((e) => e.dayIndex == null);
     return list.filter((e) => e.dayIndex === dayFilter);
   }, [expenses, group, dayFilter, categoryFilter, categoryShares]);
   const visibleTotal = useMemo(() => sumAmount(withoutGiftExpenses(visible)), [visible]);
   const activeCategory = categoryFilter ?? (categoryShares[0]?.category as ExpenseCategory | undefined);
 
-  if (isLoading) return <p className="p-6 text-sm text-muted-foreground">불러오는 중…</p>;
+  if (isLoading) return <BudgetPageSkeleton />;
   if (isError)
     return (
       <p className="p-6 text-[12px] leading-[18px] font-semibold text-[#E85D4C]">
@@ -71,10 +73,11 @@ export function BudgetTab({ trip }: { trip: Trip }) {
     );
 
   return (
-    <div className="flex min-h-full flex-col bg-white">
+    <div className="flex h-full min-h-0 flex-col bg-white">
       <FigmaPageHeader>
         <FigmaPageTitle>행복 충전 영수증</FigmaPageTitle>
       </FigmaPageHeader>
+      <FigmaPageScroll>
       <FigmaPage>
         <p className="sr-only">💰 총 비용 {total.toLocaleString()}원</p>
 
@@ -161,6 +164,9 @@ export function BudgetTab({ trip }: { trip: Trip }) {
             <FigmaChip active={dayFilter === "all"} onClick={() => setDayFilter("all")}>
               전체
             </FigmaChip>
+            <FigmaChip active={dayFilter === "prep"} onClick={() => setDayFilter("prep")}>
+              여행준비
+            </FigmaChip>
             {days.map((d) => (
               <FigmaChip key={d.dayIndex} active={dayFilter === d.dayIndex} onClick={() => setDayFilter(d.dayIndex)}>
                 Day {d.dayIndex}
@@ -207,11 +213,13 @@ export function BudgetTab({ trip }: { trip: Trip }) {
           hideTrigger
           open={addOpen}
           onOpenChange={setAddOpen}
-          defaultDayIndex={group === "day" ? (dayFilter === "all" ? 1 : dayFilter) : undefined}
+          defaultDayIndex={
+            group === "day" ? (dayFilter === "all" ? 1 : dayFilter === "prep" ? null : dayFilter) : undefined
+          }
           defaultCategory={group === "category" ? activeCategory : undefined}
           onSaved={(saved) => {
             if (group === "day") {
-              if (saved.dayIndex != null) setDayFilter(saved.dayIndex);
+              setDayFilter(saved.dayIndex == null ? "prep" : saved.dayIndex);
               return;
             }
             setCategoryFilter(saved.category);
@@ -230,7 +238,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
             }}
             onSaved={(saved) => {
               if (group === "day") {
-                if (saved.dayIndex != null) setDayFilter(saved.dayIndex);
+                setDayFilter(saved.dayIndex == null ? "prep" : saved.dayIndex);
                 return;
               }
               setCategoryFilter(saved.category);
@@ -239,6 +247,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
         )}
         {confirmDialog}
       </FigmaPage>
+      </FigmaPageScroll>
     </div>
   );
 }

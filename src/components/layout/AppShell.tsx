@@ -20,15 +20,15 @@ export function AppShell({ children, className }: { children: ReactNode; classNa
     <div
       id="app-shell"
       className={cn(
-        "relative isolate mx-auto flex w-full max-w-md flex-col bg-white",
-        "h-[var(--vv-height,100dvh)] min-h-0 overflow-visible",
-        "[transform:translateZ(0)] [--trip-nav-height:56px]",
+        "relative isolate mx-auto flex h-full w-full max-w-md flex-col bg-white",
+        "min-h-0 overflow-hidden",
+        "[transform:translateZ(0)] [--trip-nav-height:calc(64px+env(safe-area-inset-bottom,0px))]",
         "md:border-x md:border-border",
         className,
       )}
     >
       <AppShellElementContext.Provider value={modalEl}>
-        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-clip overflow-y-hidden">
+        <div className="relative flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-x-clip overflow-y-hidden">
           {children}
           <Splash />
         </div>

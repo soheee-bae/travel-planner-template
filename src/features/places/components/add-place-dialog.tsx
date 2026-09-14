@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   FigmaChip,
   FigmaChipRow,
@@ -12,6 +13,7 @@ import {
   FigmaFieldLabel,
   FigmaSheetHandle,
   figmaInputClass,
+  figmaTextareaClass,
 } from "@/components/ui/figma";
 import {
   Dialog,
@@ -341,10 +343,10 @@ export function AddPlaceDialog({
           </div>
           <div className="flex flex-col gap-1.5 py-3.5">
             <FigmaFieldLabel htmlFor="place-memo">메모 (선택)</FigmaFieldLabel>
-            <Input
+            <Textarea
               id="place-memo"
               placeholder="예: 여기서 꼭 서로 사진 찍어주기 📸"
-              className={figmaInputClass}
+              className={figmaTextareaClass}
               {...form.register("memo")}
             />
           </div>

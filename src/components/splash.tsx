@@ -30,7 +30,7 @@ export function Splash() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: reduce ? 0 : EXIT_S, ease: easing.standard }}
-          className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-[15px] bg-white shadow-[0px_0px_80px_rgba(0,0,0,0.12)]"
+          className="absolute inset-0 z-50 flex flex-col items-center bg-white pt-[26%] shadow-[0px_0px_80px_rgba(0,0,0,0.12)]"
         >
           <motion.img
             src={ILLUSTRATION.splash}
@@ -43,7 +43,7 @@ export function Splash() {
             }
             className="h-[124px] w-[212px] object-contain"
           />
-          <p className="flex h-[33px] items-center justify-center text-center font-nunito text-[14px] leading-[33px] font-extrabold text-[#4A4A4A]">
+          <p className="mt-[15px] w-full px-6 text-center font-nunito text-[14px] leading-[33px] font-extrabold text-[#4A4A4A]">
             <span>소희 & 준형&nbsp;</span>
             <JejuTypewriter reduce={!!reduce} />
           </p>
@@ -72,7 +72,7 @@ function JejuTypewriter({ reduce }: { reduce: boolean }) {
   }, [reduce]);
 
   return (
-    <span className="inline-flex min-w-[6.2em] items-center text-left" aria-hidden>
+    <span className="inline" aria-hidden>
       {JEJU_SUFFIX.slice(0, Math.min(count, JEJU_SUFFIX.length))}
       <span className={cursorOn && !reduce ? "opacity-100" : "opacity-0"}>|</span>
     </span>

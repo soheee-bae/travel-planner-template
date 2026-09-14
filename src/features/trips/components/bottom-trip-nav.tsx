@@ -123,7 +123,7 @@ export function BottomTripNav({
     <nav
       role="tablist"
       aria-label="여행 상세 탭"
-      className="sticky bottom-0 z-30 box-border flex h-14 shrink-0 items-center justify-center border-t border-black/5 bg-[rgba(255,255,255,0.92)] backdrop-blur-[8px]"
+      className="sticky bottom-0 z-30 box-border flex h-[calc(4rem+env(safe-area-inset-bottom,0px))] shrink-0 items-center justify-center border-t border-black/5 bg-[rgba(255,255,255,0.92)] pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-[8px]"
     >
       {NAV_ITEMS.map((item) => {
         const isActive = current === item.tab;

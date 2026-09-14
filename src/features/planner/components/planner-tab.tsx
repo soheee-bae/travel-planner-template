@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { FigmaCtaButton, FigmaChip, FigmaChipRow, FigmaPage, FigmaPageHeader, FigmaPageTitle } from "@/components/ui/figma";
+import { FigmaCtaButton, FigmaChip, FigmaChipRow, FigmaPage, FigmaPageHeader, FigmaPageScroll, FigmaPageTitle } from "@/components/ui/figma";
 import { useConfirmDelete } from "@/components/ui/confirm-delete-dialog";
+import { PlannerPageSkeleton } from "@/components/ui/page-skeleton";
 import { useAppShellElement } from "@/components/layout/AppShell";
 import { usePlaces, useUpdatePlace, useDeletePlace } from "@/features/places/hooks";
 import { PlannerMap } from "@/features/planner/components/planner-map";
@@ -91,7 +92,7 @@ export function PlannerTab({ trip }: { trip: Trip }) {
     setHighlightId(placeId ?? undefined);
   }
 
-  if (isLoading) return <p className="p-6 text-sm text-muted-foreground">불러오는 중…</p>;
+  if (isLoading) return <PlannerPageSkeleton />;
   if (isError)
     return (
       <p className="p-6 text-[12px] leading-[18px] font-semibold text-[#E85D4C]">
@@ -157,7 +158,7 @@ export function PlannerTab({ trip }: { trip: Trip }) {
       : null;
 
   return (
-    <div className="flex min-h-full flex-col bg-white">
+    <div className="flex h-full min-h-0 flex-col bg-white">
       <FigmaPageHeader>
         <div className="flex w-full items-center justify-between">
           <FigmaPageTitle className="w-auto flex-1 font-nunito">오늘의 느긋한 동선</FigmaPageTitle>
@@ -174,6 +175,7 @@ export function PlannerTab({ trip }: { trip: Trip }) {
           </button>
         </div>
       </FigmaPageHeader>
+      <FigmaPageScroll>
       <FigmaPage>
         <PlannerDayTabs
           startDate={trip.startDate}
@@ -280,6 +282,7 @@ export function PlannerTab({ trip }: { trip: Trip }) {
         ) : null}
         {confirmDialog}
       </FigmaPage>
+      </FigmaPageScroll>
       {blockingTravel && shell
         ? createPortal(
             <div

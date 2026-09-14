@@ -79,6 +79,8 @@ function DialogContent({
                 "shadow-[0px_-8px_40px_rgba(0,0,0,0.12)]",
                 "max-h-[calc(100%-48px)] overscroll-contain",
                 "data-open:sheet-enter data-closed:sheet-leave",
+                "[&_[data-slot=sheet-handle]]:sticky [&_[data-slot=sheet-handle]]:top-0",
+                "[&_[data-slot=dialog-header]]:sticky [&_[data-slot=dialog-header]]:top-6 [&_[data-slot=dialog-header]]:z-20",
               ),
           className,
         )}
@@ -99,7 +101,11 @@ function DialogContent({
 
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div data-slot="dialog-header" className={cn("flex w-full flex-col gap-2", className)} {...props} />
+    <div
+      data-slot="dialog-header"
+      className={cn("flex w-full shrink-0 flex-col gap-2 bg-white pb-2", className)}
+      {...props}
+    />
   );
 }
 
