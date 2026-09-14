@@ -1,21 +1,34 @@
 import { z } from "zod";
 
-export const PLACE_CATEGORIES = ["관광", "맛집", "카페", "숙소", "교통", "쇼핑", "기타"] as const;
+export const PLACE_CATEGORIES = [
+  "맛집",
+  "카페",
+  "자연",
+  "관광",
+  "숙소",
+  "교통",
+  "공항",
+  "쇼핑",
+  "기타",
+] as const;
 export type PlaceCategory = (typeof PLACE_CATEGORIES)[number];
 
 export const PLACE_CATEGORY_EMOJI: Record<PlaceCategory, string> = {
-  관광: "🏛️",
   맛집: "🍽️",
   카페: "☕",
-  쇼핑: "🛍️",
+  자연: "🌳",
+  관광: "🏛️",
   숙소: "🏨",
   교통: "🚗",
+  공항: "✈️",
+  쇼핑: "🛍️",
   기타: "📍",
 };
 
-/** DB에 남은 예전 '액티비티' 값은 숙소로 본다. */
+/** DB에 남은 예전 값을 현재 카테고리로 본다. */
 export function normalizePlaceCategory(raw: string): PlaceCategory {
   if (raw === "액티비티") return "숙소";
+  if (raw === "공원") return "자연";
   if ((PLACE_CATEGORIES as readonly string[]).includes(raw)) {
     return raw as PlaceCategory;
   }

@@ -63,7 +63,7 @@ function PlaceCardBody({
 }) {
   const hours = formatStayDuration(place.durationMin);
   return (
-    <div className="flex w-full items-start gap-2.5">
+    <div className="flex w-full items-start gap-2">
       {selectionMode ? (
         <input
           type="checkbox"
@@ -71,13 +71,13 @@ function PlaceCardBody({
           onChange={onToggleSelect}
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
-          className="mt-1.5 size-5 shrink-0"
+          className="mt-1 size-5 shrink-0"
           aria-label={`${place.name} 선택`}
         />
       ) : sortable ? (
         <button
           type="button"
-          className="mt-0.5 flex size-8 shrink-0 cursor-grab touch-none touch-callout-none items-center justify-center rounded-lg active:cursor-grabbing"
+          className="flex size-6 shrink-0 cursor-grab touch-none touch-callout-none items-center justify-center rounded-lg active:cursor-grabbing"
           {...dragBind?.attributes}
           {...dragBind?.listeners}
           aria-label={`${place.name} 순서 변경`}
@@ -88,51 +88,54 @@ function PlaceCardBody({
       ) : null}
       <span
         className={cn(
-          "flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl p-1",
+          "mt-0.5 flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl p-1",
           PLACE_CATEGORY_TONE[place.category].iconBg,
         )}
       >
         <IllustrationIcon src={PLACE_CATEGORY_ICON[place.category]} className="size-full" />
       </span>
       <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
-        <p className="w-full min-w-0 truncate text-[14px] leading-[17px] font-bold text-[#1A1A1A]">
-          {place.name}
-        </p>
-        <div className="flex w-full flex-wrap items-center gap-[5px]">
-          <span
-            className={cn(
-              "inline-flex h-[19px] items-center rounded-[99px] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555]",
-              PLACE_CATEGORY_TONE[place.category].chip,
-            )}
-          >
-            {place.category}
-          </span>
-          {hours ? (
-            <span className="font-nunito text-[11px] leading-4 font-normal text-[#B0AAA6]">{hours}</span>
+        <div className="flex w-full items-center gap-1">
+          <div className="flex min-w-0 flex-1 items-center gap-1.5">
+            <p className="min-w-0 shrink truncate text-[14px] leading-[17px] font-bold text-[#1A1A1A]">
+              {place.name}
+            </p>
+            <span
+              className={cn(
+                "inline-flex h-[19px] shrink-0 items-center rounded-[99px] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555]",
+                PLACE_CATEGORY_TONE[place.category].chip,
+              )}
+            >
+              {place.category}
+            </span>
+          </div>
+          {!selectionMode ? (
+            <div
+              className="flex shrink-0 items-center gap-0"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {onEdit ? <IconAction action="edit" label={`${place.name} 수정`} onClick={onEdit} className="size-6" /> : null}
+              {onDelete ? (
+                <IconAction action="delete" label={`${place.name} 삭제`} onClick={onDelete} className="size-6" />
+              ) : null}
+            </div>
           ) : null}
         </div>
         {place.address ? (
           <p className="w-full truncate text-[11px] leading-4 font-normal text-[#B0AAA6]">{place.address}</p>
         ) : null}
+        {hours ? (
+          <span className="font-nunito text-[11px] leading-4 font-normal text-[#B0AAA6]">{hours}</span>
+        ) : null}
         {place.memo ? (
           <ExpandableText
             text={place.memo}
+            lines={1}
             className="text-[11px] leading-4 font-medium text-[#FF9F43]"
           />
         ) : null}
       </div>
-      {!selectionMode ? (
-        <div
-          className="flex shrink-0 flex-col items-center gap-[7px]"
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {onEdit ? <IconAction action="edit" label={`${place.name} 수정`} onClick={onEdit} /> : null}
-          {onDelete ? (
-            <IconAction action="delete" label={`${place.name} 삭제`} onClick={onDelete} />
-          ) : null}
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -216,8 +219,11 @@ function TravelTimePill({ leg }: { leg?: TravelLeg }) {
   const icon = leg.mode === "walk" ? "🚶" : "🚗";
   return (
     <div className="flex h-[25px] w-full items-center justify-center">
-      <span className="flex h-[25px] items-center justify-center gap-[5px] rounded-[99px] bg-[#FFF0DB] px-2.5 py-1 text-[11px] leading-4 font-semibold text-[#F49A1F]">
-        {icon} {formatTravelDuration(leg.durationMin)}
+      <span className="inline-flex h-[25px] items-center justify-center gap-1 rounded-[99px] bg-[#FFF0DB] px-2.5 py-1 text-[11px] leading-none font-semibold text-[#F49A1F]">
+        <span className="flex size-3.5 items-center justify-center text-[12px] leading-none" aria-hidden>
+          {icon}
+        </span>
+        <span className="leading-none">{formatTravelDuration(leg.durationMin)}</span>
       </span>
     </div>
   );

@@ -43,11 +43,13 @@ function expense(overrides: Partial<Expense> = {}): Expense {
 
 describe("mapPlaceCategoryToExpense", () => {
   it("장소 카테고리를 비용 카테고리로 대응한다", () => {
-    expect(mapPlaceCategoryToExpense("관광")).toBe("놀거리");
+    expect(mapPlaceCategoryToExpense("관광")).toBe("놀거리/입장권");
+    expect(mapPlaceCategoryToExpense("자연")).toBe("놀거리/입장권");
     expect(mapPlaceCategoryToExpense("맛집")).toBe("식비");
     expect(mapPlaceCategoryToExpense("카페")).toBe("카페");
     expect(mapPlaceCategoryToExpense("숙소")).toBe("숙소");
     expect(mapPlaceCategoryToExpense("교통")).toBe("교통/주유");
+    expect(mapPlaceCategoryToExpense("공항")).toBe("기타");
   });
 });
 

@@ -1,4 +1,4 @@
-import { isGiftPayer, type Expense } from "@/mocks/fixtures/expenses";
+import { isGiftExpense, type Expense } from "@/mocks/fixtures/expenses";
 
 export interface CategoryShare {
   category: string;
@@ -12,9 +12,30 @@ export function sumAmount(expenses: Expense[]): number {
   return expenses.reduce((sum, e) => sum + e.amount, 0);
 }
 
-/** 정산 🎁 / paid_by 선물은 파이·라벨 합계에서 뺀다. */
+/** 정산 🎁 / paid_by 선물 / is_blur 항목은 파이·라벨 합계에서 뺀다. */
 export function withoutGiftExpenses(expenses: Expense[]): Expense[] {
-  return expenses.filter((e) => !isGiftPayer(e.paidBy));
+  return expenses.filter((e) => !isGiftExpense(e));
+}
+
+export interface ReceiptSettlement {
+  me: number;
+  jun: number;
+  together: number;
+  /** 양수면 소희→준형, 음수면 준형→소희. 선물은 포함하지 않는다. */
+  owe: number;
+}
+
+/** 소희/준형 정산. is_blur·선물 항목은 🎁로만 넣고 갚을 금액에서는 뺀다. */
+export function summarizeReceiptSettlement(expenses: Expense[]): ReceiptSettlement {
+  let me = 0;
+  let jun = 0;
+  let together = 0;
+  for (const e of expenses) {
+    if (isGiftExpense(e)) together += e.amount;
+    else if (e.paidBy === "준형") jun += e.amount;
+    else me += e.amount;
+  }
+  return { me, jun, together, owe: Math.round((jun - me) / 2) };
 }
 
 export function groupByCategory(expenses: Expense[]): CategoryShare[] {

@@ -123,7 +123,7 @@ export function BottomTripNav({
     <nav
       role="tablist"
       aria-label="여행 상세 탭"
-      className="sticky bottom-0 z-30 box-border flex h-[calc(4rem+env(safe-area-inset-bottom,0px))] shrink-0 items-center justify-center border-t border-black/5 bg-[rgba(255,255,255,0.92)] pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-[8px]"
+      className="sticky bottom-0 z-30 box-border flex h-[calc(3.5rem+env(safe-area-inset-bottom,0px))] shrink-0 items-center justify-center border-t border-black/5 bg-[rgba(255,255,255,0.92)] pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-[8px]"
     >
       {NAV_ITEMS.map((item) => {
         const isActive = current === item.tab;
@@ -139,7 +139,7 @@ export function BottomTripNav({
             onClick={() => onChange(item.tab)}
             aria-label={item.label}
             className={cn(
-              "flex h-full w-[78px] flex-1 flex-col items-center justify-center px-0.5 py-1.5",
+              "flex h-full w-[78px] flex-1 flex-col items-center justify-center px-0.5 py-1",
               "gap-[2.75px] text-center text-[9px] leading-[14px]",
               isActive ? "font-bold text-[#FF9F43]" : "font-normal text-[#AAAAAA]",
             )}

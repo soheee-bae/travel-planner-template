@@ -5,7 +5,7 @@ import { CATEGORY_COLORS } from "@/features/expenses/category-colors";
 import type { CategoryShare } from "@/lib/expense-aggregation";
 
 function formatPrice(amount: number): string {
-  return amount.toLocaleString("ko-KR");
+  return `${amount.toLocaleString("ko-KR")}원`;
 }
 
 export function BudgetDonutChart({ data, total }: { data: CategoryShare[]; total?: number }) {

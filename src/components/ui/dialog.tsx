@@ -77,10 +77,10 @@ function DialogContent({
                 "absolute inset-x-0 bottom-0 overflow-x-hidden overflow-y-auto",
                 "rounded-t-[24px] rounded-b-none px-5 pt-0 pb-[max(24px,env(safe-area-inset-bottom,0px))]",
                 "shadow-[0px_-8px_40px_rgba(0,0,0,0.12)]",
-                "max-h-[calc(100%-48px)] overscroll-contain",
+                "max-h-[calc(100%-48px)] gap-0 overscroll-contain",
                 "data-open:sheet-enter data-closed:sheet-leave",
                 "[&_[data-slot=sheet-handle]]:sticky [&_[data-slot=sheet-handle]]:top-0",
-                "[&_[data-slot=dialog-header]]:sticky [&_[data-slot=dialog-header]]:top-6 [&_[data-slot=dialog-header]]:z-20",
+                "[&_[data-slot=dialog-header]]:sticky [&_[data-slot=dialog-header]]:top-[12px] [&_[data-slot=dialog-header]]:z-20 [&_[data-slot=dialog-header]]:pt-3 [&_[data-slot=dialog-header]]:pb-3",
               ),
           className,
         )}
@@ -103,7 +103,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex w-full shrink-0 flex-col gap-2 bg-white pb-2", className)}
+      className={cn("flex w-full shrink-0 flex-col gap-2 bg-white", className)}
       {...props}
     />
   );

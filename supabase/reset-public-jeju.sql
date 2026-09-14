@@ -65,13 +65,13 @@ delete from trips;
 
 alter table places alter column category type text using category::text;
 drop type if exists place_category;
-create type place_category as enum ('관광', '맛집', '카페', '숙소', '교통', '쇼핑', '기타');
+create type place_category as enum ('맛집', '카페', '자연', '관광', '숙소', '교통', '공항', '쇼핑', '기타');
 alter table places alter column category type place_category using category::place_category;
 
 alter table expenses alter column category type text using category::text;
 drop type if exists expense_category;
 create type expense_category as enum (
-  '식비', '카페', '교통/주유', '숙소', '쇼핑/선물', '놀거리', '기타'
+  '식비', '카페', '교통/주유', '항공', '숙소', '쇼핑/선물', '놀거리/입장권', '기타'
 );
 alter table expenses alter column category type expense_category using category::expense_category;
 
@@ -264,7 +264,7 @@ insert into expenses (
   (
     '00000000-0000-0000-0005-000000000101',
     '00000000-0000-0000-0001-000000000001',
-    '제주항공 왕복', '교통/주유', 148000, 'KRW', '2026-10-14',
+    '제주항공 왕복', '항공', 148000, 'KRW', '2026-10-14',
     1, '카드', '준형', null, true, false
   ),
   (
@@ -288,7 +288,7 @@ insert into expenses (
   (
     '00000000-0000-0000-0005-000000000105',
     '00000000-0000-0000-0001-000000000001',
-    '성산일출봉 입장', '놀거리', 5000, 'KRW', '2026-10-16',
+    '성산일출봉 입장', '놀거리/입장권', 5000, 'KRW', '2026-10-16',
     3, '현금', '소희', '00000000-0000-0000-0004-000000000106', true, false
   ),
   (

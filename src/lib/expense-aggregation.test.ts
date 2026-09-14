@@ -5,6 +5,7 @@ import {
   groupByPayer,
   groupByPaymentMethod,
   sumAmount,
+  summarizeReceiptSettlement,
   withoutGiftExpenses,
 } from "@/lib/expense-aggregation";
 import type { Expense } from "@/mocks/fixtures/expenses";
@@ -68,6 +69,32 @@ describe("withoutGiftExpenses", () => {
       makeExpense({ amount: 2000, paidBy: "같이" }),
     ];
     expect(withoutGiftExpenses(expenses).map((e) => e.amount)).toEqual([1000]);
+  });
+
+  it("is_blur 항목도 파이 합계에서 뺀다", () => {
+    const expenses = [
+      makeExpense({ amount: 1000, paidBy: "소희" }),
+      makeExpense({ amount: 8000, paidBy: "준형", isBlur: true }),
+    ];
+    expect(withoutGiftExpenses(expenses).map((e) => e.amount)).toEqual([1000]);
+  });
+});
+
+describe("summarizeReceiptSettlement", () => {
+  it("is_blur 항목은 선물로만 넣고 갚을 금액에서는 뺀다", () => {
+    expect(
+      summarizeReceiptSettlement([
+        makeExpense({ amount: 10000, paidBy: "소희" }),
+        makeExpense({ amount: 4000, paidBy: "준형" }),
+        makeExpense({ amount: 20000, paidBy: "준형", isBlur: true }),
+        makeExpense({ amount: 3000, paidBy: "선물" }),
+      ]),
+    ).toEqual({
+      me: 10000,
+      jun: 4000,
+      together: 23000,
+      owe: -3000,
+    });
   });
 });
 

@@ -51,7 +51,7 @@ export function OverviewTab({ tripId }: { tripId: string }) {
         onClick={() => setCapsuleOpen(true)}
         className={cn(
           "pointer-events-auto absolute right-5 z-20 flex size-[60px] items-center justify-center rounded-full",
-          "bottom-[calc(var(--trip-nav-height,64px)+16px)]",
+          "bottom-[calc(var(--trip-nav-height,56px)+16px)]",
           ILLUSTRATION.giftFab.bg,
           ILLUSTRATION.giftFab.shadow,
         )}

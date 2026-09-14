@@ -10,7 +10,7 @@ export function ExpandableText({
 }: {
   text: string;
   className?: string;
-  lines?: 2 | 3;
+  lines?: 1 | 2 | 3;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -26,7 +26,17 @@ export function ExpandableText({
       aria-expanded={open}
       className={cn("w-full min-w-0 text-left", className)}
     >
-      <span className={open ? "whitespace-pre-wrap break-words" : lines === 3 ? "line-clamp-3" : "line-clamp-2"}>
+      <span
+        className={
+          open
+            ? "whitespace-pre-wrap break-words"
+            : lines === 1
+              ? "line-clamp-1"
+              : lines === 3
+                ? "line-clamp-3"
+                : "line-clamp-2"
+        }
+      >
         {text}
       </span>
     </button>

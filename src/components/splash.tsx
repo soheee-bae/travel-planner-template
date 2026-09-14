@@ -10,14 +10,18 @@ const SPLASH_MS = 2500;
 const EXIT_S = 0.5;
 const JEJU_SUFFIX = "in JEJU...";
 
-export function Splash() {
+export function Splash({ onActiveChange }: { onActiveChange?: (active: boolean) => void }) {
   const [visible, setVisible] = useState(true);
   const reduce = useReducedMotion();
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setVisible(false), SPLASH_MS);
+    onActiveChange?.(true);
+    const timer = window.setTimeout(() => {
+      setVisible(false);
+      onActiveChange?.(false);
+    }, SPLASH_MS);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [onActiveChange]);
 
   return (
     <AnimatePresence>
@@ -30,7 +34,7 @@ export function Splash() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: reduce ? 0 : EXIT_S, ease: easing.standard }}
-          className="absolute inset-0 z-50 flex flex-col items-center bg-white pt-[26%] shadow-[0px_0px_80px_rgba(0,0,0,0.12)]"
+          className="absolute inset-0 z-[80] flex flex-col items-center justify-center bg-white pb-[12vh] shadow-[0px_0px_80px_rgba(0,0,0,0.12)]"
         >
           <motion.img
             src={ILLUSTRATION.splash}

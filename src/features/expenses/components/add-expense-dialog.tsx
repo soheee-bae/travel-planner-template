@@ -114,7 +114,7 @@ export function AddExpenseDialog({
       amount: undefined as unknown as number,
       currency,
       paidBy: undefined,
-      dayIndex: defaultDayIndex !== undefined ? defaultDayIndex : (days[0]?.dayIndex ?? 1),
+      dayIndex: defaultDayIndex ?? days[0]?.dayIndex ?? 1,
     };
   }
 
@@ -128,7 +128,7 @@ export function AddExpenseDialog({
           amount: initial.amount,
           currency: initial.currency,
           paidBy: payerValue(initial.paidBy),
-          dayIndex: initial.dayIndex,
+          dayIndex: initial.dayIndex ?? days[0]?.dayIndex ?? 1,
         }
       : emptyValues(),
   });
@@ -213,7 +213,7 @@ export function AddExpenseDialog({
       )}
       <DialogContent
         showCloseButton={false}
-        className="max-h-[calc(100%-48px)] gap-4 overflow-y-auto"
+        className="max-h-[calc(100%-48px)] gap-0 overflow-y-auto"
       >
         <FigmaSheetHandle />
         <DialogHeader className="gap-0">
@@ -303,13 +303,6 @@ export function AddExpenseDialog({
           <div className="flex flex-col">
             <FigmaFieldLabel>일차</FigmaFieldLabel>
             <FigmaChipRow role="group" aria-label="일차">
-              <FigmaChip
-                size="sm"
-                active={dayIndex == null}
-                onClick={() => form.setValue("dayIndex", null)}
-              >
-                여행준비
-              </FigmaChip>
               {days.map((day) => (
                 <FigmaChip
                   key={day.dayIndex}

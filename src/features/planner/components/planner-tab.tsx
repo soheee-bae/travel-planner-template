@@ -18,7 +18,7 @@ import { getTripDays } from "@/lib/trip-days";
 import type { Trip } from "@/mocks/fixtures/trips";
 import type { Place } from "@/mocks/fixtures/places";
 
-export function PlannerTab({ trip }: { trip: Trip }) {
+export function PlannerTab({ trip, active = true }: { trip: Trip; active?: boolean }) {
   const { data: places, isLoading, isError } = usePlaces(trip.id);
   const updatePlace = useUpdatePlace(trip.id);
   const deletePlace = useDeletePlace(trip.id);
@@ -108,6 +108,7 @@ export function PlannerTab({ trip }: { trip: Trip }) {
       onSelectPlace={handleMapSelect}
       onToggleExpand={() => setMapExpanded((prev) => !prev)}
       expanded={mapExpanded}
+      visible={active}
       showPopup={!selectionMode && !mapExpanded}
     />
   );
@@ -161,7 +162,7 @@ export function PlannerTab({ trip }: { trip: Trip }) {
     <div className="flex h-full min-h-0 flex-col bg-white">
       <FigmaPageHeader>
         <div className="flex w-full items-center justify-between">
-          <FigmaPageTitle className="w-auto flex-1 font-nunito">오늘의 느긋한 동선</FigmaPageTitle>
+          <FigmaPageTitle className="w-auto flex-1">오늘의 느긋한 동선</FigmaPageTitle>
           <button
             type="button"
             className="shrink-0 text-[13px] leading-5 font-semibold text-[#8C8885]"

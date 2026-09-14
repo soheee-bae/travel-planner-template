@@ -18,6 +18,7 @@ export function NaverPlannerMap({
   selectedPlaceId,
   onSelectPlace,
   onFatalError,
+  visible = true,
 }: {
   clientId: string;
   places: Place[];
@@ -25,6 +26,7 @@ export function NaverPlannerMap({
   selectedPlaceId?: string;
   onSelectPlace?: (placeId: string | null) => void;
   onFatalError: () => void;
+  visible?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapsRef = useRef<NaverMapsApi | null>(null);
@@ -172,6 +174,16 @@ export function NaverPlannerMap({
       }
     }
   }, [places, activeDayIndex, selectedPlaceId, ready]);
+
+  useEffect(() => {
+    if (!visible || !ready) return;
+    const frame = window.requestAnimationFrame(() => mapRef.current?.autoResize?.());
+    const timer = window.setTimeout(() => mapRef.current?.autoResize?.(), 80);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [visible, ready]);
 
   return (
     <div

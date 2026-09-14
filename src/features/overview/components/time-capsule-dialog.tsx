@@ -12,7 +12,7 @@ import { formatSeoulDateTime } from "@/lib/date";
 import { easing } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { IllustrationIcon } from "@/components/ui/illustration-icon";
-import { CAPSULE_UNLOCK_ICON } from "@/lib/illustrations";
+import { CAPSULE_UNLOCK_ICON, ILLUSTRATION } from "@/lib/illustrations";
 import { capsulePopupView, isCapsuleUnlocked, type TimeCapsule } from "@/mocks/fixtures/time-capsules";
 
 const NODE_SIZE = 48;
@@ -131,7 +131,7 @@ export function TimeCapsuleDialog({
         overlayClassName="bg-[rgba(0,0,0,0.35)]"
         className="relative left-1/2 right-auto flex h-[min(755px,calc(100%-24px))] max-h-[1056px] w-[min(360px,calc(100%-20px))] max-w-[380px] -translate-x-1/2 flex-col items-center overflow-hidden rounded-[28px] bg-white px-5 pt-6 pb-7 shadow-[0px_8px_32px_rgba(74,69,67,0.13)]"
       >
-        <DialogHeader className="w-full shrink-0 items-center gap-1.5 pb-0 text-center">
+        <DialogHeader className="mb-4 w-full shrink-0 items-center gap-1.5 pb-0 text-center">
           <DialogTitle className="flex h-[30px] items-center justify-center text-center text-[20px] leading-[30px] font-extrabold text-[#4A4543]">
             소희 가이드 시크릿 노트
           </DialogTitle>
@@ -153,7 +153,7 @@ export function TimeCapsuleDialog({
             타임캡슐을 다시 불러와 줘.
           </p>
         ) : (
-          <ol className="relative mt-6 h-[560px] w-full shrink-0">
+          <ol className="relative h-[560px] w-full shrink-0">
             <svg
               className="pointer-events-none absolute inset-0 h-full w-full"
               viewBox="0 0 320 560"
@@ -196,13 +196,10 @@ export function TimeCapsuleDialog({
                       className="relative z-20 flex size-12 items-center justify-center overflow-hidden rounded-full border-[3px] border-[#FF9F43] bg-white"
                       aria-hidden
                     >
-                      {unlocked && unlockIcon ? (
-                        <IllustrationIcon src={unlockIcon} className="size-8" />
-                      ) : (
-                        <span className={unlocked ? "text-[20px] leading-4 text-[#8C8885]" : "text-[20px] leading-4 text-[#B0AAA6]"}>
-                          {unlocked ? "🍊" : "🔒"}
-                        </span>
-                      )}
+                      <IllustrationIcon
+                        src={unlocked && unlockIcon ? unlockIcon : ILLUSTRATION.lock}
+                        className="size-8"
+                      />
                     </span>
                     <span
                       className="absolute z-10 box-border flex w-max max-w-[168px] flex-col items-start gap-0.5 overflow-visible rounded-[14px] border border-[#EAE4D8] bg-white px-3 py-2.5 text-left shadow-[0px_2px_12px_rgba(0,0,0,0.06)]"

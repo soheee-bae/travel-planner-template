@@ -52,12 +52,7 @@ export function ExpenseCard({
           <IllustrationIcon src={EXPENSE_CATEGORY_ICON[expense.category]} className="size-full" />
         </div>
         <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-          <p
-            className={cn(
-              "block h-[23px] w-full truncate text-[15px] leading-[22px] font-bold text-[#1A1A1A]",
-              blurred && "select-none blur-[3.5px]",
-            )}
-          >
+          <p className="block h-[23px] w-full truncate text-[15px] leading-[22px] font-bold text-[#1A1A1A]">
             {expense.title}
           </p>
           <div className="flex h-[23px] w-full items-start gap-1 pt-1">
@@ -69,9 +64,9 @@ export function ExpenseCard({
             >
               {expense.category}
             </span>
-            {expense.paidBy ? (
+            {blurred || expense.paidBy ? (
               <span className="flex h-[19px] items-center rounded-[99px] bg-[#F5F5F5] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555]">
-                {paidByTagLabel(expense.paidBy)}
+                {blurred ? "선물" : paidByTagLabel(expense.paidBy ?? "")}
               </span>
             ) : null}
           </div>

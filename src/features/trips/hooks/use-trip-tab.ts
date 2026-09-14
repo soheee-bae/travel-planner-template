@@ -10,27 +10,25 @@ export type TripPanel = (typeof NAV_SWIPE_TABS)[number];
 
 const DEFAULT_TAB: TripTab = "overview";
 
-function isTripTab(value: string | null): value is TripTab {
-  return !!value && (TRIP_TABS as readonly string[]).includes(value);
-}
-
 /**
- * 여행 디테일의 6탭은 라우트 전환이 아니라 쿼리스트링(?tab=)으로 다룬다.
- * 지도 인스턴스·스크롤 위치가 유지되고 스와이프 제스처를 완전히 통제할 수
- * 있다 (docs/01-architecture.md §1.3).
+ * 탭은 로컬 상태가 소스다. URL의 ?tab=은 세션 중에만 맞춰 두고,
+ * 여행에 들어올 때는 항상 홈으로 시작한다.
  */
 export function useTripTab() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  const tabParam = searchParams.get("tab");
-  const urlTab: TripTab = isTripTab(tabParam) ? tabParam : DEFAULT_TAB;
-  const [tab, setTabState] = useState<TripTab>(urlTab);
+  const [tab, setTabState] = useState<TripTab>(DEFAULT_TAB);
 
   useEffect(() => {
-    setTabState(urlTab);
-  }, [urlTab]);
+    if (!searchParams.get("tab")) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("tab");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    // 들어올 때 한 번만 홈으로 맞춘다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const setTab = useCallback(
     (next: TripTab) => {

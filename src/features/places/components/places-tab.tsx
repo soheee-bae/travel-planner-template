@@ -11,7 +11,7 @@ import { PlaceFilterBar, type PlaceFilter } from "@/features/places/components/p
 import { AddPlaceDialog } from "@/features/places/components/add-place-dialog";
 import { cn } from "@/lib/utils";
 import type { Trip } from "@/mocks/fixtures/trips";
-import type { Place } from "@/mocks/fixtures/places";
+import { PLACE_CATEGORIES, type Place } from "@/mocks/fixtures/places";
 
 export function PlacesTab({ trip }: { trip: Trip }) {
   const tripId = trip.id;
@@ -25,16 +25,10 @@ export function PlacesTab({ trip }: { trip: Trip }) {
   const [query, setQuery] = useState("");
 
   const counts = useMemo(() => {
-    const base: Record<PlaceFilter, number> = {
+    const base = {
       전체: places?.length ?? 0,
-      관광: 0,
-      맛집: 0,
-      카페: 0,
-      쇼핑: 0,
-      숙소: 0,
-      교통: 0,
-      기타: 0,
-    };
+    } as Record<PlaceFilter, number>;
+    for (const category of PLACE_CATEGORIES) base[category] = 0;
     for (const p of places ?? []) base[p.category] += 1;
     return base;
   }, [places]);

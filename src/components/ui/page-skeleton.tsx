@@ -16,7 +16,7 @@ function PageChrome({ children }: { children: ReactNode }) {
 export function HomePageSkeleton() {
   return (
     <PageChrome>
-      <div className="flex items-start justify-between gap-3 px-5 pb-2">
+      <div className="flex items-start justify-between gap-3 px-5 pb-5">
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <Pulse className="h-7 w-[220px]" />
           <Pulse className="h-4 w-[140px]" />
@@ -35,7 +35,7 @@ export function HomePageSkeleton() {
 export function ListPageSkeleton() {
   return (
     <PageChrome>
-      <div className="px-[22px] pb-2">
+      <div className="px-[22px] pb-5">
         <Pulse className="h-7 w-[200px]" />
       </div>
       <div className="flex flex-col gap-3 px-5 pt-1">
@@ -56,7 +56,7 @@ export function ListPageSkeleton() {
 export function PlannerPageSkeleton() {
   return (
     <PageChrome>
-      <div className="px-[22px] pb-2">
+      <div className="px-[22px] pb-5">
         <Pulse className="h-7 w-[180px]" />
       </div>
       <div className="flex flex-col gap-3 px-5 pt-1">
@@ -76,7 +76,7 @@ export function PlannerPageSkeleton() {
 export function BudgetPageSkeleton() {
   return (
     <PageChrome>
-      <div className="px-[22px] pb-2">
+      <div className="px-[22px] pb-5">
         <Pulse className="h-7 w-[160px]" />
       </div>
       <div className="flex flex-col gap-3 px-5 pt-1">
@@ -92,7 +92,7 @@ export function BudgetPageSkeleton() {
 export function PrepPageSkeleton() {
   return (
     <PageChrome>
-      <div className="px-[22px] pb-2">
+      <div className="px-[22px] pb-5">
         <Pulse className="h-7 w-[240px]" />
       </div>
       <PrepBodySkeleton className="px-5 pt-1" />

@@ -6,6 +6,7 @@ import { airportCodeFromName, cityLabelFromName } from "@/lib/airport";
 import { formatDday, formatDdayCaption, formatDuration } from "@/lib/date";
 import { useJejuWeather } from "@/features/overview/hooks/use-jeju-weather";
 import { IllustrationIcon } from "@/components/ui/illustration-icon";
+import { ILLUSTRATION } from "@/lib/illustrations";
 import { WeatherCardSkeleton } from "@/components/ui/page-skeleton";
 import { TicketPerforation } from "@/components/ui/figma";
 import { SegmentedSwap } from "@/components/ui/segmented-swap";
@@ -78,27 +79,34 @@ export function JejuHomeHero({
 
   return (
     <section className="flex h-full min-h-0 w-full flex-col">
-      <header className="flex w-full shrink-0 items-start justify-between gap-3 bg-white px-5 pt-[calc(20px+env(safe-area-inset-top,0px))] pb-1">
-        <div className="flex min-w-0 flex-1 flex-col items-start">
-          <h1 className="w-full truncate font-nunito text-[20px] leading-[30px] font-bold text-[#1A1A1A]">
-            {trip.title}
+      <header className="flex w-full shrink-0 items-center bg-white px-5 pt-[calc(20px+env(safe-area-inset-top,0px))] pb-5">
+        <div className="flex min-w-0 flex-col items-start">
+          <h1 className="flex w-full items-center gap-1.5 font-nunito text-[20px] leading-[30px] font-bold text-[#1A1A1A]">
+            <IllustrationIcon src={ILLUSTRATION.tangerine} className="size-7 shrink-0" />
+            <span className="min-w-0 truncate">{trip.title}</span>
           </h1>
-          <p className="w-full text-xs leading-[18px] font-normal text-[#8E8E8E]">
-            {formatMd(trip.startDate)} - {formatMd(trip.endDate)} · {formatDuration(trip.startDate, trip.endDate)}
-          </p>
-        </div>
-        <div className="flex shrink-0 flex-col items-end pt-0.5">
-          <p className="text-[10px] leading-[15px] font-medium tracking-[0.2px] text-[#FF9F43]">
-            {formatDdayCaption(trip.startDate, trip.endDate)}
-          </p>
-          <p className="font-nunito text-[18px] leading-[24px] font-extrabold tracking-[-0.4px] text-[#FF893B]">
-            {formatDday(trip.startDate, trip.endDate)}
-          </p>
         </div>
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-      <div className="flex w-full flex-col items-start gap-3 px-5 pt-2 pb-8">
+      <div className="flex w-full flex-col items-start gap-3 px-5 pb-8">
+        <div
+          className={cn(
+            "relative isolate mt-3 flex h-[106px] w-full flex-col items-start overflow-visible rounded-[20px] bg-[#FF893B] px-6 pt-3.5 pb-0",
+            "shadow-[0px_2px_12px_rgba(0,0,0,0.06),0px_6px_16px_rgba(255,137,59,0.28)]",
+          )}
+        >
+          <p className="flex h-[18px] w-full items-center text-xs leading-[18px] tracking-[0.3px] text-[#FFFFFA]">
+            {formatDdayCaption(trip.startDate, trip.endDate)}
+          </p>
+          <p className="flex h-11 w-full items-center font-nunito text-[38px] leading-11 font-bold tracking-[-1px] text-[#FFFFFA]">
+            {formatDday(trip.startDate, trip.endDate)}
+          </p>
+          <p className="flex h-[22px] w-full items-center text-xs leading-[18px] text-[rgba(255,255,255,0.8)]">
+            {formatMd(trip.startDate)}-{formatMd(trip.endDate)} {formatDuration(trip.startDate, trip.endDate)}
+          </p>
+        </div>
+
         {activeFlight ? (
           <article className="flex w-full flex-col items-start overflow-hidden rounded-[20px] bg-white shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
             <LayoutGroup id="home-flight-tabs">
@@ -305,10 +313,10 @@ function StayTicketBody({ stay }: { stay: Accommodation }) {
     <>
       <div className="flex h-[76px] w-full items-center gap-3 px-[22px] py-4">
         <span
-          className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-[#FFD6BB] text-xl"
+          className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-[#FFD6BB] p-1.5"
           aria-hidden
         >
-          {stay.icon ?? "🏨"}
+          <IllustrationIcon src={ILLUSTRATION.hotel} className="size-full" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
           <p className="flex h-[23px] w-full items-center truncate text-[15px] leading-[22px] font-bold text-[#1A1A1A]">

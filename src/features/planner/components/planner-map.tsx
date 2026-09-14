@@ -40,6 +40,7 @@ export function PlannerMap({
   onSelectPlace,
   onToggleExpand,
   expanded = false,
+  visible = true,
   showPopup = true,
 }: {
   places: Place[];
@@ -48,6 +49,7 @@ export function PlannerMap({
   onSelectPlace?: (placeId: string | null) => void;
   onToggleExpand?: () => void;
   expanded?: boolean;
+  visible?: boolean;
   showPopup?: boolean;
 }) {
   const { clientId, pending } = useNaverMapClientId();
@@ -75,11 +77,14 @@ export function PlannerMap({
           selectedPlaceId={selectedPlaceId}
           onSelectPlace={onSelectPlace}
           onFatalError={onFatalError}
+          visible={visible}
         />
       )}
       {showMock ? (
         <p className="pointer-events-none absolute top-2 left-2 z-20 max-w-[68%] rounded-[10px] bg-white/95 px-2 py-1 text-[10px] leading-[14px] font-medium text-[#6B6560] shadow-[0px_2px_8px_rgba(0,0,0,0.08)]">
-          네이버 지도 키가 없어 임시 지도야
+          {clientId
+            ? "네이버 지도를 못 불러와서 임시 지도야"
+            : "네이버 지도 키가 없어 임시 지도야"}
         </p>
       ) : null}
       {showPopup && selectedPlace ? (

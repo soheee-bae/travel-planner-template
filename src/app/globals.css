@@ -179,6 +179,10 @@
     @apply border-border outline-ring/50;
   }
 
+  textarea {
+    resize: none;
+  }
+
   html {
     @apply font-sans overflow-x-clip overflow-y-hidden bg-shell-outer;
     height: 100%;

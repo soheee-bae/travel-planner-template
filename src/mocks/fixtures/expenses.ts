@@ -4,9 +4,10 @@ export const EXPENSE_CATEGORIES = [
   "식비",
   "카페",
   "교통/주유",
+  "항공",
   "숙소",
   "쇼핑/선물",
-  "놀거리",
+  "놀거리/입장권",
   "기타",
 ] as const;
 export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
@@ -15,20 +16,30 @@ export const EXPENSE_CATEGORY_EMOJI: Record<ExpenseCategory, string> = {
   식비: "🍽️",
   카페: "☕",
   "교통/주유": "🚗",
+  항공: "✈️",
   숙소: "🛏️",
   "쇼핑/선물": "🛍️",
-  놀거리: "🎡",
+  "놀거리/입장권": "🎡",
   기타: "🏷️",
 };
 
-/** DB에 남은 예전 비용 카테고리를 새 7종으로 본다. */
+/** DB에 남은 예전 비용 카테고리를 현재 종으로 본다. */
 export function normalizeExpenseCategory(raw: string): ExpenseCategory {
   if (raw === "식비" || raw === "맛집") return "식비";
   if (raw === "카페") return "카페";
-  if (raw === "교통/주유" || raw === "교통" || raw === "항공") return "교통/주유";
+  if (raw === "항공" || raw === "항공권" || raw === "비행기") return "항공";
+  if (raw === "교통/주유" || raw === "교통") return "교통/주유";
   if (raw === "숙소") return "숙소";
   if (raw === "쇼핑/선물" || raw === "쇼핑") return "쇼핑/선물";
-  if (raw === "놀거리" || raw === "관광" || raw === "관광·입장" || raw === "액티비티") return "놀거리";
+  if (
+    raw === "놀거리/입장권" ||
+    raw === "놀거리" ||
+    raw === "관광" ||
+    raw === "관광·입장" ||
+    raw === "액티비티"
+  ) {
+    return "놀거리/입장권";
+  }
   if ((EXPENSE_CATEGORIES as readonly string[]).includes(raw)) return raw as ExpenseCategory;
   return "기타";
 }
@@ -60,6 +71,11 @@ export function isGiftPayer(paidBy?: string): boolean {
   return payer === "선물" || payer === "같이";
 }
 
+/** 파이·정산 합계에서 빼는 선물. is_blur 항목도 선물로 본다. */
+export function isGiftExpense(expense: Pick<Expense, "paidBy" | "isBlur">): boolean {
+  return expense.isBlur === true || isGiftPayer(expense.paidBy);
+}
+
 export function shouldBlurExpense(expense: Pick<Expense, "isBlur">): boolean {
   return expense.isBlur === true;
 }
@@ -81,7 +97,7 @@ export const initialExpenses: Expense[] = [
     id: "exp_jeju_1",
     tripId: "trip_jeju",
     title: "제주항공 왕복",
-    category: "교통/주유",
+    category: "항공",
     amount: 148000,
     currency: "KRW",
     date: "2026-09-17",
@@ -141,7 +157,7 @@ export const initialExpenses: Expense[] = [
     id: "exp_nagoya_3",
     tripId: "trip_nagoya",
     title: "지브리 파크 입장권",
-    category: "놀거리",
+    category: "놀거리/입장권",
     amount: 3500,
     currency: "JPY",
     date: "2026-11-07",

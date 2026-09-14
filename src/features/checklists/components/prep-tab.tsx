@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useChecklistCategories, useChecklistItems } from "@/features/checklists/hooks";
 import { ChecklistCategorySection } from "@/features/checklists/components/checklist-category";
+import { IllustrationIcon } from "@/components/ui/illustration-icon";
 import { FigmaChip, FigmaChipRow, FigmaPage, FigmaPageHeader, FigmaPageTitle } from "@/components/ui/figma";
+import { ILLUSTRATION } from "@/lib/illustrations";
 import { AddChecklistItemDialog } from "@/features/checklists/components/add-checklist-item-dialog";
 import { PrepBodySkeleton, PrepPageSkeleton } from "@/components/ui/page-skeleton";
 import {
@@ -95,8 +97,9 @@ export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boole
       </FigmaChipRow>
       <div className="flex w-full flex-col items-start gap-1.5 rounded-[20px] bg-white px-5 py-[18px] shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
         <div className="flex h-[34px] w-full items-center justify-between pb-1">
-          <p className="flex min-h-[21px] items-center text-[14px] leading-[21px] font-bold text-[#1A1A1A]">
-            🔋 제주력 {pct}% 충전 완료
+          <p className="flex min-h-[21px] items-center gap-1.5 text-[14px] leading-[21px] font-bold text-[#1A1A1A]">
+            <IllustrationIcon src={ILLUSTRATION.battery} className="size-5" />
+            제주력 {pct}% 충전 완료
           </p>
           <p className="font-nunito text-[14px] leading-[21px] font-bold text-[#1A1A1A]">
             {checkedCount}/{totalCount}

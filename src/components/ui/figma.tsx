@@ -2,6 +2,8 @@
 
 import { useRef, type ButtonHTMLAttributes, type PointerEvent, type ReactNode } from "react";
 import { DialogClose } from "@/components/ui/dialog";
+import { IllustrationIcon } from "@/components/ui/illustration-icon";
+import { ILLUSTRATION } from "@/lib/illustrations";
 import { cn } from "@/lib/utils";
 
 export const figmaShadowCard = "shadow-[0px_2px_12px_rgba(0,0,0,0.06)]";
@@ -18,7 +20,7 @@ export const figmaInputClass = cn(
 
 export const figmaTextareaClass = cn(
   figmaInputClass,
-  "h-[127px] min-h-[127px] py-[13.5px] leading-[21px]",
+  "h-[127px] min-h-[127px] resize-none py-[13.5px] leading-[21px]",
   "placeholder:text-[rgba(74,69,67,0.5)]",
 );
 
@@ -30,7 +32,7 @@ export function FigmaPage({
   className?: string;
 }) {
   return (
-    <div className={cn("flex w-full flex-col items-start gap-4 px-5 pt-1 pb-6", className)}>{children}</div>
+    <div className={cn("flex w-full flex-col items-start gap-4 px-5 pt-0 pb-6", className)}>{children}</div>
   );
 }
 
@@ -46,18 +48,19 @@ export function FigmaPageTitle({
   return (
     <Tag
       className={cn(
-        "flex h-[30px] w-full items-center text-[20px] leading-[30px] font-bold text-[#1A1A1A]",
+        "flex h-[30px] w-full items-center gap-1.5 font-nunito text-[20px] leading-[30px] font-bold text-[#1A1A1A]",
         className,
       )}
     >
-      {children}
+      <IllustrationIcon src={ILLUSTRATION.tangerine} className="size-7 shrink-0" />
+      <span className="min-w-0 truncate">{children}</span>
     </Tag>
   );
 }
 
 export function FigmaPageHeader({ children }: { children: ReactNode }) {
   return (
-    <div className="flex w-full shrink-0 flex-col items-start bg-white px-[22px] pt-[calc(20px+env(safe-area-inset-top,0px))] pb-1">
+    <div className="flex w-full shrink-0 flex-col items-start bg-white px-[22px] pt-[calc(20px+env(safe-area-inset-top,0px))] pb-5">
       {children}
     </div>
   );
@@ -239,8 +242,7 @@ export function FigmaSheetHandle({ wide = false }: { wide?: boolean }) {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         className={cn(
-          "sticky top-0 z-20 flex h-6 w-full shrink-0 items-start justify-center bg-white",
-          wide ? "pt-3.5 pb-1" : "pt-3 pb-2",
+          "sticky top-0 z-20 flex w-full shrink-0 items-center justify-center bg-white pt-2 pb-0",
         )}
       >
         <span

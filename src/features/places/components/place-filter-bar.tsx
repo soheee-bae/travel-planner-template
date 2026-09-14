@@ -1,18 +1,8 @@
 import { FigmaChip, FigmaChipRow } from "@/components/ui/figma";
-import type { PlaceCategory } from "@/mocks/fixtures/places";
+import { PLACE_CATEGORIES, type PlaceCategory } from "@/mocks/fixtures/places";
 
 export type PlaceFilter = "전체" | PlaceCategory;
-const FILTERS: PlaceFilter[] = ["전체", "관광", "맛집", "카페", "숙소", "교통", "쇼핑", "기타"];
-const FILTER_LABEL: Record<PlaceFilter, string> = {
-  전체: "전체",
-  관광: "관광",
-  맛집: "맛집",
-  카페: "카페",
-  숙소: "숙소",
-  교통: "교통",
-  쇼핑: "쇼핑",
-  기타: "기타",
-};
+const FILTERS: PlaceFilter[] = ["전체", ...PLACE_CATEGORIES];
 
 export function PlaceFilterBar({
   active,
@@ -32,7 +22,7 @@ export function PlaceFilterBar({
           active={active === filter}
           onClick={() => onChange(filter)}
         >
-          {FILTER_LABEL[filter]}
+          {filter}
         </FigmaChip>
       ))}
     </FigmaChipRow>

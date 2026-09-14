@@ -8,8 +8,9 @@ export const CATEGORY_COLORS: Record<ExpenseCategory, string> = {
   식비: "#F29C9F",
   카페: "#F3C65B",
   "교통/주유": "#F09040",
+  항공: "#6B9FDB",
   숙소: "#8CB9D2",
   "쇼핑/선물": "#C2568F",
-  놀거리: "#7AB87A",
+  "놀거리/입장권": "#7AB87A",
   기타: "#9E8FD0",
 };

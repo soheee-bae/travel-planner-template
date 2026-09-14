@@ -1,7 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { groupByCategory, sumAmount, withoutGiftExpenses } from "@/lib/expense-aggregation";
+import {
+  groupByCategory,
+  sumAmount,
+  summarizeReceiptSettlement,
+  withoutGiftExpenses,
+} from "@/lib/expense-aggregation";
 import { useDeleteExpense, useExpenses } from "@/features/expenses/hooks";
 import { BudgetDonutChart } from "@/features/expenses/components/budget-donut-chart";
 import { ExpenseCard, SecretAmount } from "@/features/expenses/components/expense-card";
@@ -12,7 +17,6 @@ import { BudgetPageSkeleton } from "@/components/ui/page-skeleton";
 import type { Trip } from "@/mocks/fixtures/trips";
 import {
   EXPENSE_CATEGORIES,
-  isGiftPayer,
   type Expense,
   type ExpenseCategory,
 } from "@/mocks/fixtures/expenses";
@@ -36,19 +40,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
     [trip.startDate, trip.endDate],
   );
 
-  const paid = useMemo(() => {
-    let me = 0;
-    let jun = 0;
-    let together = 0;
-    for (const e of expenses ?? []) {
-      // 정산 🎁 열은 paid_by가 선물(또는 예전 값 같이)일 때만. is_blur는 카드 숨김용.
-      if (e.paidBy === "준형") jun += e.amount;
-      else if (isGiftPayer(e.paidBy)) together += e.amount;
-      else me += e.amount;
-    }
-    const owe = Math.round((jun - me) / 2);
-    return { me, jun, together, owe };
-  }, [expenses]);
+  const paid = useMemo(() => summarizeReceiptSettlement(expenses ?? []), [expenses]);
 
   const visible = useMemo(() => {
     const list = expenses ?? [];

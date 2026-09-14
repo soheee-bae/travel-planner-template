@@ -2,12 +2,14 @@ import type { Expense, ExpenseCategory } from "@/mocks/fixtures/expenses";
 import type { Place, PlaceCategory } from "@/mocks/fixtures/places";
 
 const CATEGORY_MAP: Record<PlaceCategory, ExpenseCategory> = {
-  관광: "놀거리",
   맛집: "식비",
   카페: "카페",
-  쇼핑: "쇼핑/선물",
+  자연: "놀거리/입장권",
+  관광: "놀거리/입장권",
   숙소: "숙소",
   교통: "교통/주유",
+  공항: "기타",
+  쇼핑: "쇼핑/선물",
   기타: "기타",
 };
 
