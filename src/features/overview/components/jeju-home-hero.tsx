@@ -8,7 +8,7 @@ import { useJejuWeather } from "@/features/overview/hooks/use-jeju-weather";
 import { IllustrationIcon } from "@/components/ui/illustration-icon";
 import { ILLUSTRATION } from "@/lib/illustrations";
 import { WeatherCardSkeleton } from "@/components/ui/page-skeleton";
-import { TicketPerforation } from "@/components/ui/figma";
+import { TicketPerforation, applyTitleScrollShadow } from "@/components/ui/figma";
 import { SegmentedSwap } from "@/components/ui/segmented-swap";
 import { useReducedMotion } from "@/hooks/use-motion-safe";
 import { cn } from "@/lib/utils";
@@ -79,31 +79,35 @@ export function JejuHomeHero({
 
   return (
     <section className="flex h-full min-h-0 w-full flex-col">
-      <header className="flex w-full shrink-0 items-center bg-white px-5 pt-[calc(20px+env(safe-area-inset-top,0px))] pb-5">
+      <header className="relative z-10 flex w-full shrink-0 items-center bg-white px-5 pt-[calc(12px+env(safe-area-inset-top,0px))] pb-3 transition-shadow duration-200 data-[scrolled]:shadow-[0_4px_10px_rgba(0,0,0,0.04)]">
         <div className="flex min-w-0 flex-col items-start">
-          <h1 className="flex w-full items-center gap-1.5 font-nunito text-[20px] leading-[30px] font-bold text-[#1A1A1A]">
-            <IllustrationIcon src={ILLUSTRATION.tangerine} className="size-7 shrink-0" />
+          <h1 className="flex w-full items-center font-nunito text-[20px] leading-[30px] font-bold text-[#1A1A1A]">
             <span className="min-w-0 truncate">{trip.title}</span>
           </h1>
         </div>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-      <div className="flex w-full flex-col items-start gap-3 px-5 pb-8">
+      <div
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        onScroll={(event) => applyTitleScrollShadow(event.currentTarget)}
+      >
+      <div className="flex w-full flex-col items-start gap-3 px-5 pb-[50px]">
         <div
           className={cn(
-            "relative isolate mt-3 flex h-[106px] w-full flex-col items-start overflow-visible rounded-[20px] bg-[#FF893B] px-6 pt-3.5 pb-0",
+            "relative isolate mt-3 flex min-h-[88px] w-full items-center overflow-visible rounded-[20px] bg-[#FF893B] px-6 py-4",
             "shadow-[0px_2px_12px_rgba(0,0,0,0.06),0px_6px_16px_rgba(255,137,59,0.28)]",
           )}
         >
-          <p className="flex h-[18px] w-full items-center text-xs leading-[18px] tracking-[0.3px] text-[#FFFFFA]">
-            {formatDdayCaption(trip.startDate, trip.endDate)}
-          </p>
-          <p className="flex h-11 w-full items-center font-nunito text-[38px] leading-11 font-bold tracking-[-1px] text-[#FFFFFA]">
+          <div className="flex min-w-0 flex-1 flex-col items-start justify-center gap-1 pr-4">
+            <p className="w-full text-xs leading-[18px] tracking-[0.3px] text-[#FFFFFA]">
+              {formatDdayCaption(trip.startDate, trip.endDate)}
+            </p>
+            <p className="w-full text-xs leading-[18px] text-[rgba(255,255,255,0.8)]">
+              {formatMd(trip.startDate)}-{formatMd(trip.endDate)} {formatDuration(trip.startDate, trip.endDate)}
+            </p>
+          </div>
+          <p className="shrink-0 font-nunito text-[38px] leading-none font-bold tracking-[-1px] text-[#FFFFFA]">
             {formatDday(trip.startDate, trip.endDate)}
-          </p>
-          <p className="flex h-[22px] w-full items-center text-xs leading-[18px] text-[rgba(255,255,255,0.8)]">
-            {formatMd(trip.startDate)}-{formatMd(trip.endDate)} {formatDuration(trip.startDate, trip.endDate)}
           </p>
         </div>
 

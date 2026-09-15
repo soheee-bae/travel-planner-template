@@ -1,14 +1,28 @@
 "use client";
 
-import { useRef, type ButtonHTMLAttributes, type PointerEvent, type ReactNode } from "react";
+import { useRef, type ButtonHTMLAttributes, type PointerEvent, type ReactNode, type UIEvent } from "react";
 import { DialogClose } from "@/components/ui/dialog";
-import { IllustrationIcon } from "@/components/ui/illustration-icon";
-import { ILLUSTRATION } from "@/lib/illustrations";
 import { cn } from "@/lib/utils";
 
 export const figmaShadowCard = "shadow-[0px_2px_12px_rgba(0,0,0,0.06)]";
 export const figmaShadowLift = "shadow-[0px_4px_18px_rgba(74,69,67,0.1)]";
 export const figmaShadowCta = "shadow-[0px_8px_24px_rgba(255,159,67,0.25)]";
+export const figmaHeaderScrolledShadow = "shadow-[0_4px_10px_rgba(0,0,0,0.04)]";
+
+const figmaPageHeaderChrome = cn(
+  "relative z-10 bg-white transition-shadow duration-200",
+  "data-[scrolled]:shadow-[0_4px_10px_rgba(0,0,0,0.04)]",
+);
+
+export function applyTitleScrollShadow(scrollEl: HTMLElement) {
+  const header = scrollEl.previousElementSibling;
+  if (!(header instanceof HTMLElement)) return;
+  header.toggleAttribute("data-scrolled", scrollEl.scrollTop > 0);
+}
+
+function onTitleScroll(event: UIEvent<HTMLElement>) {
+  applyTitleScrollShadow(event.currentTarget);
+}
 
 export const figmaInputClass = cn(
   "h-11 w-full rounded-[14px] border-0 bg-white px-4 py-[13.5px]",
@@ -48,11 +62,10 @@ export function FigmaPageTitle({
   return (
     <Tag
       className={cn(
-        "flex h-[30px] w-full items-center gap-1.5 font-nunito text-[20px] leading-[30px] font-bold text-[#1A1A1A]",
+        "flex h-[30px] w-full items-center font-nunito text-[20px] leading-[30px] font-bold text-[#1A1A1A]",
         className,
       )}
     >
-      <IllustrationIcon src={ILLUSTRATION.tangerine} className="size-7 shrink-0" />
       <span className="min-w-0 truncate">{children}</span>
     </Tag>
   );
@@ -60,7 +73,12 @@ export function FigmaPageTitle({
 
 export function FigmaPageHeader({ children }: { children: ReactNode }) {
   return (
-    <div className="flex w-full shrink-0 flex-col items-start bg-white px-[22px] pt-[calc(20px+env(safe-area-inset-top,0px))] pb-5">
+    <div
+      className={cn(
+        "flex w-full shrink-0 flex-col items-start px-[22px] pt-[calc(12px+env(safe-area-inset-top,0px))] pb-3",
+        figmaPageHeaderChrome,
+      )}
+    >
       {children}
     </div>
   );
@@ -74,7 +92,12 @@ export function FigmaPageScroll({
   className?: string;
 }) {
   return (
-    <div className={cn("min-h-0 flex-1 overflow-y-auto overscroll-contain", className)}>{children}</div>
+    <div
+      className={cn("min-h-0 flex-1 overflow-y-auto overscroll-contain", className)}
+      onScroll={onTitleScroll}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -272,13 +295,13 @@ export function TicketPerforation({
 export function DragHandle({ label }: { label?: string }) {
   return (
     <div
-      className="flex h-[14px] w-[18px] flex-col items-center justify-center gap-[2px] opacity-40"
+      className="flex h-[18px] w-[22px] flex-col items-center justify-center gap-[3px] opacity-50"
       aria-hidden={label ? undefined : true}
       aria-label={label}
     >
-      <span className="h-[1.5px] w-[12px] rounded-[99px] bg-[#AAAAAA]" />
-      <span className="h-[1.5px] w-[12px] rounded-[99px] bg-[#AAAAAA]" />
-      <span className="h-[1.5px] w-[12px] rounded-[99px] bg-[#AAAAAA]" />
+      <span className="h-[2px] w-[16px] rounded-[99px] bg-[#AAAAAA]" />
+      <span className="h-[2px] w-[16px] rounded-[99px] bg-[#AAAAAA]" />
+      <span className="h-[2px] w-[16px] rounded-[99px] bg-[#AAAAAA]" />
     </div>
   );
 }

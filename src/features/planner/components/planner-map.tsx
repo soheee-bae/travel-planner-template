@@ -24,12 +24,11 @@ function useNaverMapClientId() {
       if (!isClientIdPayload(data)) return null;
       return typeof data.clientId === "string" && data.clientId.length > 0 ? data.clientId : null;
     },
-    enabled: !builtIn,
     staleTime: Infinity,
   });
   return {
     clientId: builtIn ?? remote.data ?? undefined,
-    pending: !builtIn && remote.isPending,
+    pending: !builtIn && (remote.isPending || remote.isFetching),
   };
 }
 
@@ -69,7 +68,7 @@ export function PlannerMap({
           selectedPlaceId={selectedPlaceId}
           onSelectPlace={onSelectPlace}
         />
-      ) : (
+      ) : visible ? (
         <NaverPlannerMap
           clientId={clientId}
           places={places}
@@ -79,6 +78,8 @@ export function PlannerMap({
           onFatalError={onFatalError}
           visible={visible}
         />
+      ) : (
+        <div className="h-full w-full bg-[#dbe4d8]" aria-hidden="true" />
       )}
       {showMock ? (
         <p className="pointer-events-none absolute top-2 left-2 z-20 max-w-[68%] rounded-[10px] bg-white/95 px-2 py-1 text-[10px] leading-[14px] font-medium text-[#6B6560] shadow-[0px_2px_8px_rgba(0,0,0,0.08)]">

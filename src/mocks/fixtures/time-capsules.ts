@@ -99,8 +99,8 @@ export const initialTimeCapsules: TimeCapsule[] = COPY.map((item, index) => ({
   playsConfetti: item.playsConfetti,
 }));
 
-/** 아이콘 확인용. 여행 전에 false로 되돌린다. */
-export const PREVIEW_UNLOCK_ALL_CAPSULES = true;
+/** 아이콘 확인용. true면 unlockAt을 무시하고 전부 연다. */
+export const PREVIEW_UNLOCK_ALL_CAPSULES = false;
 
 export function isUnlockTimeReached(unlockAt: string, nowMs = Date.now()): boolean {
   const at = new Date(unlockAt).getTime();
@@ -112,13 +112,26 @@ export function isCapsuleUnlocked(unlockAt: string, nowMs = Date.now()): boolean
 }
 
 export function capsulePopupView(item: TimeCapsule): { title: string; text: string; cta: string } {
-  const copy = COPY.find((entry) => entry.sortOrder === item.sortOrder);
-  if (item.sortOrder === 1) {
-    return {
-      title: copy?.popupTitle ?? item.popupTitle,
-      text: copy?.popupText ?? item.popupText,
-      cta: "확인 완료!",
-    };
-  }
-  return { title: item.popupTitle, text: item.popupText, cta: "닫기" };
+  return {
+    title: item.popupTitle,
+    text: item.popupText,
+    cta: item.sortOrder === 1 ? "확인 완료!" : "닫기",
+  };
+}
+
+/** DB 리치텍스트/줄바꿈을 화면에 맞게 정규화한다. HTML은 줄바꿈만 살리고 태그는 뺀다. */
+export function normalizeCapsuleRichText(raw: string): string {
+  return raw
+    .replace(/\r\n?/g, "\n")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>\s*<p[^>]*>/gi, "\n\n")
+    .replace(/<\/?p[^>]*>/gi, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .trim();
 }

@@ -13,7 +13,7 @@ import { easing } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { IllustrationIcon } from "@/components/ui/illustration-icon";
 import { CAPSULE_UNLOCK_ICON, ILLUSTRATION } from "@/lib/illustrations";
-import { capsulePopupView, isCapsuleUnlocked, type TimeCapsule } from "@/mocks/fixtures/time-capsules";
+import { capsulePopupView, isCapsuleUnlocked, normalizeCapsuleRichText, type TimeCapsule } from "@/mocks/fixtures/time-capsules";
 
 const NODE_SIZE = 48;
 /** 원과 말풍선 사이 간격. 5단계 모두 동일. */
@@ -279,15 +279,17 @@ export function TimeCapsuleDialog({
                 animate={reduce ? { opacity: 1 } : { opacity: 1, scale: 1 }}
                 exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.92 }}
                 transition={{ duration: enter, ease: easing.standard }}
-                className="flex h-[min(490px,calc(100%-8rem))] max-h-[1056px] w-[min(360px,calc(100%-8px))] max-w-[380px] shrink-0 flex-col items-start gap-2.5 overflow-hidden rounded-[28px] bg-white p-5 shadow-[0px_8px_32px_rgba(74,69,67,0.13)]"
+                className="flex h-[min(560px,calc(100%-8rem))] max-h-[1056px] w-[min(360px,calc(100%-8px))] max-w-[380px] shrink-0 flex-col items-start gap-0 overflow-hidden rounded-[28px] bg-white p-5 shadow-[0px_8px_32px_rgba(74,69,67,0.13)]"
                 onClick={(event) => event.stopPropagation()}
               >
-                <h3
-                  id="capsule-popup-title"
-                  className="flex h-[30px] w-full shrink-0 items-center justify-center text-center text-[20px] leading-[30px] font-extrabold text-[#4A4543]"
-                >
-                  {popup.title}
-                </h3>
+                <DialogHeader className="w-full shrink-0 gap-0 bg-white p-0 pb-5">
+                  <h3
+                    id="capsule-popup-title"
+                    className="flex min-h-[24px] w-full items-center justify-center text-center text-[16px] leading-[24px] font-extrabold text-[#4A4543]"
+                  >
+                    {popup.title}
+                  </h3>
+                </DialogHeader>
                 <div className="min-h-0 w-full flex-1 overflow-y-auto overscroll-contain">
                   <div className="h-[231px] w-full overflow-hidden bg-white">
                     <img
@@ -296,14 +298,14 @@ export function TimeCapsuleDialog({
                       className="h-full w-full object-contain"
                     />
                   </div>
-                  <p className="pt-2.5 text-[12px] leading-[22px] font-normal text-black">
-                    {popup.text}
+                  <p className="pt-2.5 text-[12px] leading-[22px] font-normal whitespace-pre-wrap break-words text-black">
+                    {normalizeCapsuleRichText(popup.text)}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedId(null)}
-                  className="flex h-[49px] w-full shrink-0 items-center justify-center rounded-[14px] bg-[#FF9F43] py-[13px] text-[15px] leading-[22px] font-bold text-white shadow-[0px_6px_20px_rgba(255,159,67,0.3)]"
+                  className="mt-2.5 flex h-[49px] w-full shrink-0 items-center justify-center rounded-[14px] bg-[#FF9F43] py-[13px] text-[15px] leading-[22px] font-bold text-white shadow-[0px_6px_20px_rgba(255,159,67,0.3)]"
                 >
                   {popup.cta}
                 </button>

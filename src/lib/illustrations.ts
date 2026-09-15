@@ -10,8 +10,8 @@ export const ILLUSTRATION = {
   battery: "/illustrations/battery.png",
   tangerine: "/illustrations/한라봉.png",
   giftFab: {
-    bg: "bg-white",
-    shadow: "shadow-[0px_10px_28px_rgba(192,112,96,0.42)]",
+    bg: "bg-[#FFF4EC] border border-[#F0D4C8]",
+    shadow: "shadow-[0px_10px_28px_rgba(192,112,96,0.28)]",
   },
   weather: {
     맑음: "/illustrations/weather-sun.png",

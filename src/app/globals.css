@@ -237,7 +237,12 @@
     -webkit-touch-callout: none;
   }
 
-  /* 지도 타일이 Tailwind img max-width에 잘리지 않게 한다. */
+  /* 지도 타일이 Tailwind img max-width에 잘리지 않게 한다.
+     로고 z-index가 다이얼로그 위로 새지 않게 이 컨테이너 안에 가둔다. */
+  .naver-map-root {
+    isolation: isolate;
+    z-index: 0;
+  }
   .naver-map-root img,
   .osm-map-root img {
     max-width: none;

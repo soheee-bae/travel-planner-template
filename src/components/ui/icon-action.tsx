@@ -24,12 +24,11 @@ export const IconAction = forwardRef<
         onClick?.();
       }}
       className={cn(
-        "flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors",
-        action === "delete" ? "hover:bg-destructive/10 hover:text-destructive" : "hover:bg-muted",
+        "flex size-8 items-center justify-center rounded-full text-[#B0AAA6] transition-colors hover:bg-muted",
         className,
       )}
     >
-      <Icon className="size-3.5" strokeWidth={1.75} />
+      <Icon className="size-4" strokeWidth={1.75} />
     </button>
   );
 });

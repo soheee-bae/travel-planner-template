@@ -43,6 +43,40 @@ function DialogOverlay({
   );
 }
 
+function isVerticallyScrollable(el: HTMLElement): boolean {
+  const overflowY = window.getComputedStyle(el).overflowY;
+  return overflowY === "auto" || overflowY === "scroll";
+}
+
+function findHeaderScrollTarget(header: HTMLElement): HTMLElement | null {
+  let node: HTMLElement | null = header.parentElement;
+  while (node) {
+    if (isVerticallyScrollable(node)) return node;
+    node = node.parentElement;
+  }
+  let sibling = header.nextElementSibling;
+  while (sibling) {
+    if (sibling instanceof HTMLElement && isVerticallyScrollable(sibling)) return sibling;
+    sibling = sibling.nextElementSibling;
+  }
+  return null;
+}
+
+function useHeaderScrollShadow(ref: React.RefObject<HTMLElement | null>) {
+  React.useLayoutEffect(() => {
+    const header = ref.current;
+    if (!header) return;
+    const scrollEl = findHeaderScrollTarget(header);
+    if (!scrollEl) return;
+    const onScroll = () => {
+      header.toggleAttribute("data-scrolled", scrollEl.scrollTop > 0);
+    };
+    scrollEl.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => scrollEl.removeEventListener("scroll", onScroll);
+  }, []);
+}
+
 function DialogContent({
   className,
   children,
@@ -100,10 +134,18 @@ function DialogContent({
 }
 
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  useHeaderScrollShadow(ref);
   return (
     <div
+      ref={ref}
       data-slot="dialog-header"
-      className={cn("flex w-full shrink-0 flex-col gap-2 bg-white", className)}
+      className={cn(
+        "relative z-20 flex w-full shrink-0 flex-col gap-2 bg-white",
+        "transition-shadow duration-200",
+        "data-[scrolled]:shadow-[0_4px_10px_rgba(0,0,0,0.04)]",
+        className,
+      )}
       {...props}
     />
   );
