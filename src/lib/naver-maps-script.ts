@@ -50,6 +50,9 @@ declare global {
 }
 
 const SCRIPT_ID = "naver-maps-sdk";
+const LOAD_TIMEOUT_MS = 8_000;
+
+let inflight: Promise<NaverMapsApi> | null = null;
 
 export function getNaverMapClientId(): string | undefined {
   const id = process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID;
@@ -61,30 +64,54 @@ export function loadNaverMapsScript(clientId: string): Promise<NaverMapsApi> {
     return Promise.reject(new Error("window 없음"));
   }
   if (window.naver?.maps) return Promise.resolve(window.naver.maps);
+  if (inflight) return inflight;
 
-  const existing = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
-  if (existing) {
-    return new Promise((resolve, reject) => {
-      const check = () => {
-        if (window.naver?.maps) resolve(window.naver.maps);
-        else reject(new Error("네이버 지도 스크립트 로드 실패"));
-      };
-      existing.addEventListener("load", check);
-      existing.addEventListener("error", () => reject(new Error("네이버 지도 스크립트 로드 실패")));
-      if (window.naver?.maps) resolve(window.naver.maps);
-    });
-  }
+  inflight = new Promise<NaverMapsApi>((resolve, reject) => {
+    let settled = false;
 
-  return new Promise((resolve, reject) => {
-    window.__onNaverMapsReady = () => {
-      if (window.naver?.maps) resolve(window.naver.maps);
-      else reject(new Error("네이버 지도 객체가 없습니다"));
+    const succeed = (): boolean => {
+      if (settled) return true;
+      const maps = window.naver?.maps;
+      if (!maps) return false;
+      settled = true;
+      resolve(maps);
+      return true;
     };
-    const script = document.createElement("script");
-    script.id = SCRIPT_ID;
-    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(clientId)}&callback=__onNaverMapsReady`;
-    script.async = true;
-    script.onerror = () => reject(new Error("네이버 지도 스크립트 로드 실패"));
-    document.head.appendChild(script);
+
+    const fail = (message: string) => {
+      if (settled) return;
+      settled = true;
+      inflight = null;
+      reject(new Error(message));
+    };
+
+    window.__onNaverMapsReady = () => {
+      succeed();
+    };
+
+    const existing = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
+    if (!existing) {
+      const script = document.createElement("script");
+      script.id = SCRIPT_ID;
+      script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(clientId)}&callback=__onNaverMapsReady`;
+      script.async = true;
+      script.onerror = () => fail("네이버 지도 스크립트 로드 실패");
+      document.head.appendChild(script);
+    } else {
+      existing.addEventListener("error", () => fail("네이버 지도 스크립트 로드 실패"), { once: true });
+    }
+
+    const started = Date.now();
+    const poll = () => {
+      if (succeed()) return;
+      if (Date.now() - started > LOAD_TIMEOUT_MS) {
+        fail("네이버 지도 스크립트 로드 실패");
+        return;
+      }
+      window.setTimeout(poll, 50);
+    };
+    poll();
   });
+
+  return inflight;
 }

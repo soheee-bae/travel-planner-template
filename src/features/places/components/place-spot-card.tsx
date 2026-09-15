@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, type ComponentProps, type ReactNode } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { ChevronDown } from "lucide-react";
+import { useMotionSafeDuration, useReducedMotion } from "@/hooks/use-motion-safe";
+import { easing } from "@/lib/motion";
 import { DragHandle } from "@/components/ui/figma";
 import { IconAction } from "@/components/ui/icon-action";
 import { IllustrationIcon } from "@/components/ui/illustration-icon";
@@ -69,10 +72,11 @@ export function PlaceSpotCard({
   onActivate?: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const reduce = useReducedMotion();
+  const expandDuration = useMotionSafeDuration("enter");
   const time = stayLabel(place.durationMin);
   const canExpand = Boolean(place.memo || onEdit || onDelete);
   const showChevron = canExpand && !selectionMode;
-  const showFooter = expanded && showChevron && Boolean(onEdit || onDelete);
 
   const leading = selectionMode ? (
     <input
@@ -108,7 +112,10 @@ export function PlaceSpotCard({
         setExpanded((current) => !current);
       }}
     >
-      {expanded ? <ChevronUp className="size-5" strokeWidth={2} /> : <ChevronDown className="size-5" strokeWidth={2} />}
+      <ChevronDown
+        className={cn("size-5 transition-transform duration-200 ease-out motion-reduce:transition-none", expanded && "rotate-180")}
+        strokeWidth={2}
+      />
     </button>
   ) : null;
 
@@ -158,29 +165,40 @@ export function PlaceSpotCard({
             </div>
           </div>
         </HeaderRow>
-
-        {expanded && showChevron && place.memo ? (
-          <div className="flex h-auto w-full items-start gap-2.5 pt-2">
-            {leading ? <span className="w-8 shrink-0" aria-hidden /> : null}
-            <span className="w-11 shrink-0" aria-hidden />
-            <p className="h-auto min-w-0 flex-1 whitespace-pre-wrap text-[13px] leading-[20px] font-normal text-[#4A4543]">
-              {place.memo}
-            </p>
-            {trailing ? <span className="w-8 shrink-0" aria-hidden /> : null}
-          </div>
-        ) : null}
       </div>
 
-      {showFooter ? (
-        <div
-          className="flex h-auto w-full items-center justify-end gap-0.5 border-t border-[#EFEFEF] px-3 py-0.5"
-          onPointerDown={(event) => event.stopPropagation()}
-          onClick={(event) => event.stopPropagation()}
-        >
-          {onEdit ? <IconAction action="edit" label={`${place.name} 수정`} onClick={onEdit} /> : null}
-          {onDelete ? <IconAction action="delete" label={`${place.name} 삭제`} onClick={onDelete} /> : null}
-        </div>
-      ) : null}
+      <AnimatePresence initial={false}>
+        {expanded && showChevron ? (
+          <motion.div
+            key="place-card-expand"
+            initial={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            transition={{ duration: expandDuration, ease: easing.standard }}
+            className="overflow-hidden"
+          >
+            {place.memo ? (
+              <div className="flex h-auto w-full items-start gap-2.5 px-4 pb-3.5">
+                {leading ? <span className="w-8 shrink-0" aria-hidden /> : null}
+                <span className="w-11 shrink-0" aria-hidden />
+                <p className="h-auto min-w-0 flex-1 whitespace-pre-wrap text-[13px] leading-[20px] font-normal text-[#4A4543]">
+                  {place.memo}
+                </p>
+              </div>
+            ) : null}
+            {onEdit || onDelete ? (
+              <div
+                className="flex h-auto w-full items-center justify-end gap-0.5 border-t border-[#EFEFEF] px-3 py-0.5"
+                onPointerDown={(event) => event.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
+              >
+                {onEdit ? <IconAction action="edit" label={`${place.name} 수정`} onClick={onEdit} /> : null}
+                {onDelete ? <IconAction action="delete" label={`${place.name} 삭제`} onClick={onDelete} /> : null}
+              </div>
+            ) : null}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

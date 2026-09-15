@@ -25,12 +25,13 @@ const CURVE_T = [0.4, 0.58, 0.46, 0.63] as const;
 /**
  * 1→2는 말풍선이 안 겹칠 만큼만 벌리고, 아래로 갈수록 S 진폭이 커진다.
  */
+const TRACK_HEIGHT = 820;
 const LAYOUT = [
-  { nodeLeft: 84, nodeTop: 6, side: "right" },
-  { nodeLeft: 208, nodeTop: 120, side: "left" },
-  { nodeLeft: 44, nodeTop: 244, side: "right" },
-  { nodeLeft: 246, nodeTop: 378, side: "left" },
-  { nodeLeft: 22, nodeTop: 488, side: "right" },
+  { nodeLeft: 84, nodeTop: 10, side: "right" },
+  { nodeLeft: 208, nodeTop: 185, side: "left" },
+  { nodeLeft: 44, nodeTop: 365, side: "right" },
+  { nodeLeft: 246, nodeTop: 550, side: "left" },
+  { nodeLeft: 22, nodeTop: 725, side: "right" },
 ] as const;
 
 function cardTopFor(nodeTop: number): number {
@@ -131,7 +132,7 @@ export function TimeCapsuleDialog({
         overlayClassName="bg-[rgba(0,0,0,0.35)]"
         className="relative left-1/2 right-auto flex h-[min(755px,calc(100%-24px))] max-h-[1056px] w-[min(360px,calc(100%-20px))] max-w-[380px] -translate-x-1/2 flex-col items-center overflow-hidden rounded-[28px] bg-white px-5 pt-6 pb-7 shadow-[0px_8px_32px_rgba(74,69,67,0.13)]"
       >
-        <DialogHeader className="mb-4 w-full shrink-0 items-center gap-1.5 pb-0 text-center">
+        <DialogHeader scrollShadow={false} className="mb-4 w-full shrink-0 items-center gap-1.5 pb-0 text-center">
           <DialogTitle className="flex h-[30px] items-center justify-center text-center text-[20px] leading-[30px] font-extrabold text-[#4A4543]">
             소희 가이드 시크릿 노트
           </DialogTitle>
@@ -153,10 +154,10 @@ export function TimeCapsuleDialog({
             타임캡슐을 다시 불러와 줘.
           </p>
         ) : (
-          <ol className="relative h-[560px] w-full shrink-0">
+          <ol className="relative w-full shrink-0" style={{ height: TRACK_HEIGHT }}>
             <svg
               className="pointer-events-none absolute inset-0 h-full w-full"
-              viewBox="0 0 320 560"
+              viewBox={`0 0 320 ${TRACK_HEIGHT}`}
               fill="none"
               aria-hidden
             >

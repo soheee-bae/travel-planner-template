@@ -11,6 +11,31 @@ function markerHtml(label: string, selected: boolean): string {
   return `<div style="width:28px;height:28px;border-radius:9999px;background:${bg};color:#fff;font:700 12px/28px sans-serif;text-align:center;border:2px solid #fff;box-shadow:0 2px 8px rgba(255,159,67,.4)">${label}</div>`;
 }
 
+function hasSize(el: HTMLElement): boolean {
+  return el.clientWidth > 0 && el.clientHeight > 0;
+}
+
+function waitForElementSize(el: HTMLElement, timeoutMs = 2_000): Promise<void> {
+  if (hasSize(el)) return Promise.resolve();
+  return new Promise((resolve) => {
+    const observer = new ResizeObserver(() => {
+      if (hasSize(el)) {
+        cleanup();
+        resolve();
+      }
+    });
+    const timer = window.setTimeout(() => {
+      cleanup();
+      resolve();
+    }, timeoutMs);
+    const cleanup = () => {
+      observer.disconnect();
+      window.clearTimeout(timer);
+    };
+    observer.observe(el);
+  });
+}
+
 export function NaverPlannerMap({
   clientId,
   places,
@@ -46,10 +71,20 @@ export function NaverPlannerMap({
     const el = containerRef.current;
     if (!el) return;
 
-    loadNaverMapsScript(clientId)
-      .then((maps) => {
-        if (cancelled) return;
-        mapsRef.current = maps;
+    void (async () => {
+      await waitForElementSize(el);
+      if (cancelled) return;
+      let maps: NaverMapsApi;
+      try {
+        maps = await loadNaverMapsScript(clientId);
+      } catch {
+        if (!cancelled) onFatalError();
+        return;
+      }
+      if (cancelled) return;
+      mapsRef.current = maps;
+      el.replaceChildren();
+      try {
         mapRef.current = new maps.Map(el, {
           center: new maps.LatLng(33.4996, 126.5312),
           zoom: 11,
@@ -60,22 +95,24 @@ export function NaverPlannerMap({
           logoControlOptions: maps.Position ? { position: maps.Position.TOP_LEFT } : undefined,
           compassControl: false,
         });
-        maps.Event.addListener(mapRef.current, "click", () => {
-          if (suppressMapClickRef.current) {
-            suppressMapClickRef.current = false;
-            return;
-          }
-          onSelectRef.current?.(null);
-        });
-        setReady(true);
-        requestAnimationFrame(() => mapRef.current?.autoResize?.());
-        resizeTimer = window.setTimeout(() => mapRef.current?.autoResize?.(), 200);
-        resizeObserver = new ResizeObserver(() => mapRef.current?.autoResize?.());
-        resizeObserver.observe(el);
-      })
-      .catch(() => {
+      } catch {
         if (!cancelled) onFatalError();
+        return;
+      }
+      maps.Event.addListener(mapRef.current, "click", () => {
+        if (suppressMapClickRef.current) {
+          suppressMapClickRef.current = false;
+          return;
+        }
+        onSelectRef.current?.(null);
       });
+      setReady(true);
+      const resize = () => mapRef.current?.autoResize?.();
+      requestAnimationFrame(resize);
+      resizeTimer = window.setTimeout(resize, 200);
+      resizeObserver = new ResizeObserver(resize);
+      resizeObserver.observe(el);
+    })();
 
     return () => {
       cancelled = true;
@@ -85,6 +122,8 @@ export function NaverPlannerMap({
       overlaysRef.current = [];
       mapRef.current?.destroy?.();
       mapRef.current = null;
+      mapsRef.current = null;
+      el.replaceChildren();
     };
   }, [clientId, onFatalError]);
 

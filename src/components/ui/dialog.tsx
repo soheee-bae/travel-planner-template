@@ -62,8 +62,9 @@ function findHeaderScrollTarget(header: HTMLElement): HTMLElement | null {
   return null;
 }
 
-function useHeaderScrollShadow(ref: React.RefObject<HTMLElement | null>) {
+function useHeaderScrollShadow(ref: React.RefObject<HTMLElement | null>, enabled: boolean) {
   React.useLayoutEffect(() => {
+    if (!enabled) return;
     const header = ref.current;
     if (!header) return;
     const scrollEl = findHeaderScrollTarget(header);
@@ -74,7 +75,7 @@ function useHeaderScrollShadow(ref: React.RefObject<HTMLElement | null>) {
     scrollEl.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => scrollEl.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [enabled]);
 }
 
 function DialogContent({
@@ -133,17 +134,21 @@ function DialogContent({
   );
 }
 
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+function DialogHeader({
+  className,
+  scrollShadow = true,
+  ...props
+}: React.ComponentProps<"div"> & { scrollShadow?: boolean }) {
   const ref = React.useRef<HTMLDivElement>(null);
-  useHeaderScrollShadow(ref);
+  useHeaderScrollShadow(ref, scrollShadow);
   return (
     <div
       ref={ref}
       data-slot="dialog-header"
       className={cn(
-        "relative z-20 flex w-full shrink-0 flex-col gap-2 bg-white",
-        "transition-shadow duration-200",
-        "data-[scrolled]:shadow-[0_4px_10px_rgba(0,0,0,0.04)]",
+        "relative z-20 flex w-full shrink-0 flex-col gap-2 overflow-visible bg-white",
+        scrollShadow &&
+          "after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-2 after:bg-linear-to-b after:from-[rgba(0,0,0,0.08)] after:to-transparent after:opacity-0 after:transition-opacity after:duration-200 after:content-[''] data-scrolled:after:opacity-100",
         className,
       )}
       {...props}
