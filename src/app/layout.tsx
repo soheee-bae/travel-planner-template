@@ -31,6 +31,19 @@ const jua = Jua({
 export const metadata: Metadata = {
   title: "소희랑 준형이랑 귤 까먹으러",
   description: "남자친구 생일 기념 제주 여행 플래너",
+  applicationName: "제주 플래너",
+  appleWebApp: {
+    capable: true,
+    title: "제주 플래너",
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
+  },
 };
 
 export const viewport: Viewport = {
@@ -39,6 +52,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   viewportFit: "cover",
   interactiveWidget: "resizes-content",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

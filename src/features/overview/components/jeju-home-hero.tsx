@@ -99,10 +99,10 @@ export function JejuHomeHero({
           )}
         >
           <div className="flex min-w-0 flex-1 flex-col items-start justify-center gap-1 pr-4">
-            <p className="w-full text-xs leading-[18px] tracking-[0.3px] text-[#FFFFFA]">
+            <p className="w-full text-[14px] leading-[20px] tracking-[0.3px] text-[#FFFFFA]">
               {formatDdayCaption(trip.startDate, trip.endDate)}
             </p>
-            <p className="w-full text-xs leading-[18px] text-[rgba(255,255,255,0.8)]">
+            <p className="w-full text-[14px] leading-[20px] text-[rgba(255,255,255,0.8)]">
               {formatMd(trip.startDate)}-{formatMd(trip.endDate)} {formatDuration(trip.startDate, trip.endDate)}
             </p>
           </div>

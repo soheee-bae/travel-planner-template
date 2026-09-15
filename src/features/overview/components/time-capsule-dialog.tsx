@@ -25,13 +25,13 @@ const CURVE_T = [0.4, 0.58, 0.46, 0.63] as const;
 /**
  * 1→2는 말풍선이 안 겹칠 만큼만 벌리고, 아래로 갈수록 S 진폭이 커진다.
  */
-const TRACK_HEIGHT = 820;
+const TRACK_HEIGHT = 680;
 const LAYOUT = [
-  { nodeLeft: 84, nodeTop: 10, side: "right" },
-  { nodeLeft: 208, nodeTop: 185, side: "left" },
-  { nodeLeft: 44, nodeTop: 365, side: "right" },
-  { nodeLeft: 246, nodeTop: 550, side: "left" },
-  { nodeLeft: 22, nodeTop: 725, side: "right" },
+  { nodeLeft: 84, nodeTop: 8, side: "right" },
+  { nodeLeft: 208, nodeTop: 148, side: "left" },
+  { nodeLeft: 44, nodeTop: 298, side: "right" },
+  { nodeLeft: 246, nodeTop: 452, side: "left" },
+  { nodeLeft: 22, nodeTop: 598, side: "right" },
 ] as const;
 
 function cardTopFor(nodeTop: number): number {
