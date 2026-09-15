@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Jua, Noto_Sans_KR, Nunito } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { appleSplashStartupImages } from "@/lib/apple-splash";
 import { AppShell } from "@/components/layout/AppShell";
 import { Providers } from "@/app/providers";
 import "./globals.css";
@@ -31,11 +32,12 @@ const jua = Jua({
 export const metadata: Metadata = {
   title: "소희랑 준형이랑 귤 까먹으러",
   description: "남자친구 생일 기념 제주 여행 플래너",
-  applicationName: "제주 플래너",
+  applicationName: "JEJU",
   appleWebApp: {
     capable: true,
-    title: "제주 플래너",
+    title: "JEJU",
     statusBarStyle: "default",
+    startupImage: appleSplashStartupImages(),
   },
   icons: {
     icon: [

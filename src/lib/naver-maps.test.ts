@@ -69,7 +69,7 @@ describe("travel-leg", () => {
     expect(drivingSummaryToLeg(10, 1000).durationMin).toBe(1);
   });
 
-  it("자차가 5분 이하면 네이버 거리로 도보를 보여준다", () => {
+  it("자차가 3분 이하면 네이버 거리로 도보를 보여준다", () => {
     const car = drivingSummaryToLeg(400, 180_000);
     expect(car.durationMin).toBe(3);
     const shown = resolveDisplayedLeg(car, { lat: 37.55, lng: 126.97 }, { lat: 37.56, lng: 126.98 });
@@ -78,7 +78,13 @@ describe("travel-leg", () => {
     expect(shown.distanceM).toBe(400);
   });
 
-  it("자차가 5분을 넘으면 차를 보여준다", () => {
+  it("자차가 3분을 넘으면 차를 보여준다", () => {
+    const fourMin = drivingSummaryToLeg(800, 240_000);
+    expect(fourMin.durationMin).toBe(4);
+    expect(
+      resolveDisplayedLeg(fourMin, { lat: 33.5, lng: 126.5 }, { lat: 33.51, lng: 126.52 }),
+    ).toEqual(fourMin);
+
     const car = drivingSummaryToLeg(3200, 420_000);
     expect(car.durationMin).toBe(7);
     const shown = resolveDisplayedLeg(car, { lat: 33.5, lng: 126.5 }, { lat: 33.51, lng: 126.52 });

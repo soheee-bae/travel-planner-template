@@ -19,7 +19,7 @@ const DETOUR_FACTOR = 1.3;
 const WALK_SPEED_KMH = 4.5;
 /** 네이버 Directions가 없을 때 쓰는 시내 평균 속도. */
 const ESTIMATE_CAR_SPEED_KMH = 30;
-const CAR_WALK_THRESHOLD_MIN = 5;
+const CAR_WALK_THRESHOLD_MIN = 3;
 
 export function estimateWalkLeg(a: LatLng, b: LatLng): TravelLeg {
   return {
@@ -65,7 +65,7 @@ export function drivingSummaryToLeg(distanceM: number, durationMs: number): Trav
   };
 }
 
-/** 자차 우선. 5분 이하면 같은 거리로 도보 시간을 보여준다. */
+/** 자차 우선. 3분 이하면 같은 거리로 도보 시간을 보여준다. */
 export function resolveDisplayedLeg(car: TravelLeg | null, start: LatLng, end: LatLng): TravelLeg {
   const driving = car?.mode === "car" ? car : estimateCarLeg(start, end);
   if (driving.durationMin > CAR_WALK_THRESHOLD_MIN) return driving;
