@@ -13,7 +13,8 @@ import { easing } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { IllustrationIcon } from "@/components/ui/illustration-icon";
 import { CAPSULE_UNLOCK_ICON, ILLUSTRATION } from "@/lib/illustrations";
-import { capsulePopupView, isCapsuleUnlocked, normalizeCapsuleRichText, type TimeCapsule } from "@/mocks/fixtures/time-capsules";
+import { CapsuleRichText } from "@/features/overview/components/capsule-rich-text";
+import { capsulePopupView, isCapsuleUnlocked, type TimeCapsule } from "@/mocks/fixtures/time-capsules";
 
 const NODE_SIZE = 48;
 /** 원과 말풍선 사이 간격. 5단계 모두 동일. */
@@ -299,9 +300,9 @@ export function TimeCapsuleDialog({
                       className="h-full w-full object-contain"
                     />
                   </div>
-                  <p className="pt-2.5 text-[12px] leading-[22px] font-normal whitespace-pre-wrap break-words text-black">
-                    {normalizeCapsuleRichText(popup.text)}
-                  </p>
+                  <div className="pt-2.5 text-[12px] leading-[22px] font-normal whitespace-pre-wrap break-words text-black">
+                    <CapsuleRichText value={popup.text} />
+                  </div>
                 </div>
                 <button
                   type="button"

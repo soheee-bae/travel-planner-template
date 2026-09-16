@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { placesOnDayWithCoords, visitNumbers } from "@/lib/visit-order";
+import { placesOnDayWithCoords, placesWithCoords, visitNumbers } from "@/lib/visit-order";
 import type { Place } from "@/mocks/fixtures/places";
 
 const TILE_SIZE = 256;
@@ -50,12 +50,14 @@ export function MockMap({
   activeDayIndex,
   selectedPlaceId,
   onSelectPlace,
+  expanded = false,
   className,
 }: {
   places: Place[];
   activeDayIndex: number;
   selectedPlaceId?: string;
   onSelectPlace?: (placeId: string | null) => void;
+  expanded?: boolean;
   className?: string;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -72,7 +74,9 @@ export function MockMap({
   }, []);
 
   const markerPlaces = placesOnDayWithCoords(places, activeDayIndex);
-  const focused = markerPlaces.find((p) => p.id === selectedPlaceId);
+  const otherPlaces = placesWithCoords(places).filter((place) => place.dayIndex !== activeDayIndex);
+  const focused = placesWithCoords(places).find((p) => p.id === selectedPlaceId);
+  const overviewPlaces = expanded ? placesWithCoords(places) : markerPlaces;
   const bbox =
     focused && focused.lat != null && focused.lng != null
       ? {
@@ -81,7 +85,7 @@ export function MockMap({
           minLng: focused.lng - 0.012,
           maxLng: focused.lng + 0.012,
         }
-      : boundsOf(markerPlaces);
+      : boundsOf(overviewPlaces);
   const zoom = pickZoom(bbox, size.w, size.h, focused ? 16 : 13);
   const sw = latLngToWorld(bbox.minLat, bbox.minLng, zoom);
   const ne = latLngToWorld(bbox.maxLat, bbox.maxLng, zoom);
@@ -160,6 +164,38 @@ export function MockMap({
           />
         </svg>
       ) : null}
+      {otherPlaces.map((place) => {
+        const point = latLngToWorld(place.lat!, place.lng!, zoom);
+        const left = offsetX + (point.x - viewLeft) * scale;
+        const top = offsetY + (point.y - viewTop) * scale;
+        const selected = selectedPlaceId === place.id;
+        return (
+          <button
+            key={place.id}
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onSelectPlace?.(place.id);
+            }}
+            aria-label={place.name}
+            title={place.name}
+            className="absolute z-[9] flex -translate-x-1/2 -translate-y-[9px] flex-col items-center"
+            style={{ left, top }}
+          >
+            <span
+              className={cn(
+                "size-[18px] rounded-full border-2 border-white shadow-sm",
+                selected ? "bg-[#E87820]" : "bg-[#FF9F43]",
+              )}
+            />
+            {expanded ? (
+              <span className="mt-0.5 max-w-[72px] truncate rounded-[6px] bg-white/95 px-1 text-[10px] leading-[14px] font-bold text-[#4A4543] shadow-sm">
+                {place.name}
+              </span>
+            ) : null}
+          </button>
+        );
+      })}
       {markerPlaces.map((place) => {
         const point = latLngToWorld(place.lat!, place.lng!, zoom);
         const left = offsetX + (point.x - viewLeft) * scale;
@@ -175,13 +211,22 @@ export function MockMap({
             }}
             aria-label={place.name}
             title={place.name}
-            className={cn(
-              "absolute z-10 flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white text-[11px] font-bold text-white shadow-sm",
-              selected ? "bg-[#E87820] scale-110" : "bg-[#FF9F43]",
-            )}
+            className="absolute z-10 flex -translate-x-1/2 -translate-y-[14px] flex-col items-center"
             style={{ left, top }}
           >
-            {numbers.get(place.id) ?? "·"}
+            <span
+              className={cn(
+                "flex size-7 items-center justify-center rounded-full border-2 border-white text-[11px] font-bold text-white shadow-sm",
+                selected ? "bg-[#E87820] scale-110" : "bg-[#FF9F43]",
+              )}
+            >
+              {numbers.get(place.id) ?? "·"}
+            </span>
+            {expanded ? (
+              <span className="mt-0.5 max-w-[72px] truncate rounded-[6px] bg-white/95 px-1 text-[10px] leading-[14px] font-bold text-[#4A4543] shadow-sm">
+                {place.name}
+              </span>
+            ) : null}
           </button>
         );
       })}

@@ -30,7 +30,7 @@ const jua = Jua({
 });
 
 export const metadata: Metadata = {
-  title: "소희랑 준형이랑 귤 까먹으러",
+  title: "JEJU",
   description: "남자친구 생일 기념 제주 여행 플래너",
   applicationName: "JEJU",
   appleWebApp: {

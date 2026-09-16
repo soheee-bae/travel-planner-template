@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IconAction } from "@/components/ui/icon-action";
-import { ExpandableCardBody } from "@/components/ui/expandable-card-body";
 import { Input } from "@/components/ui/input";
 import { useConfirmDelete } from "@/components/ui/confirm-delete-dialog";
 import { cn } from "@/lib/utils";
@@ -19,6 +18,84 @@ import type { ChecklistCategory, ChecklistItem } from "@/mocks/fixtures/checklis
 import { canonicalPrepCategory, parseChecklistNotes } from "@/mocks/fixtures/checklists";
 import { IllustrationIcon } from "@/components/ui/illustration-icon";
 import { PREP_CATEGORY_ICON } from "@/lib/illustrations";
+
+function ChecklistItemCard({
+  item,
+  onToggleChecked,
+  onEdit,
+  onDelete,
+}: {
+  item: ChecklistItem;
+  onToggleChecked: (checked: boolean) => void;
+  onEdit?: () => void;
+  onDelete: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const content = parseChecklistNotes(item.notes).content.trim();
+
+  return (
+    <div className="flex w-full items-start gap-2.5 rounded-[20px] bg-white px-3.5 py-3 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
+      <span className="relative mt-0.5 flex size-[22px] shrink-0 items-center justify-center">
+        <input
+          type="checkbox"
+          checked={item.isChecked}
+          onChange={(event) => onToggleChecked(event.target.checked)}
+          className={cn(
+            "size-[22px] appearance-none rounded-[7px] border-2 border-[#DDDDDD]",
+            item.isChecked && "border-0 bg-[#FF9F43]",
+          )}
+          aria-label={`${item.title} 완료`}
+        />
+        {item.isChecked ? (
+          <span
+            className="pointer-events-none absolute text-[13px] leading-5 font-bold text-white"
+            aria-hidden="true"
+          >
+            ✓
+          </span>
+        ) : null}
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <div className="flex w-full items-start">
+          <button
+            type="button"
+            aria-expanded={expanded}
+            aria-label={expanded ? `${item.title} 접기` : `${item.title} 펼쳐보기`}
+            onClick={() => setExpanded((open) => !open)}
+            className="min-w-0 flex-1 cursor-pointer text-left"
+          >
+            <p
+              className={cn(
+                "w-full break-words text-[14px] leading-[21px] font-semibold",
+                expanded ? "whitespace-pre-wrap" : "line-clamp-2",
+                item.isChecked ? "text-[#AAAAAA] line-through" : "text-[#4A4543]",
+              )}
+            >
+              {item.title}
+            </p>
+          </button>
+          <div className="flex h-[22px] shrink-0 items-center">
+            {onEdit ? (
+              <IconAction action="edit" label={`${item.title} 수정`} className="size-6" onClick={onEdit} />
+            ) : null}
+            <IconAction action="delete" label={`${item.title} 삭제`} className="size-6" onClick={onDelete} />
+          </div>
+        </div>
+        {content ? (
+          <p
+            className={cn(
+              "w-full cursor-pointer break-words text-[11px] leading-4 text-[#AAAAAA]",
+              expanded ? "whitespace-pre-wrap" : "line-clamp-2",
+            )}
+            onClick={() => setExpanded((open) => !open)}
+          >
+            {content}
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 
 export function ChecklistCategorySection({
   tripId,
@@ -128,79 +205,17 @@ export function ChecklistCategorySection({
       ) : null}
 
       <div className="flex w-full flex-col items-start gap-2">
-        {items.map((item) => {
-          const content = parseChecklistNotes(item.notes).content.trim();
-          return (
-            <div
-              key={item.id}
-              className="flex w-full items-start gap-2.5 rounded-[20px] bg-white px-3.5 py-3 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]"
-            >
-              <span className="relative mt-0.5 flex size-[22px] shrink-0 items-center justify-center">
-                <input
-                  type="checkbox"
-                  checked={item.isChecked}
-                  onChange={(e) =>
-                    updateItem.mutate({ id: item.id, patch: { isChecked: e.target.checked } })
-                  }
-                  className={cn(
-                    "size-[22px] appearance-none rounded-[7px] border-2 border-[#DDDDDD]",
-                    item.isChecked && "border-0 bg-[#FF9F43]",
-                  )}
-                  aria-label={`${item.title} 완료`}
-                />
-                {item.isChecked ? (
-                  <span
-                    className="pointer-events-none absolute text-[13px] leading-5 font-bold text-white"
-                    aria-hidden="true"
-                  >
-                    ✓
-                  </span>
-                ) : null}
-              </span>
-              <ExpandableCardBody label={item.title} className="flex flex-col items-start gap-0.5">
-                {(expanded) => (
-                  <>
-                    <p
-                      className={cn(
-                        "w-full break-words text-[14px] leading-[21px] font-semibold",
-                        expanded ? "whitespace-pre-wrap" : "line-clamp-2",
-                        item.isChecked ? "text-[#AAAAAA] line-through" : "text-[#4A4543]",
-                      )}
-                    >
-                      {item.title}
-                    </p>
-                    {content ? (
-                      <p
-                        className={cn(
-                          "w-full break-words text-[11px] leading-4 text-[#AAAAAA]",
-                          expanded ? "whitespace-pre-wrap" : "line-clamp-2",
-                        )}
-                      >
-                        {content}
-                      </p>
-                    ) : null}
-                  </>
-                )}
-              </ExpandableCardBody>
-              <div className="flex h-[22px] shrink-0 items-center gap-0">
-                {onEdit ? (
-                  <IconAction
-                    action="edit"
-                    label={`${item.title} 수정`}
-                    className="size-6"
-                    onClick={() => onEdit(item)}
-                  />
-                ) : null}
-                <IconAction
-                  action="delete"
-                  label={`${item.title} 삭제`}
-                  className="size-6"
-                  onClick={() => askDelete(() => deleteItem.mutate(item.id))}
-                />
-              </div>
-            </div>
-          );
-        })}
+        {items.map((item) => (
+          <ChecklistItemCard
+            key={item.id}
+            item={item}
+            onToggleChecked={(checked) =>
+              updateItem.mutate({ id: item.id, patch: { isChecked: checked } })
+            }
+            onEdit={onEdit ? () => onEdit(item) : undefined}
+            onDelete={() => askDelete(() => deleteItem.mutate(item.id))}
+          />
+        ))}
       </div>
 
       {manageable ? (

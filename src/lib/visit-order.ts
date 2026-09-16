@@ -33,6 +33,10 @@ export function placesOnDayWithCoords(places: Place[], day: number): Place[] {
   return placesOnDay(places, day).filter((p) => p.lat != null && p.lng != null);
 }
 
+export function placesWithCoords(places: Place[]): Place[] {
+  return places.filter((p) => p.lat != null && p.lng != null);
+}
+
 export function nextOrderIndexForDay(places: Place[], dayIndex: number): number {
   const onDay = places.filter((p) => p.dayIndex === dayIndex);
   if (onDay.length === 0) return 0;

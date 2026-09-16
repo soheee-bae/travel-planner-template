@@ -28,6 +28,7 @@ export function PlannerTab({ trip, active = true }: { trip: Trip; active?: boole
   const [selectionMode, setSelectionMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [highlightId, setHighlightId] = useState<string>();
+  const [focusNonce, setFocusNonce] = useState(0);
   const [mapExpanded, setMapExpanded] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<Place | null>(null);
@@ -72,6 +73,7 @@ export function PlannerTab({ trip, active = true }: { trip: Trip; active?: boole
 
   function assignSelected(dayIndex: number | null) {
     if (selected.size === 0) return;
+    const firstId = [...selected][0];
     if (dayIndex == null) {
       selected.forEach((id) => updatePlace.mutate({ id, patch: { dayIndex: null } }));
     } else {
@@ -82,6 +84,15 @@ export function PlannerTab({ trip, active = true }: { trip: Trip; active?: boole
       });
     }
     exitSelectionMode();
+    if (dayIndex != null) {
+      setActiveDay(dayIndex);
+      if (firstId) focusPlace(firstId);
+    }
+  }
+
+  function focusPlace(placeId: string) {
+    setHighlightId(placeId);
+    setFocusNonce((nonce) => nonce + 1);
   }
 
   function handleMapSelect(placeId: string | null) {
@@ -89,7 +100,15 @@ export function PlannerTab({ trip, active = true }: { trip: Trip; active?: boole
       if (placeId) toggleSelect(placeId);
       return;
     }
-    setHighlightId(placeId ?? undefined);
+    if (!placeId) {
+      setHighlightId(undefined);
+      return;
+    }
+    const place = allPlaces.find((item) => item.id === placeId);
+    if (place?.dayIndex != null && place.dayIndex !== activeDay) {
+      setActiveDay(place.dayIndex);
+    }
+    focusPlace(placeId);
   }
 
   if (isLoading) return <PlannerPageSkeleton />;
@@ -110,6 +129,7 @@ export function PlannerTab({ trip, active = true }: { trip: Trip; active?: boole
       expanded={mapExpanded}
       visible={active}
       showPopup={!selectionMode && !mapExpanded}
+      focusNonce={focusNonce}
     />
   );
 
@@ -150,7 +170,7 @@ export function PlannerTab({ trip, active = true }: { trip: Trip; active?: boole
                 places={dayItems}
                 activeDayIndex={activeDay}
                 selectedPlaceId={highlightId}
-                onSelectPlace={(id) => setHighlightId(id)}
+                onSelectPlace={focusPlace}
               />
             </div>
           </div>,
@@ -232,7 +252,7 @@ export function PlannerTab({ trip, active = true }: { trip: Trip; active?: boole
           highlightedId={highlightId}
           sortable
           onToggleSelect={toggleSelect}
-          onHighlight={setHighlightId}
+          onHighlight={focusPlace}
           onEdit={(place) => setEditing(place)}
           onDelete={(place) => askDelete(() => deletePlace.mutate(place.id))}
         />

@@ -27,55 +27,53 @@ function WishlistCard({
   onDelete: () => void;
 }) {
   return (
-    <div className="flex w-full flex-col items-start rounded-[20px] bg-white px-4 pt-5 pb-4 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
-      <div className="flex w-full items-start gap-0">
-        <ExpandableCardBody label={item.title} className="flex flex-col items-start gap-1.5">
-          {(expanded) => (
-            <>
+    <div className="relative flex w-full flex-col items-start rounded-[20px] bg-white px-4 pt-5 pb-4 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
+      <ExpandableCardBody label={item.title} className="flex w-full flex-col items-start gap-1.5">
+        {(expanded) => (
+          <>
+            <p
+              className={cn(
+                "w-full pr-12 break-words text-[14px] leading-[21px] font-bold text-[#4A4543]",
+                expanded ? "whitespace-pre-wrap" : "line-clamp-2",
+              )}
+            >
+              <span className="inline-flex items-center gap-1.5">
+                <span
+                  className={cn(
+                    "flex size-7 shrink-0 items-center justify-center rounded-lg p-0.5",
+                    memoIconBg(resolveMemoIcon(item.icon)),
+                  )}
+                >
+                  <Glyph value={item.icon} className="size-5" />
+                </span>
+                {item.title}
+              </span>
+            </p>
+            {item.content ? (
               <p
                 className={cn(
-                  "w-full break-words text-[14px] leading-[21px] font-bold text-[#4A4543]",
+                  "w-full break-words text-[13px] leading-[21px] font-normal text-[#8C8885]",
                   expanded ? "whitespace-pre-wrap" : "line-clamp-2",
                 )}
               >
-                <span className="inline-flex items-center gap-1.5">
-                  <span
-                    className={cn(
-                      "flex size-7 shrink-0 items-center justify-center rounded-lg p-0.5",
-                      memoIconBg(resolveMemoIcon(item.icon)),
-                    )}
-                  >
-                    <Glyph value={item.icon} className="size-5" />
-                  </span>
-                  {item.title}
-                </span>
+                {item.content}
               </p>
-              {item.content ? (
-                <p
-                  className={cn(
-                    "w-full break-words text-[13px] leading-[21px] font-normal text-[#8C8885]",
-                    expanded ? "whitespace-pre-wrap" : "line-clamp-2",
-                  )}
-                >
-                  {item.content}
-                </p>
-              ) : null}
-            </>
-          )}
-        </ExpandableCardBody>
-        <div className="flex items-start gap-0">
-          <WishlistItemDialog
-            initial={item}
-            onSubmit={onEdit}
-            trigger={<IconAction action="edit" label={`${item.title} 편집`} className="size-6" />}
-          />
-          <IconAction
-            action="delete"
-            label={`${item.title} 삭제`}
-            className="size-6"
-            onClick={onDelete}
-          />
-        </div>
+            ) : null}
+          </>
+        )}
+      </ExpandableCardBody>
+      <div className="absolute top-5 right-4 flex items-start gap-0">
+        <WishlistItemDialog
+          initial={item}
+          onSubmit={onEdit}
+          trigger={<IconAction action="edit" label={`${item.title} 편집`} className="size-6" />}
+        />
+        <IconAction
+          action="delete"
+          label={`${item.title} 삭제`}
+          className="size-6"
+          onClick={onDelete}
+        />
       </div>
     </div>
   );

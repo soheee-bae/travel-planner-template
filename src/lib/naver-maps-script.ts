@@ -13,6 +13,7 @@ export interface NaverMapsApi {
     setCenter?: (latlng: unknown) => void;
     setZoom?: (zoom: number) => void;
     panTo?: (latlng: unknown) => void;
+    morph?: (latlng: unknown, zoom?: number) => void;
     autoResize?: () => void;
     destroy?: () => void;
   };

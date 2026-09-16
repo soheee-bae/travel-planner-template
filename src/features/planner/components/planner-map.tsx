@@ -41,6 +41,7 @@ export function PlannerMap({
   expanded = false,
   visible = true,
   showPopup = true,
+  focusNonce = 0,
 }: {
   places: Place[];
   activeDayIndex: number;
@@ -50,6 +51,7 @@ export function PlannerMap({
   expanded?: boolean;
   visible?: boolean;
   showPopup?: boolean;
+  focusNonce?: number;
 }) {
   const { clientId, pending } = useNaverMapClientId();
   const [loadFailed, setLoadFailed] = useState(false);
@@ -67,6 +69,7 @@ export function PlannerMap({
           activeDayIndex={activeDayIndex}
           selectedPlaceId={selectedPlaceId}
           onSelectPlace={onSelectPlace}
+          expanded={expanded}
         />
       ) : visible ? (
         <NaverPlannerMap
@@ -77,6 +80,8 @@ export function PlannerMap({
           onSelectPlace={onSelectPlace}
           onFatalError={onFatalError}
           visible={visible}
+          focusNonce={focusNonce}
+          expanded={expanded}
         />
       ) : (
         <div className="h-full w-full bg-[#dbe4d8]" aria-hidden="true" />

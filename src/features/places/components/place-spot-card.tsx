@@ -146,9 +146,23 @@ export function PlaceSpotCard({
             <IllustrationIcon src={PLACE_CATEGORY_ICON[place.category]} className="size-full" />
           </span>
           <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-            <p className="w-full truncate text-[16px] leading-[22px] font-bold text-[#1A1A1A]">{place.name}</p>
+            <p
+              className={cn(
+                "w-full text-[16px] leading-[22px] font-bold text-[#1A1A1A]",
+                expanded ? "whitespace-pre-wrap break-words" : "truncate",
+              )}
+            >
+              {place.name}
+            </p>
             {place.address ? (
-              <p className="w-full truncate text-[12px] leading-[18px] font-normal text-[#B0AAA6]">{place.address}</p>
+              <p
+                className={cn(
+                  "w-full text-[12px] leading-[18px] font-normal text-[#B0AAA6]",
+                  expanded ? "whitespace-pre-wrap break-words" : "truncate",
+                )}
+              >
+                {place.address}
+              </p>
             ) : null}
             <div className="flex w-full min-w-0 items-center gap-1.5">
               <span
@@ -160,7 +174,14 @@ export function PlaceSpotCard({
                 {place.category}
               </span>
               {time ? (
-                <span className="min-w-0 truncate text-[12px] leading-[18px] font-normal text-[#C4C0BC]">{time}</span>
+                <span
+                  className={cn(
+                    "min-w-0 text-[12px] leading-[18px] font-normal text-[#C4C0BC]",
+                    expanded ? "whitespace-pre-wrap break-words" : "truncate",
+                  )}
+                >
+                  {time}
+                </span>
               ) : null}
             </div>
           </div>

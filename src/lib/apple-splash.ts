@@ -14,8 +14,11 @@ export const APPLE_SPLASH_IMAGES = [
 ] as const;
 
 export function appleSplashStartupImages() {
-  return APPLE_SPLASH_IMAGES.map((size) => ({
-    url: `/splash/apple-splash-${size.w}x${size.h}.png`,
-    media: `(device-width: ${size.cssW}px) and (device-height: ${size.cssH}px) and (-webkit-device-pixel-ratio: ${size.dpr}) and (orientation: portrait)`,
-  }));
+  return [
+    { url: "/splash/apple-splash.png" },
+    ...APPLE_SPLASH_IMAGES.map((size) => ({
+      url: `/splash/apple-splash-${size.w}x${size.h}.png`,
+      media: `(device-width: ${size.cssW}px) and (device-height: ${size.cssH}px) and (-webkit-device-pixel-ratio: ${size.dpr}) and (orientation: portrait)`,
+    })),
+  ];
 }

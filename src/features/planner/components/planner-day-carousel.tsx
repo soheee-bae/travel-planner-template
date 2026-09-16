@@ -3,7 +3,17 @@
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { visitNumbers } from "@/lib/visit-order";
+import { PLACE_CATEGORY_TONE } from "@/lib/illustrations";
 import type { Place } from "@/mocks/fixtures/places";
+
+function stayLabel(min?: number): string | null {
+  if (min == null || min <= 0) return null;
+  const hours = Math.floor(min / 60);
+  const minutes = min % 60;
+  if (hours > 0 && minutes > 0) return `${hours}h ${minutes}m`;
+  if (hours > 0) return `${hours}h`;
+  return `${minutes}m`;
+}
 
 export function PlannerDayCarousel({
   places,
@@ -44,6 +54,7 @@ export function PlannerDayCarousel({
       {places.map((place) => {
         const selected = selectedPlaceId === place.id;
         const number = numbers.get(place.id);
+        const stay = stayLabel(place.durationMin);
         return (
           <button
             key={place.id}
@@ -60,6 +71,21 @@ export function PlannerDayCarousel({
               {number != null ? `${number}. ` : ""}
               {place.name}
             </p>
+            <div className="mt-1 flex w-full min-w-0 items-center gap-1.5">
+              <span
+                className={cn(
+                  "inline-flex h-[19px] shrink-0 items-center rounded-[99px] px-2 py-0.5 text-[10px] leading-[15px] font-semibold text-[#555555]",
+                  PLACE_CATEGORY_TONE[place.category].chip,
+                )}
+              >
+                {place.category}
+              </span>
+              {stay ? (
+                <span className="min-w-0 truncate text-[12px] leading-[18px] font-normal text-[#C4C0BC]">
+                  {stay}
+                </span>
+              ) : null}
+            </div>
             {place.address ? (
               <p className="mt-0.5 w-full truncate text-[12px] leading-[18px] text-[#8C8885]">
                 {place.address}

@@ -3,7 +3,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import type { ReactNode } from "react";
 import { server } from "@/mocks/server";
-import { isUnlockTimeReached, normalizeCapsuleRichText } from "@/mocks/fixtures/time-capsules";
+import {
+  isUnlockTimeReached,
+  normalizeCapsuleRichText,
+  parseCapsuleRichText,
+} from "@/mocks/fixtures/time-capsules";
 import {
   useAccommodations,
   useCreateAccommodation,
@@ -101,6 +105,15 @@ describe("time capsules", () => {
     expect(normalizeCapsuleRichText("안녕<br>준형")).toBe("안녕\n준형");
     expect(normalizeCapsuleRichText("<p>첫째</p><p>둘째</p>")).toBe("첫째\n\n둘째");
     expect(normalizeCapsuleRichText("줄\n바꿈")).toBe("줄\n바꿈");
+  });
+
+  it("팝업 리치텍스트에서 허용된 강조 태그를 남긴다", () => {
+    expect(parseCapsuleRichText("안녕 <b>준형</b>")).toEqual([
+      { type: "text", value: "안녕 " },
+      { type: "element", tag: "b", children: [{ type: "text", value: "준형" }] },
+    ]);
+    expect(normalizeCapsuleRichText("안녕 <strong>준형</strong>")).toBe("안녕 준형");
+    expect(normalizeCapsuleRichText("안녕 <script>alert(1)</script>")).toBe("안녕 alert(1)");
   });
 
   it("제주 타임캡슐 5개를 조회하고 3번은 폭죽 플래그가 있다", async () => {
