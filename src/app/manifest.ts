@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "소희 & 준형 in JEJU",
-    short_name: "소희 & 준형",
+    name: " ",
+    short_name: " ",
     description: "남자친구 생일 기념 제주 여행 플래너",
     start_url: "/",
     scope: "/",
