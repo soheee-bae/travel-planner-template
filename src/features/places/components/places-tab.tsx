@@ -12,6 +12,7 @@ import { AddPlaceDialog } from "@/features/places/components/add-place-dialog";
 import { cn } from "@/lib/utils";
 import type { Trip } from "@/mocks/fixtures/trips";
 import { PLACE_CATEGORIES, type Place } from "@/mocks/fixtures/places";
+import { assignedDaysOf, groupedSpots } from "@/lib/visit-order";
 
 export function PlacesTab({ trip }: { trip: Trip }) {
   const tripId = trip.id;
@@ -24,21 +25,23 @@ export function PlacesTab({ trip }: { trip: Trip }) {
   const [editing, setEditing] = useState<Place | null>(null);
   const [query, setQuery] = useState("");
 
+  const groups = useMemo(() => groupedSpots(places ?? []), [places]);
+
   const counts = useMemo(() => {
     const base = {
-      전체: places?.length ?? 0,
+      전체: groups.length,
     } as Record<PlaceFilter, number>;
     for (const category of PLACE_CATEGORIES) base[category] = 0;
-    for (const p of places ?? []) base[p.category] += 1;
+    for (const group of groups) base[group.representative.category] += 1;
     return base;
-  }, [places]);
+  }, [groups]);
 
   const filtered = useMemo(() => {
-    if (!places) return [];
-    return (filter === "전체" ? places : places.filter((p) => p.category === filter)).filter((p) =>
-      query.trim() ? p.name.includes(query.trim()) : true,
-    );
-  }, [places, filter, query]);
+    return groups.filter((group) => {
+      if (filter !== "전체" && group.representative.category !== filter) return false;
+      return query.trim() ? group.representative.name.includes(query.trim()) : true;
+    });
+  }, [groups, filter, query]);
 
   function toggleSelect(id: string) {
     setSelected((prev) => {
@@ -55,7 +58,10 @@ export function PlacesTab({ trip }: { trip: Trip }) {
   }
 
   function handleBulkDelete() {
-    selected.forEach((id) => deletePlace.mutate(id));
+    for (const id of selected) {
+      const group = groups.find((item) => item.representative.id === id);
+      (group?.members ?? []).forEach((member) => deletePlace.mutate(member.id));
+    }
     exitSelectionMode();
   }
 
@@ -127,21 +133,31 @@ export function PlacesTab({ trip }: { trip: Trip }) {
         )}
 
         <div className="flex w-full flex-col items-start gap-2.5">
-          {filtered.map((place) => (
-            <PlaceCard
-              key={place.id}
-              place={place}
-              selectionMode={selectionMode}
-              selected={selected.has(place.id)}
-              onToggleSelect={() => toggleSelect(place.id)}
-              onDelete={() => askDelete(() => deletePlace.mutate(place.id))}
-              onEdit={() => setEditing(place)}
-              onLongPress={() => {
-                setSelectionMode(true);
-                toggleSelect(place.id);
-              }}
-            />
-          ))}
+          {filtered.map((group) => {
+            const place = group.representative;
+            const memberIds = group.members.map((member) => member.id);
+            const days = assignedDaysOf(group.members);
+            return (
+              <PlaceCard
+                key={place.id}
+                place={place}
+                assignedDays={days.length > 1 ? days : undefined}
+                selectionMode={selectionMode}
+                selected={selected.has(place.id)}
+                onToggleSelect={() => toggleSelect(place.id)}
+                onDelete={() =>
+                  askDelete(() => {
+                    memberIds.forEach((id) => deletePlace.mutate(id));
+                  })
+                }
+                onEdit={() => setEditing(place)}
+                onLongPress={() => {
+                  setSelectionMode(true);
+                  toggleSelect(place.id);
+                }}
+              />
+            );
+          })}
         </div>
         <AddPlaceDialog
           tripId={tripId}
@@ -160,6 +176,12 @@ export function PlacesTab({ trip }: { trip: Trip }) {
             endDate={trip.endDate}
             initial={editing}
             existingPlaces={places ?? []}
+            syncIdentityToIds={
+              groups
+                .find((group) => group.members.some((member) => member.id === editing.id))
+                ?.members.filter((member) => member.id !== editing.id)
+                .map((member) => member.id) ?? []
+            }
             open
             onOpenChange={(next) => {
               if (!next) setEditing(null);

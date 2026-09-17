@@ -46,6 +46,7 @@ function HeaderRow({
 
 export function PlaceSpotCard({
   place,
+  assignedDays,
   selected,
   selectionMode,
   showDragHandle,
@@ -59,6 +60,7 @@ export function PlaceSpotCard({
   onActivate,
 }: {
   place: Place;
+  assignedDays?: number[];
   selected?: boolean;
   selectionMode?: boolean;
   showDragHandle?: boolean;
@@ -173,6 +175,11 @@ export function PlaceSpotCard({
               >
                 {place.category}
               </span>
+              {assignedDays && assignedDays.length > 0 ? (
+                <span className="min-w-0 truncate text-[12px] leading-[18px] font-normal text-[#C4C0BC]">
+                  {assignedDays.map((day) => `Day ${day}`).join(" · ")}
+                </span>
+              ) : null}
               {time ? (
                 <span
                   className={cn(

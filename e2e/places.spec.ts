@@ -47,6 +47,39 @@ test("선택 모드에서 취소와 삭제만 보인다", async ({ page }) => {
   await expect(page.getByText("1개 선택됨")).toHaveCount(0);
 });
 
+test("같은 이름·주소·카테고리는 스팟 목록에서 한 줄로 합치고 일정 카드는 Day별로 남긴다", async ({ page }) => {
+  await page.route("**/api/geocode**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ lat: 35.185, lng: 136.9 }),
+    });
+  });
+
+  async function addHotel(dayLabel: string) {
+    await page.getByRole("button", { name: "여기 가볼까?" }).click();
+    await page.getByLabel("장소 이름").fill("호텔 시리우스");
+    await page.getByLabel("주소").fill("제주시");
+    await page.getByRole("button", { name: "숙소" }).click();
+    await page.getByRole("group", { name: "일차" }).getByRole("button", { name: dayLabel, exact: true }).click();
+    await page.getByRole("button", { name: "지도에 담기" }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+  }
+
+  await page.goto("/trips/trip_nagoya?tab=places");
+  await addHotel("Day 1");
+  await addHotel("Day 2");
+
+  await expect(page.getByText("호텔 시리우스")).toHaveCount(1);
+  await expect(page.getByText("Day 1 · Day 2")).toBeVisible();
+
+  await page.getByRole("tablist", { name: "여행 상세 탭" }).getByRole("tab", { name: "플래너" }).click();
+  await expect(page.getByRole("tab", { name: "Day 1" })).toBeVisible();
+  await expect(page.getByText("호텔 시리우스")).toBeVisible();
+  await page.getByRole("tab", { name: "Day 2" }).click();
+  await expect(page.getByText("호텔 시리우스")).toBeVisible();
+});
+
 test("선택 모드로 여러 장소를 한 번에 삭제할 수 있다", async ({ page }) => {
   await page.goto("/trips/trip_nagoya?tab=places");
   await page.getByRole("button", { name: "선택", exact: true }).click();

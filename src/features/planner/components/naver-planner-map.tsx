@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { loadNaverMapsScript, type NaverMapsApi } from "@/lib/naver-maps-script";
-import { placesOnDayWithCoords, placesWithCoords, visitNumbers } from "@/lib/visit-order";
+import { uniqueMapPlaces, isMapSpotSelected, visitNumbers } from "@/lib/visit-order";
 import type { Place } from "@/mocks/fixtures/places";
 
 function escapeHtml(value: string): string {
@@ -26,8 +26,8 @@ function markerHtml(label: string, selected: boolean, name?: string): string {
 }
 
 function otherMarkerHtml(selected: boolean, name?: string): string {
-  const bg = selected ? "#E87820" : "#FF9F43";
-  const pin = `<div style="width:18px;height:18px;border-radius:9999px;background:${bg};border:2px solid #fff;box-shadow:0 1px 4px rgba(255,159,67,.45)"></div>`;
+  const bg = selected ? "#8C8885" : "#C4C0BC";
+  const pin = `<div style="width:18px;height:18px;border-radius:9999px;background:${bg};border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.2)"></div>`;
   if (!name) return pin;
   return `<div style="display:flex;width:76px;flex-direction:column;align-items:center">${pin}${pinLabelHtml(name)}</div>`;
 }
@@ -174,12 +174,11 @@ export function NaverPlannerMap({
     overlaysRef.current.forEach((o) => o.setMap(null));
     overlaysRef.current = [];
 
-    const dayPlaces = placesOnDayWithCoords(places, activeDayIndex);
-    const otherPlaces = placesWithCoords(places).filter((place) => place.dayIndex !== activeDayIndex);
+    const { dayPlaces, otherPlaces } = uniqueMapPlaces(places, activeDayIndex);
     const numbers = visitNumbers(places, activeDayIndex);
 
     for (const place of otherPlaces) {
-      const selected = selectedPlaceId === place.id;
+      const selected = isMapSpotSelected(place, places, selectedPlaceId);
       const marker = new maps.Marker({
         position: new maps.LatLng(place.lat!, place.lng!),
         map,
@@ -202,7 +201,7 @@ export function NaverPlannerMap({
       const pos = new maps.LatLng(place.lat!, place.lng!);
       path.push(pos);
       const label = numbers.get(place.id)?.toString() ?? "·";
-      const selected = selectedPlaceId === place.id;
+      const selected = isMapSpotSelected(place, places, selectedPlaceId);
       const marker = new maps.Marker({
         position: pos,
         map,
@@ -242,32 +241,33 @@ export function NaverPlannerMap({
 
     const run = () => {
       map.autoResize?.();
-      const highlighted = placesWithCoords(places).find((place) => place.id === selectedPlaceId);
-      if (highlighted) {
-        focusLatLng(map, maps, highlighted.lat!, highlighted.lng!, 16);
+      const highlighted = places.find((place) => place.id === selectedPlaceId);
+      if (highlighted?.lat != null && highlighted.lng != null) {
+        focusLatLng(map, maps, highlighted.lat, highlighted.lng, 16);
         return;
       }
 
-      const overviewPlaces = expanded
-        ? placesWithCoords(places)
-        : placesOnDayWithCoords(places, activeDayIndex);
-      if (overviewPlaces.length === 0) {
+      const dayPlaces = uniqueMapPlaces(places, activeDayIndex).dayPlaces;
+      if (dayPlaces.length === 0) {
         map.setCenter?.(new maps.LatLng(33.4996, 126.5312));
         map.setZoom?.(11);
         return;
       }
-      if (overviewPlaces.length === 1) {
-        focusLatLng(map, maps, overviewPlaces[0].lat!, overviewPlaces[0].lng!, 14);
+      if (dayPlaces.length === 1) {
+        focusLatLng(map, maps, dayPlaces[0].lat!, dayPlaces[0].lng!, 14);
         return;
       }
       const bounds = new maps.LatLngBounds(
-        new maps.LatLng(overviewPlaces[0].lat!, overviewPlaces[0].lng!),
-        new maps.LatLng(overviewPlaces[0].lat!, overviewPlaces[0].lng!),
+        new maps.LatLng(dayPlaces[0].lat!, dayPlaces[0].lng!),
+        new maps.LatLng(dayPlaces[0].lat!, dayPlaces[0].lng!),
       );
-      for (const place of overviewPlaces) {
+      for (const place of dayPlaces) {
         bounds.extend(new maps.LatLng(place.lat!, place.lng!));
       }
-      map.fitBounds(bounds);
+      map.fitBounds(
+        bounds,
+        expanded ? { top: 72, right: 56, bottom: 40, left: 40 } : { top: 28, right: 40, bottom: 28, left: 28 },
+      );
     };
 
     const frame = window.requestAnimationFrame(run);

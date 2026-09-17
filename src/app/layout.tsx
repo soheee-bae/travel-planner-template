@@ -30,12 +30,12 @@ const jua = Jua({
 });
 
 export const metadata: Metadata = {
-  title: "JEJU",
+  title: "소희 & 준형 in JEJU",
   description: "남자친구 생일 기념 제주 여행 플래너",
-  applicationName: "JEJU",
+  applicationName: "소희 & 준형 in JEJU",
   appleWebApp: {
     capable: true,
-    title: "JEJU",
+    title: "소희 & 준형",
     statusBarStyle: "default",
     startupImage: appleSplashStartupImages(),
   },

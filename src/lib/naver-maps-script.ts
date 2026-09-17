@@ -9,7 +9,10 @@ export interface NaverMapsApi {
     el: HTMLElement,
     opts: Record<string, unknown>,
   ) => {
-    fitBounds: (bounds: unknown) => void;
+    fitBounds: (
+      bounds: unknown,
+      margin?: number | { top?: number; right?: number; bottom?: number; left?: number },
+    ) => void;
     setCenter?: (latlng: unknown) => void;
     setZoom?: (zoom: number) => void;
     panTo?: (latlng: unknown) => void;

@@ -82,6 +82,7 @@ export function AddPlaceDialog({
   defaultDayIndex,
   defaultCategory,
   onSaved,
+  syncIdentityToIds = [],
 }: {
   tripId: string;
   initial?: Place;
@@ -95,6 +96,7 @@ export function AddPlaceDialog({
   defaultDayIndex?: number | null;
   defaultCategory?: PlaceCategory;
   onSaved?: (place: { dayIndex: number | null; category: PlaceCategory }) => void;
+  syncIdentityToIds?: string[];
 }) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const open = openProp ?? uncontrolledOpen;
@@ -203,6 +205,18 @@ export function AddPlaceDialog({
         },
         {
           onSuccess: () => {
+            for (const id of syncIdentityToIds) {
+              updatePlace.mutate({
+                id,
+                patch: {
+                  name: values.name,
+                  address: values.address,
+                  category: values.category,
+                  lat,
+                  lng,
+                },
+              });
+            }
             onSaved?.({ dayIndex: nextDay, category: values.category });
             setOpen(false);
           },

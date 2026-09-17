@@ -1,4 +1,4 @@
-/** iOS 홈 화면 앱 실행 시 한라봉 기본 스플래시 대신 쓸 이미지. CSS 픽셀 × DPR = PNG 크기. */
+/** iOS 홈 화면 앱 실행 시 인앱 스플래시와 같은 섬+문구 이미지. CSS 픽셀 × DPR = PNG 크기. */
 export const APPLE_SPLASH_IMAGES = [
   { cssW: 440, cssH: 956, dpr: 3, w: 1320, h: 2868 },
   { cssW: 430, cssH: 932, dpr: 3, w: 1290, h: 2796 },

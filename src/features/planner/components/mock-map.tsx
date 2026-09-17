@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { placesOnDayWithCoords, placesWithCoords, visitNumbers } from "@/lib/visit-order";
+import { uniqueMapPlaces, isMapSpotSelected, visitNumbers } from "@/lib/visit-order";
 import type { Place } from "@/mocks/fixtures/places";
 
 const TILE_SIZE = 256;
@@ -21,7 +21,9 @@ function boundsOf(places: Place[]): typeof JEJU {
   if (coords.length === 0) return JEJU;
   const lats = coords.map((p) => p.lat!);
   const lngs = coords.map((p) => p.lng!);
-  const pad = 0.03;
+  const latSpan = Math.max(...lats) - Math.min(...lats);
+  const lngSpan = Math.max(...lngs) - Math.min(...lngs);
+  const pad = Math.max(0.004, Math.max(latSpan, lngSpan) * 0.18);
   return {
     minLat: Math.min(...lats) - pad,
     maxLat: Math.max(...lats) + pad,
@@ -73,10 +75,9 @@ export function MockMap({
     return () => observer.disconnect();
   }, []);
 
-  const markerPlaces = placesOnDayWithCoords(places, activeDayIndex);
-  const otherPlaces = placesWithCoords(places).filter((place) => place.dayIndex !== activeDayIndex);
-  const focused = placesWithCoords(places).find((p) => p.id === selectedPlaceId);
-  const overviewPlaces = expanded ? placesWithCoords(places) : markerPlaces;
+  const { dayPlaces: markerPlaces, otherPlaces } = uniqueMapPlaces(places, activeDayIndex);
+  const focused = places.find((p) => p.id === selectedPlaceId);
+  const overviewPlaces = markerPlaces;
   const bbox =
     focused && focused.lat != null && focused.lng != null
       ? {
@@ -86,7 +87,7 @@ export function MockMap({
           maxLng: focused.lng + 0.012,
         }
       : boundsOf(overviewPlaces);
-  const zoom = pickZoom(bbox, size.w, size.h, focused ? 16 : 13);
+  const zoom = pickZoom(bbox, size.w, size.h, focused ? 16 : 15);
   const sw = latLngToWorld(bbox.minLat, bbox.minLng, zoom);
   const ne = latLngToWorld(bbox.maxLat, bbox.maxLng, zoom);
   const viewLeft = Math.min(sw.x, ne.x);
@@ -168,7 +169,7 @@ export function MockMap({
         const point = latLngToWorld(place.lat!, place.lng!, zoom);
         const left = offsetX + (point.x - viewLeft) * scale;
         const top = offsetY + (point.y - viewTop) * scale;
-        const selected = selectedPlaceId === place.id;
+        const selected = isMapSpotSelected(place, places, selectedPlaceId);
         return (
           <button
             key={place.id}
@@ -185,7 +186,7 @@ export function MockMap({
             <span
               className={cn(
                 "size-[18px] rounded-full border-2 border-white shadow-sm",
-                selected ? "bg-[#E87820]" : "bg-[#FF9F43]",
+                selected ? "bg-[#8C8885]" : "bg-[#C4C0BC]",
               )}
             />
             {expanded ? (
@@ -200,7 +201,7 @@ export function MockMap({
         const point = latLngToWorld(place.lat!, place.lng!, zoom);
         const left = offsetX + (point.x - viewLeft) * scale;
         const top = offsetY + (point.y - viewTop) * scale;
-        const selected = selectedPlaceId === place.id;
+        const selected = isMapSpotSelected(place, places, selectedPlaceId);
         return (
           <button
             key={place.id}

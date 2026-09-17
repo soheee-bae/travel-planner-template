@@ -5,6 +5,7 @@ import type { Place } from "@/mocks/fixtures/places";
 
 export function PlaceCard({
   place,
+  assignedDays,
   selected,
   selectionMode,
   onToggleSelect,
@@ -13,6 +14,7 @@ export function PlaceCard({
   onLongPress,
 }: {
   place: Place;
+  assignedDays?: number[];
   selected?: boolean;
   selectionMode?: boolean;
   onToggleSelect?: () => void;
@@ -23,6 +25,7 @@ export function PlaceCard({
   return (
     <PlaceSpotCard
       place={place}
+      assignedDays={assignedDays}
       selected={selected}
       selectionMode={selectionMode}
       onToggleSelect={onToggleSelect}

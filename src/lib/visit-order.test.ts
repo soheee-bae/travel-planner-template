@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { nextOrderIndexForDay, placesOnDay, placesOnDayWithCoords, visitNumbers } from "@/lib/visit-order";
+import { assignedDaysOf, nextOrderIndexForDay, placesOnDay, placesOnDayWithCoords, groupedSpots, uniqueMapPlaces, visitNumbers } from "@/lib/visit-order";
 import type { Place } from "@/mocks/fixtures/places";
 
 function place(partial: Partial<Place> & Pick<Place, "id" | "dayIndex" | "orderIndex">): Place {
@@ -34,6 +34,62 @@ describe("visitNumbers", () => {
     ];
     expect(placesOnDay(places, 1).map((p) => p.id)).toEqual(["b", "a"]);
     expect(placesOnDayWithCoords(places, 2).map((p) => p.id)).toEqual(["c"]);
+  });
+});
+
+describe("uniqueMapPlaces", () => {
+  it("이름·주소·카테고리가 같으면 핀을 하나로 합치고 그날 일정을 우선한다", () => {
+    const places = [
+      place({
+        id: "in",
+        name: "호텔 시리우스",
+        address: "제주시",
+        category: "숙소",
+        dayIndex: 1,
+        orderIndex: 4,
+        lat: 33.5,
+        lng: 126.5,
+      }),
+      place({
+        id: "out",
+        name: "호텔 시리우스",
+        address: "제주시",
+        category: "숙소",
+        dayIndex: 2,
+        orderIndex: 0,
+        lat: 33.5,
+        lng: 126.5,
+      }),
+    ];
+    expect(uniqueMapPlaces(places, 1).dayPlaces.map((p) => p.id)).toEqual(["in"]);
+    expect(uniqueMapPlaces(places, 1).otherPlaces).toEqual([]);
+    expect(uniqueMapPlaces(places, 2).dayPlaces.map((p) => p.id)).toEqual(["out"]);
+    expect(uniqueMapPlaces(places, 3).otherPlaces.map((p) => p.id)).toEqual(["in"]);
+  });
+
+  it("스팟 목록은 이름·주소·카테고리가 같으면 한 줄로 묶는다", () => {
+    const places = [
+      place({
+        id: "in",
+        name: "호텔 시리우스",
+        address: "제주시",
+        category: "숙소",
+        dayIndex: 1,
+        orderIndex: 4,
+      }),
+      place({
+        id: "out",
+        name: "호텔 시리우스",
+        address: "제주시",
+        category: "숙소",
+        dayIndex: 2,
+        orderIndex: 0,
+      }),
+    ];
+    const groups = groupedSpots(places);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].members.map((p) => p.id)).toEqual(["in", "out"]);
+    expect(assignedDaysOf(groups[0].members)).toEqual([1, 2]);
   });
 });
 

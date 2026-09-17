@@ -161,6 +161,7 @@ export function PlannerTab({ trip, active = true }: { trip: Trip; active?: boole
                   setActiveDay(day);
                   setHighlightId(undefined);
                   exitSelectionMode();
+                  setFocusNonce((nonce) => nonce + 1);
                 }}
               />
             </div>
@@ -206,6 +207,7 @@ export function PlannerTab({ trip, active = true }: { trip: Trip; active?: boole
             setActiveDay(day);
             setHighlightId(undefined);
             exitSelectionMode();
+            setFocusNonce((nonce) => nonce + 1);
           }}
         />
 
