@@ -78,8 +78,8 @@ export function JejuHomeHero({
   const weatherDate = weather?.date;
 
   return (
-    <section className="flex h-full min-h-0 w-full flex-col">
-      <header className="relative z-10 flex w-full shrink-0 items-center bg-white px-5 pt-[calc(12px+env(safe-area-inset-top,0px))] pb-3 transition-shadow duration-200 data-[scrolled]:shadow-[0_4px_10px_rgba(0,0,0,0.04)]">
+    <section className="flex h-full min-h-0 w-full min-w-0 flex-col">
+      <header className="relative z-10 flex w-full min-w-0 shrink-0 items-center bg-white px-5 pt-[calc(12px+env(safe-area-inset-top,0px))] pb-3 transition-shadow duration-200 data-[scrolled]:shadow-[0_4px_10px_rgba(0,0,0,0.04)]">
         <div className="flex min-w-0 flex-col items-start">
           <h1 className="flex w-full items-center font-nunito text-[20px] leading-[30px] font-bold text-[#1A1A1A]">
             <span className="min-w-0 truncate">{trip.title}</span>
@@ -88,13 +88,13 @@ export function JejuHomeHero({
       </header>
 
       <div
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain"
         onScroll={(event) => applyTitleScrollShadow(event.currentTarget)}
       >
-      <div className="flex w-full flex-col items-start gap-3 px-5 pb-[50px]">
+      <div className="flex w-full min-w-0 max-w-full flex-col gap-3 px-5 pb-[50px]">
         <div
           className={cn(
-            "relative isolate mt-3 flex min-h-[88px] w-full items-center overflow-visible rounded-[20px] bg-[#FF893B] px-6 py-4",
+            "relative isolate mt-3 flex min-h-[88px] w-full min-w-0 max-w-full items-center overflow-visible rounded-[20px] bg-[#FF893B] px-6 py-4",
             "shadow-[0px_2px_12px_rgba(0,0,0,0.06),0px_6px_16px_rgba(255,137,59,0.28)]",
           )}
         >
@@ -112,7 +112,7 @@ export function JejuHomeHero({
         </div>
 
         {activeFlight ? (
-          <article className="flex w-full flex-col items-start overflow-hidden rounded-[20px] bg-white shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
+          <article className="flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-[20px] bg-white shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
             <LayoutGroup id="home-flight-tabs">
             <div className="box-border flex h-[45px] w-full items-start justify-center border-b border-[#EEEEEE] p-0">
               {(sortedFlights.length > 0 ? sortedFlights : [activeFlight]).map((flight, index) => (
@@ -146,7 +146,7 @@ export function JejuHomeHero({
         ) : null}
 
         {activeStay ? (
-          <article className="relative isolate flex w-full flex-col items-start overflow-hidden rounded-[20px] bg-white shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
+          <article className="relative isolate flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-[20px] bg-white shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
             <LayoutGroup id="home-stay-tabs">
             <div className="box-border flex h-[45px] w-full items-start justify-center border-b border-[#EEEEEE] p-0">
               {sortedStays.map((stay, index) => (
@@ -181,11 +181,11 @@ export function JejuHomeHero({
         {weatherPending ? (
           <WeatherCardSkeleton />
         ) : weatherError || !weather || !weatherDate ? (
-          <article className="flex min-h-[96px] w-full items-center justify-center rounded-[20px] bg-white px-[18px] py-3.5 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
+          <article className="flex min-h-[96px] w-full min-w-0 max-w-full items-center justify-center rounded-[20px] bg-white px-[18px] py-3.5 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
             <p className="text-[13px] leading-5 text-[#8E8E8E]">오늘 날씨를 못 가져왔어</p>
           </article>
         ) : (
-          <article className="relative flex min-h-[96px] w-full items-center rounded-[20px] bg-white px-[18px] py-3.5 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
+          <article className="relative flex min-h-[96px] w-full min-w-0 max-w-full items-center rounded-[20px] bg-white px-[18px] py-3.5 shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
             <div className="flex w-full min-w-0 items-center gap-3.5">
               <span className="flex size-[58px] shrink-0 items-center justify-center" aria-hidden>
                 <IllustrationIcon src={weather.icon} className="size-[58px]" />
@@ -223,7 +223,7 @@ export function JejuHomeHero({
 function FlightTicketBody({ flight }: { flight: Transport }) {
   return (
     <>
-      <div className="flex h-[85px] w-full items-center justify-between px-[22px] py-4">
+      <div className="flex h-[85px] w-full min-w-0 items-center justify-between px-[22px] py-4">
         <div className="flex h-[53px] w-[51px] shrink-0 flex-col items-start gap-[3px]">
           <p className="flex h-[33px] w-full items-center font-nunito text-[22px] leading-[33px] font-extrabold text-black">
             {airportCode(flight, "from")}
@@ -252,28 +252,28 @@ function FlightTicketBody({ flight }: { flight: Transport }) {
 
       <TicketPerforation />
 
-      <div className="flex h-[70px] w-full items-start justify-between gap-[44.3px] px-[22px] py-4">
-        <div className="flex h-[38px] flex-col items-start gap-[3px]">
+      <div className="flex h-[70px] w-full min-w-0 items-start justify-between gap-2 px-[22px] py-4">
+        <div className="flex h-[38px] min-w-0 flex-1 flex-col items-start gap-[3px]">
           <p className="flex h-[15px] items-center text-[10px] leading-[15px] text-[#8E8E8E]">날짜</p>
-          <p className="flex h-5 items-center font-nunito text-[13px] leading-5 font-bold whitespace-nowrap text-[#4A4543]">
+          <p className="flex h-5 items-center font-nunito text-[13px] leading-5 font-bold text-[#4A4543]">
             {flight.departureAt.slice(0, 10).replaceAll("-", ".")}
           </p>
         </div>
-        <div className="flex h-[38px] flex-col items-start gap-[3px]">
+        <div className="flex h-[38px] min-w-0 flex-1 flex-col items-start gap-[3px]">
           <p className="flex h-[15px] items-center text-[10px] leading-[15px] text-[#8E8E8E]">출발</p>
-          <p className="flex h-[18px] items-center text-xs leading-[18px] font-bold whitespace-nowrap text-[#1A1A1A]">
+          <p className="flex h-[18px] items-center text-xs leading-[18px] font-bold text-[#1A1A1A]">
             {timeOf(flight.departureAt)}
           </p>
         </div>
-        <div className="flex h-[38px] flex-col items-start gap-[3px]">
+        <div className="flex h-[38px] min-w-0 flex-1 flex-col items-start gap-[3px]">
           <p className="flex h-[15px] items-center text-[10px] leading-[15px] text-[#8E8E8E]">도착</p>
-          <p className="flex h-[18px] items-center text-xs leading-[18px] font-bold whitespace-nowrap text-[#1A1A1A]">
+          <p className="flex h-[18px] items-center text-xs leading-[18px] font-bold text-[#1A1A1A]">
             {timeOf(flight.arrivalAt)}
           </p>
         </div>
-        <div className="flex h-[38px] flex-col items-start gap-[3px]">
+        <div className="flex h-[38px] min-w-0 flex-1 flex-col items-start gap-[3px]">
           <p className="flex h-[15px] items-center text-[10px] leading-[15px] text-[#8E8E8E]">항공사</p>
-          <p className="flex h-[18px] items-center text-xs leading-[18px] font-bold whitespace-nowrap text-[#1A1A1A]">
+          <p className="flex h-[18px] items-center text-xs leading-[18px] font-bold text-[#1A1A1A]">
             {flight.bookingRef ?? ""}
           </p>
         </div>
@@ -281,7 +281,7 @@ function FlightTicketBody({ flight }: { flight: Transport }) {
 
       <TicketPerforation />
 
-      <div className="flex h-16 w-full items-center justify-between gap-[100.6px] rounded-b-[20px] bg-white px-[22px] py-4">
+      <div className="flex h-16 w-full min-w-0 items-center justify-between gap-3 rounded-b-[20px] bg-white px-[22px] py-4">
         {flight.memo ? (
           <p className="flex h-[17px] min-w-0 items-center truncate text-[11px] leading-4 font-bold tracking-[0.66px] text-[#FF9F43]">
             {flight.memo}
@@ -315,7 +315,7 @@ function FlightTicketBody({ flight }: { flight: Transport }) {
 function StayTicketBody({ stay }: { stay: Accommodation }) {
   return (
     <>
-      <div className="flex h-[76px] w-full items-center gap-3 px-[22px] py-4">
+      <div className="flex h-[76px] w-full min-w-0 items-center gap-3 px-[22px] py-4">
         <span
           className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-[#FFD6BB] p-1.5"
           aria-hidden
@@ -332,7 +332,7 @@ function StayTicketBody({ stay }: { stay: Accommodation }) {
         </div>
       </div>
       <TicketPerforation />
-      <div className="flex h-[70px] w-full items-start px-[22px] py-4">
+      <div className="flex h-[70px] w-full min-w-0 items-start px-[22px] py-4">
         <div className="flex h-[38px] min-w-0 flex-1 flex-col items-start gap-[3px]">
           <p className="flex h-[15px] w-full items-center text-[10px] leading-[15px] text-[#8E8E8E]">체크인</p>
           <p className="flex h-5 w-full items-center font-nunito text-[13px] leading-5 font-bold text-[#4A4543]">

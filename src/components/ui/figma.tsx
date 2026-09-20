@@ -284,7 +284,7 @@ export function TicketPerforation({
   punchColor?: string;
 }) {
   return (
-    <div className="flex h-px w-full items-center" aria-hidden>
+    <div className="flex h-px w-full min-w-0 items-center" aria-hidden>
       <span className="size-4 shrink-0 rounded-full" style={{ background: punchColor }} />
       <span className="box-border h-[1.5px] flex-1 border-t-[1.5px] border-dashed border-[#DDDDDD]" />
       <span className="size-4 shrink-0 rounded-full" style={{ background: punchColor }} />

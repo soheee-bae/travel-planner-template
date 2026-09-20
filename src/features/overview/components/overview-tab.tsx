@@ -60,7 +60,7 @@ export function OverviewTab({ tripId }: { tripId: string }) {
       </button>
     );
     return (
-      <div className="relative mx-auto flex h-full min-h-0 w-full flex-col bg-white">
+      <div className="relative mx-auto flex h-full min-h-0 w-full min-w-0 flex-col bg-white">
         <JejuHomeHero trip={trip} flights={flights} stays={accommodations ?? []} />
         {shell ? createPortal(fab, shell) : null}
         <TimeCapsuleDialog tripId={tripId} open={capsuleOpen} onOpenChange={setCapsuleOpen} />

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calcNights, formatDateRange, formatDday, formatDuration } from "@/lib/date";
+import { calcNights, formatDateRange, formatDday, formatDdayCaption, formatDuration } from "@/lib/date";
 
 describe("calcNights", () => {
   it("2박 3일을 2로 계산한다", () => {
@@ -41,7 +41,18 @@ describe("formatDday", () => {
     expect(formatDday("2026-09-17", "2026-09-19", "2026-09-19")).toBe("D+2");
   });
 
-  it("종료 후면 지난 여행", () => {
-    expect(formatDday("2026-09-17", "2026-09-19", "2026-09-20")).toBe("지난 여행");
+  it("종료 다음날부터 귀국일 기준 D+n", () => {
+    expect(formatDday("2026-09-17", "2026-09-19", "2026-09-20")).toBe("D+1");
+    expect(formatDday("2026-09-17", "2026-09-19", "2026-09-22")).toBe("D+3");
+  });
+});
+
+describe("formatDdayCaption", () => {
+  it("출발 전이면 비행기 뜨는 날까지", () => {
+    expect(formatDdayCaption("2026-09-17", "2026-09-19", "2026-09-04")).toBe("비행기 뜨는 날까지");
+  });
+
+  it("종료 후면 다녀온 지", () => {
+    expect(formatDdayCaption("2026-09-17", "2026-09-19", "2026-09-20")).toBe("다녀온 지");
   });
 });

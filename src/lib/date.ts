@@ -31,13 +31,13 @@ export function todayIsoSeoul(): string {
   return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Seoul" });
 }
 
-/** 오늘 기준 D-day. 출발 전 D-n, 당일 D-Day, 여행 중 D+n, 종료 후 지난 여행. */
+/** 오늘 기준 D-day. 출발 전 D-n, 당일 D-Day, 여행 중 출발일 기준 D+n, 종료 다음날부터 귀국일 기준 D+n. */
 export function formatDday(startDate: string, endDate: string, todayIso?: string): string {
   const today = todayIso ?? todayIsoSeoul();
   if (today < startDate) return `D-${calcNights(today, startDate)}`;
   if (today === startDate) return "D-Day";
   if (today <= endDate) return `D+${calcNights(startDate, today)}`;
-  return "지난 여행";
+  return `D+${calcNights(endDate, today)}`;
 }
 
 /** D-day 카드 위 라벨. */
@@ -46,7 +46,7 @@ export function formatDdayCaption(startDate: string, endDate: string, todayIso?:
   if (today < startDate) return "비행기 뜨는 날까지";
   if (today === startDate) return "출발일";
   if (today <= endDate) return "여행 중";
-  return "지난 여행";
+  return "다녀온 지";
 }
 
 /** 타임캡슐 카드용. 예: 10월 14일 오후 3:00 */

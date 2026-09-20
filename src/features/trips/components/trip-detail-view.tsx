@@ -16,7 +16,7 @@ import { JEJU_TRIP_ID } from "@/lib/jeju-trip";
 function TabPane({ active, children }: { active: boolean; children: ReactNode }) {
   return (
     <div
-      className={cn("h-full min-h-0", active ? "block" : "hidden")}
+      className={cn("h-full min-h-0 w-full min-w-0", active ? "block" : "hidden")}
       inert={active ? undefined : true}
       aria-hidden={!active}
     >
@@ -36,7 +36,7 @@ export function TripDetailView({ tripId }: { tripId: string }) {
   if (isLoading) {
     return (
       <div className="flex min-h-0 flex-1 flex-col bg-white">
-        <div className="relative min-h-0 flex-1 overflow-hidden">
+        <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
           <HomePageSkeleton />
         </div>
         <BottomTripNav active={tab} onChange={setTab} />
@@ -61,7 +61,7 @@ export function TripDetailView({ tripId }: { tripId: string }) {
         </h1>
       )}
       <div
-        className="relative min-h-0 flex-1 overflow-hidden"
+        className="relative min-h-0 min-w-0 flex-1 overflow-hidden"
         role="tabpanel"
         id={`trip-tabpanel-${panel}`}
         aria-labelledby={`trip-tab-${panel}`}

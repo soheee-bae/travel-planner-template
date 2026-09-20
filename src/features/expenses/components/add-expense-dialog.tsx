@@ -28,6 +28,7 @@ import {
   createExpenseInputSchema,
   EXPENSE_CATEGORIES,
   isGiftPayer,
+  shouldBlurExpense,
   type CreateExpenseInput,
   type Expense,
   type ExpenseCategory,
@@ -38,7 +39,7 @@ import { z } from "zod";
 
 const PAYER_REQUIRED_MESSAGE = "고구마냐... 감자냐... 그것이 문제로다...";
 
-function createExpenseFormSchema(requirePayer: boolean) {
+function createExpenseFormSchema(requirePayer: boolean, hideAmount: boolean) {
   const paidBySchema = requirePayer
     ? z.enum(["소희", "준형"], { error: PAYER_REQUIRED_MESSAGE })
     : z.enum(["소희", "준형"]).optional();
@@ -54,7 +55,9 @@ function createExpenseFormSchema(requirePayer: boolean) {
     })
     .extend({
       title: z.string().trim().min(1, "어디다 긁었는지 까먹으면 안 돼!"),
-      amount: z.number({ error: "행복 값 입력 필수!" }).positive("행복 값 입력 필수!"),
+      amount: hideAmount
+        ? z.number().positive().optional()
+        : z.number({ error: "행복 값 입력 필수!" }).positive("행복 값 입력 필수!"),
       paidBy: paidBySchema,
     });
 }
@@ -105,7 +108,8 @@ export function AddExpenseDialog({
   const updateExpense = useUpdateExpense(tripId);
   const days = startDate && endDate ? getTripDays(startDate, endDate) : [];
   const requirePayer = !(initial && isGiftPayer(initial.paidBy));
-  const formSchema = createExpenseFormSchema(requirePayer);
+  const hideAmount = Boolean(initial && shouldBlurExpense(initial));
+  const formSchema = createExpenseFormSchema(requirePayer, hideAmount);
 
   function emptyValues(): FormValues {
     return {
@@ -125,7 +129,7 @@ export function AddExpenseDialog({
       ? {
           title: initial.title,
           category: initial.category,
-          amount: initial.amount,
+          amount: hideAmount ? undefined : initial.amount,
           currency: initial.currency,
           paidBy: payerValue(initial.paidBy),
           dayIndex: initial.dayIndex ?? days[0]?.dayIndex ?? 1,
@@ -152,10 +156,19 @@ export function AddExpenseDialog({
       return;
     }
     if (initial) {
+      const { amount, ...rest } = values;
       updateExpense.mutate(
         {
           id: initial.id,
-          patch: { ...values, paidBy, date, paymentMethod, dayIndex, isManual: true },
+          patch: {
+            ...rest,
+            paidBy,
+            date,
+            paymentMethod,
+            dayIndex,
+            isManual: true,
+            ...(hideAmount || amount == null ? {} : { amount }),
+          },
         },
         {
           onSuccess: () => {
@@ -166,6 +179,10 @@ export function AddExpenseDialog({
       );
       return;
     }
+    if (values.amount == null) {
+      form.setError("amount", { type: "required", message: "행복 값 입력 필수!" });
+      return;
+    }
     const input: CreateExpenseInput = {
       tripId,
       placeId: null,
@@ -174,6 +191,7 @@ export function AddExpenseDialog({
       paymentMethod,
       isBlur: false,
       ...values,
+      amount: values.amount,
       paidBy,
       dayIndex,
     };
@@ -241,24 +259,26 @@ export function AddExpenseDialog({
               <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">{errors.title.message}</p>
             ) : null}
           </div>
-          <div className="flex flex-col gap-1.5">
-            <FigmaFieldLabel htmlFor="exp-amount">금액 (원)</FigmaFieldLabel>
-            <Controller
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <MoneyInput
-                  id="exp-amount"
-                  className={figmaInputClass}
-                  value={field.value}
-                  onChange={(v) => field.onChange(v)}
-                />
-              )}
-            />
-            {errors.amount ? (
-              <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">{errors.amount.message}</p>
-            ) : null}
-          </div>
+          {hideAmount ? null : (
+            <div className="flex flex-col gap-1.5">
+              <FigmaFieldLabel htmlFor="exp-amount">금액 (원)</FigmaFieldLabel>
+              <Controller
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <MoneyInput
+                    id="exp-amount"
+                    className={figmaInputClass}
+                    value={field.value}
+                    onChange={(v) => field.onChange(v)}
+                  />
+                )}
+              />
+              {errors.amount ? (
+                <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">{errors.amount.message}</p>
+              ) : null}
+            </div>
+          )}
           <div className="flex flex-col gap-2">
             <p className="w-full text-xs leading-[18px] font-semibold text-[#AAAAAA]" id="exp-payer-label">
               결제 요정은 누구?
