@@ -26,7 +26,7 @@ export function SegmentedSwap({
   const shift = reduce ? 0 : offset.segment;
 
   return (
-    <div className={cn("relative w-full min-w-0 max-w-full overflow-hidden", className)}>
+    <div className={cn("relative w-full min-w-0 overflow-hidden", className)}>
       <AnimatePresence mode="popLayout" initial={false} custom={direction}>
         <motion.div
           key={activeKey}
@@ -40,7 +40,7 @@ export function SegmentedSwap({
           animate="center"
           exit="exit"
           transition={{ duration: slide, ease: easing.standard }}
-          className={cn("w-full min-w-0 max-w-full", contentClassName)}
+          className={cn("w-full min-w-0", contentClassName)}
         >
           {children}
         </motion.div>

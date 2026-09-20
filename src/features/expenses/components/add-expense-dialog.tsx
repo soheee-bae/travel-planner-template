@@ -109,6 +109,7 @@ export function AddExpenseDialog({
   const days = startDate && endDate ? getTripDays(startDate, endDate) : [];
   const requirePayer = !(initial && isGiftPayer(initial.paidBy));
   const hideAmount = Boolean(initial && shouldBlurExpense(initial));
+  const lockPrepDay = Boolean(initial && initial.dayIndex == null);
   const formSchema = createExpenseFormSchema(requirePayer, hideAmount);
 
   function emptyValues(): FormValues {
@@ -118,7 +119,7 @@ export function AddExpenseDialog({
       amount: undefined as unknown as number,
       currency,
       paidBy: undefined,
-      dayIndex: defaultDayIndex ?? days[0]?.dayIndex ?? 1,
+      dayIndex: defaultDayIndex !== undefined ? defaultDayIndex : (days[0]?.dayIndex ?? 1),
     };
   }
 
@@ -132,7 +133,7 @@ export function AddExpenseDialog({
           amount: hideAmount ? undefined : initial.amount,
           currency: initial.currency,
           paidBy: payerValue(initial.paidBy),
-          dayIndex: initial.dayIndex ?? days[0]?.dayIndex ?? 1,
+          dayIndex: initial.dayIndex,
         }
       : emptyValues(),
   });
@@ -148,7 +149,7 @@ export function AddExpenseDialog({
     const selectedDay = days.find((d) => d.dayIndex === values.dayIndex);
     const date = initial?.date || selectedDay?.date || startDate || todayIsoSeoul();
     const paymentMethod = initial?.paymentMethod ?? "카드";
-    const dayIndex = values.dayIndex ?? null;
+    const dayIndex = lockPrepDay ? null : (values.dayIndex ?? null);
     const paidBy =
       values.paidBy ?? (initial && isGiftPayer(initial.paidBy) ? initial.paidBy : undefined);
     if (!paidBy) {
@@ -322,18 +323,26 @@ export function AddExpenseDialog({
           </div>
           <div className="flex flex-col">
             <FigmaFieldLabel>일차</FigmaFieldLabel>
-            <FigmaChipRow role="group" aria-label="일차">
-              {days.map((day) => (
-                <FigmaChip
-                  key={day.dayIndex}
-                  size="sm"
-                  active={dayIndex === day.dayIndex}
-                  onClick={() => form.setValue("dayIndex", day.dayIndex)}
-                >
-                  Day {day.dayIndex}
+            {lockPrepDay ? (
+              <FigmaChipRow role="group" aria-label="일차">
+                <FigmaChip size="sm" active disabled className="disabled:opacity-100">
+                  여행준비
                 </FigmaChip>
-              ))}
-            </FigmaChipRow>
+              </FigmaChipRow>
+            ) : (
+              <FigmaChipRow role="group" aria-label="일차">
+                {days.map((day) => (
+                  <FigmaChip
+                    key={day.dayIndex}
+                    size="sm"
+                    active={dayIndex === day.dayIndex}
+                    onClick={() => form.setValue("dayIndex", day.dayIndex)}
+                  >
+                    Day {day.dayIndex}
+                  </FigmaChip>
+                ))}
+              </FigmaChipRow>
+            )}
           </div>
           <div className="flex flex-col gap-2">
             <FigmaFieldLabel>카테고리</FigmaFieldLabel>
