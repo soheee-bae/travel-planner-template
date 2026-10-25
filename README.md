@@ -20,8 +20,8 @@ corepack prepare pnpm@11.25.0 --activate
 ## 1. 클론
 
 ```bash
-git clone https://github.com/soheee-bae/travel-planner.git
-cd travel-planner
+git clone https://github.com/soheee-bae/travel-planner-template.git
+cd travel-planner-template
 pnpm install
 ```
 
