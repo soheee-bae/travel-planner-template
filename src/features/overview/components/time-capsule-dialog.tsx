@@ -135,7 +135,7 @@ export function TimeCapsuleDialog({
       >
         <DialogHeader scrollShadow={false} className="mb-4 w-full shrink-0 items-center gap-1.5 pb-0 text-center">
           <DialogTitle className="flex h-[30px] items-center justify-center text-center text-[20px] leading-[30px] font-extrabold text-[#4A4543]">
-            소희 가이드 시크릿 노트
+            시크릿 노트
           </DialogTitle>
           <p className="text-center text-[12px] leading-[18px] font-normal text-[#B0AAA6]">
             가이드가 여행 중간중간 숨겨둔 특별한 메세지들!

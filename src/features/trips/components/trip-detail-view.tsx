@@ -11,7 +11,6 @@ import { PlannerTab } from "@/features/planner/components/planner-tab";
 import { BudgetTab } from "@/features/expenses/components/budget-tab";
 import { PrepWorkspace } from "@/features/checklists/components/prep-workspace";
 import { HomePageSkeleton } from "@/components/ui/page-skeleton";
-import { JEJU_TRIP_ID } from "@/lib/jeju-trip";
 
 function TabPane({ active, children }: { active: boolean; children: ReactNode }) {
   return (
@@ -51,7 +50,7 @@ export function TripDetailView({ tripId }: { tripId: string }) {
     );
   }
 
-  const hideChromeTitle = trip.id === JEJU_TRIP_ID && panel === "overview";
+  const hideChromeTitle = panel === "overview";
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-white">

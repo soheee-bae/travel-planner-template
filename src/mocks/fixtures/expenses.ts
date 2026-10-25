@@ -81,9 +81,7 @@ export function shouldBlurExpense(expense: Pick<Expense, "isBlur">): boolean {
 }
 
 export function paidByTagLabel(paidBy: string): string {
-  if (paidBy === "나" || paidBy === "소희") return "소희";
-  if (paidBy === "준형") return "준형";
-  return paidBy;
+  return paidBy.trim();
 }
 
 export const createExpenseInputSchema = expenseSchema.omit({ id: true });
@@ -103,7 +101,7 @@ export const initialExpenses: Expense[] = [
     date: "2026-09-17",
     dayIndex: 1,
     paymentMethod: "카드",
-    paidBy: "준형",
+    paidBy: "Sam",
     placeId: null,
     isManual: true,
     isBlur: false,
@@ -133,7 +131,7 @@ export const initialExpenses: Expense[] = [
     date: "2026-11-06",
     dayIndex: 1,
     paymentMethod: "카드",
-    paidBy: "소희",
+    paidBy: "Alex",
     placeId: "place_nagoya_2",
     isManual: false,
     isBlur: false,
@@ -148,7 +146,7 @@ export const initialExpenses: Expense[] = [
     date: "2026-11-07",
     dayIndex: 2,
     paymentMethod: "카드",
-    paidBy: "소희",
+    paidBy: "Alex",
     placeId: "place_nagoya_3",
     isManual: false,
     isBlur: false,
@@ -163,7 +161,7 @@ export const initialExpenses: Expense[] = [
     date: "2026-11-07",
     dayIndex: 2,
     paymentMethod: "카드",
-    paidBy: "소희",
+    paidBy: "Alex",
     placeId: "place_nagoya_1",
     isManual: false,
     isBlur: false,
@@ -178,7 +176,7 @@ export const initialExpenses: Expense[] = [
     date: "2026-11-07",
     dayIndex: 2,
     paymentMethod: "현금",
-    paidBy: "소희",
+    paidBy: "Alex",
     placeId: null,
     isManual: true,
     isBlur: false,
@@ -193,7 +191,7 @@ export const initialExpenses: Expense[] = [
     date: "2026-11-06",
     dayIndex: 1,
     paymentMethod: "카드",
-    paidBy: "소희",
+    paidBy: "Alex",
     placeId: null,
     isManual: true,
     isBlur: false,

@@ -47,8 +47,7 @@ export type PrepCategoryName = (typeof PREP_CATEGORIES)[number]["name"];
 export const PREP_PAGE_FILTERS = ["전체", "맛집/카페", "관광", "쇼핑/선물", "기타"] as const;
 export type PrepPageFilter = (typeof PREP_PAGE_FILTERS)[number];
 
-const PREP_ASSIGNEES = ["공통", "소희", "준형"] as const;
-export type PrepAssignee = (typeof PREP_ASSIGNEES)[number];
+const SHARED_ASSIGNEE = "공통";
 
 export function canonicalPrepCategory(name: string): PrepCategoryName {
   const found = PREP_CATEGORIES.find(
@@ -57,13 +56,17 @@ export function canonicalPrepCategory(name: string): PrepCategoryName {
   return found?.name ?? "기타";
 }
 
-export function parseChecklistNotes(notes?: string): { assignee: PrepAssignee; content: string } {
-  if (!notes) return { assignee: "공통", content: "" };
+export function parseChecklistNotes(
+  notes?: string,
+  people: readonly string[] = [],
+): { assignee: string; content: string } {
+  if (!notes) return { assignee: SHARED_ASSIGNEE, content: "" };
   const [first, ...rest] = notes.split("\n");
-  if ((PREP_ASSIGNEES as readonly string[]).includes(first)) {
-    return { assignee: first as PrepAssignee, content: rest.join("\n") };
+  const known = new Set<string>([SHARED_ASSIGNEE, ...people]);
+  if (first && known.has(first)) {
+    return { assignee: first, content: rest.join("\n") };
   }
-  return { assignee: "공통", content: notes };
+  return { assignee: SHARED_ASSIGNEE, content: notes };
 }
 
 export function formatChecklistNotes(content: string): string | undefined {
@@ -133,7 +136,7 @@ function buildSeed(tripId: string) {
         title,
         // 일부는 체크된 상태로 시드해 프로그레스 바가 0%가 아니게 한다.
         isChecked: categoryIndex === 0 && itemIndex < 2,
-        notes: (["공통", "소희", "준형"] as const)[itemIndex % 3],
+        notes: (["공통", "Alex", "Sam"] as const)[itemIndex % 3],
         orderIndex: itemIndex,
       });
     });

@@ -103,7 +103,7 @@ export function AddAccommodationDialog({
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="acc-name">숙소명</Label>
-            <Input id="acc-name" placeholder="예: 제주 신라호텔" {...form.register("name")} />
+            <Input id="acc-name" placeholder="예: 시내 호텔" {...form.register("name")} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label>체크인 ~ 체크아웃</Label>

@@ -306,13 +306,19 @@ export function DragHandle({ label }: { label?: string }) {
   );
 }
 
+const ASSIGNEE_TONES = [
+  "bg-[#FDDFE0] text-[#F29C9F]",
+  "bg-[#D8EDF8] text-[#6BAED4]",
+  "bg-[#E5F6D8] text-[#6AAA4F]",
+  "bg-[#EDE4FF] text-[#8A6AD4]",
+];
+
 export function AssigneeBadge({ assignee }: { assignee?: string }) {
+  const label = assignee?.trim() || "공통";
   const tone =
-    assignee === "소희"
-      ? "bg-[#FDDFE0] text-[#F29C9F]"
-      : assignee === "준형"
-        ? "bg-[#D8EDF8] text-[#6BAED4]"
-        : "bg-[#FDF3D1] text-[#F3C65B]";
+    label === "공통"
+      ? "bg-[#FDF3D1] text-[#F3C65B]"
+      : ASSIGNEE_TONES[[...label].reduce((sum, char) => sum + char.charCodeAt(0), 0) % ASSIGNEE_TONES.length];
   return (
     <span
       className={cn(
@@ -320,7 +326,7 @@ export function AssigneeBadge({ assignee }: { assignee?: string }) {
         tone,
       )}
     >
-      {assignee === "소희" ? "소희" : assignee === "준형" ? "준형" : "공통"}
+      {label}
     </span>
   );
 }

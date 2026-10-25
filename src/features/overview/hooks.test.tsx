@@ -102,17 +102,17 @@ describe("time capsules", () => {
   });
 
   it("팝업 리치텍스트 줄바꿈을 살린다", () => {
-    expect(normalizeCapsuleRichText("안녕<br>준형")).toBe("안녕\n준형");
+    expect(normalizeCapsuleRichText("안녕<br>친구")).toBe("안녕\n친구");
     expect(normalizeCapsuleRichText("<p>첫째</p><p>둘째</p>")).toBe("첫째\n\n둘째");
     expect(normalizeCapsuleRichText("줄\n바꿈")).toBe("줄\n바꿈");
   });
 
   it("팝업 리치텍스트에서 허용된 강조 태그를 남긴다", () => {
-    expect(parseCapsuleRichText("안녕 <b>준형</b>")).toEqual([
+    expect(parseCapsuleRichText("안녕 <b>친구</b>")).toEqual([
       { type: "text", value: "안녕 " },
-      { type: "element", tag: "b", children: [{ type: "text", value: "준형" }] },
+      { type: "element", tag: "b", children: [{ type: "text", value: "친구" }] },
     ]);
-    expect(normalizeCapsuleRichText("안녕 <strong>준형</strong>")).toBe("안녕 준형");
+    expect(normalizeCapsuleRichText("안녕 <strong>친구</strong>")).toBe("안녕 친구");
     expect(normalizeCapsuleRichText("안녕 <script>alert(1)</script>")).toBe("안녕 alert(1)");
   });
 

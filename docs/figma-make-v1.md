@@ -15,7 +15,7 @@ This is NOT a multi-trip dashboard. There is no login, no share/invite, no trip 
 Please design 6 screens (390×844 mobile):
 
 1) Home (개요)
-- Header: cute tangerine character illustration (mascot), trip title "귤귤 커플의 제주 여행", subtitle "남자친구 생일 기념".
+- Header: cute tangerine character illustration (mascot), trip title from the database, subtitle from companions.
 - Prominent D-Day counter for the trip start / birthday trip (large number, "D-9" style).
 - Small weather widget (Jeju, temperature + sunny icon) — visual only.
 - Flight ticket UI with dashed perforation line (Gimpo → Jeju, date/time, airline).

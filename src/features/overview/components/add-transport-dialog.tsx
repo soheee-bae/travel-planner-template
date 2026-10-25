@@ -129,7 +129,7 @@ export function AddTransportDialog({
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="tr-to">도착지</Label>
-              <Input id="tr-to" placeholder="예: 제주" {...form.register("arrivalTo")} />
+              <Input id="tr-to" placeholder="예: 간사이 공항" {...form.register("arrivalTo")} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">

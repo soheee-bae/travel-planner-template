@@ -16,6 +16,7 @@ import { FigmaPage, FigmaPageHeader, FigmaPageTitle } from "@/components/ui/figm
 import { useConfirmDelete } from "@/components/ui/confirm-delete-dialog";
 import { PrepBodySkeleton, PrepPageSkeleton } from "@/components/ui/page-skeleton";
 import type { WishlistItem } from "@/mocks/fixtures/wishlist";
+import { useTrip } from "@/features/trips/hooks";
 
 function WishlistCard({
   item,
@@ -80,6 +81,8 @@ function WishlistCard({
 }
 
 export function MemoTab({ tripId, embedded }: { tripId: string; embedded?: boolean }) {
+  const { data: trip } = useTrip(tripId);
+  const city = trip?.destinationCity || "여행지";
   const { data, isLoading, isError } = useWishlist(tripId);
   const createItem = useCreateWishlistItem(tripId);
   const updateItem = useUpdateWishlistItem(tripId);
@@ -140,7 +143,7 @@ export function MemoTab({ tripId, embedded }: { tripId: string; embedded?: boole
   return (
     <div className="flex flex-col bg-white">
       <FigmaPageHeader>
-        <FigmaPageTitle>제주에서 슬쩍 하고 싶은 것들</FigmaPageTitle>
+        <FigmaPageTitle>{`${city}에서 슬쩍 하고 싶은 것들`}</FigmaPageTitle>
       </FigmaPageHeader>
       <FigmaPage>{body}</FigmaPage>
     </div>

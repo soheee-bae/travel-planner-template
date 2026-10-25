@@ -21,10 +21,10 @@ test("결제자가 둘이면 더치페이 정산이 보인다", async ({ page })
   await page.getByRole("button", { name: "긁었다!" }).click();
   await page.getByLabel("항목 이름").fill("친구가 낸 택시");
   await page.getByLabel("금액").fill("2000");
-  await page.getByRole("dialog").getByRole("button", { name: /준형/ }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Sam", exact: true }).click();
   await page.getByRole("button", { name: "영수증에 넣기" }).click();
   await expect(page.getByRole("heading", { name: "더치페이 정산" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "더치페이 정산" }).locator("..").getByText("준형", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "더치페이 정산" }).locator("..").getByText("Sam", { exact: true })).toBeVisible();
 });
 
 test("결제 요정을 고르지 않으면 에러 메시지가 보인다", async ({ page }) => {
@@ -33,7 +33,7 @@ test("결제 요정을 고르지 않으면 에러 메시지가 보인다", async
   await page.getByLabel("항목 이름").fill("에러 확인용");
   await page.getByLabel("금액").fill("1000");
   await page.getByRole("button", { name: "영수증에 넣기" }).click();
-  await expect(page.getByRole("alert")).toHaveText("고구마냐... 감자냐... 그것이 문제로다...");
+  await expect(page.getByRole("alert")).toHaveText("누가 냈는지 골라 줘");
 });
 
 test("비용을 추가하면 즉시 목록과 총액에 반영된다", async ({ page }) => {
@@ -41,7 +41,7 @@ test("비용을 추가하면 즉시 목록과 총액에 반영된다", async ({ 
   await page.getByRole("button", { name: "긁었다!" }).click();
   await page.getByLabel("항목 이름").fill("테스트 기념품");
   await page.getByLabel("금액").fill("1500");
-  await page.getByRole("dialog").getByRole("button", { name: /소희/ }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Alex", exact: true }).click();
   await page.getByRole("button", { name: "영수증에 넣기" }).click();
   await expect(page.getByText("테스트 기념품")).toBeVisible();
 });

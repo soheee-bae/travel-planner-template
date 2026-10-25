@@ -14,12 +14,14 @@ export type JejuWeather = {
   icon: string;
 };
 
-export function useJejuWeather() {
+export function useJejuWeather(city: string) {
   const today = todayIsoSeoul();
+  const region = city.trim();
   return useQuery({
-    queryKey: ["weather", "jeju", today],
+    queryKey: ["weather", region, today],
+    enabled: region.length > 0,
     queryFn: async (): Promise<JejuWeather> => {
-      const res = await fetch("/api/weather");
+      const res = await fetch(`/api/weather?city=${encodeURIComponent(region)}`);
       if (!res.ok) throw new Error("weather");
       return (await res.json()) as JejuWeather;
     },

@@ -21,9 +21,15 @@ import {
   type ExpenseCategory,
 } from "@/mocks/fixtures/expenses";
 import { getTripDays } from "@/lib/trip-days";
+import { useTripPeople } from "@/features/trips/people-hooks";
 
 export function BudgetTab({ trip }: { trip: Trip }) {
   const { data: expenses, isLoading, isError } = useExpenses(trip.id);
+  const { data: tripPeople } = useTripPeople(trip.id);
+  const payerNames = useMemo(
+    () => (tripPeople ?? []).map((person) => person.displayName),
+    [tripPeople],
+  );
   const deleteExpense = useDeleteExpense(trip.id);
   const { request: askDelete, dialog: confirmDialog } = useConfirmDelete();
   const [group, setGroup] = useState<"day" | "category">("day");
@@ -40,7 +46,10 @@ export function BudgetTab({ trip }: { trip: Trip }) {
     [trip.startDate, trip.endDate],
   );
 
-  const paid = useMemo(() => summarizeReceiptSettlement(expenses ?? []), [expenses]);
+  const paid = useMemo(
+    () => summarizeReceiptSettlement(expenses ?? [], payerNames),
+    [expenses, payerNames],
+  );
 
   const visible = useMemo(() => {
     const list = expenses ?? [];
@@ -92,19 +101,18 @@ export function BudgetTab({ trip }: { trip: Trip }) {
             <span aria-hidden="true">정산</span>
             <span className="sr-only">더치페이 정산</span>
           </h2>
-          <div className="grid w-full grid-cols-3 gap-2">
-            <div className="flex min-w-0 flex-col items-center gap-0.5">
-              <p className="text-center text-[11px] leading-4 text-[#8C8885]">소희</p>
-              <p className="w-full break-all text-center font-nunito text-[13px] leading-[18px] font-bold text-[#4A4543] tabular-nums">
-                {paid.me.toLocaleString()}원
-              </p>
-            </div>
-            <div className="flex min-w-0 flex-col items-center gap-0.5">
-              <p className="text-center text-[11px] leading-4 text-[#8C8885]">준형</p>
-              <p className="w-full break-all text-center font-nunito text-[13px] leading-[18px] font-bold text-[#4A4543] tabular-nums">
-                {paid.jun.toLocaleString()}원
-              </p>
-            </div>
+          <div
+            className="grid w-full gap-2"
+            style={{ gridTemplateColumns: `repeat(${Math.max(paid.people.length + 1, 1)}, minmax(0, 1fr))` }}
+          >
+            {paid.people.map((person) => (
+              <div key={person.name} className="flex min-w-0 flex-col items-center gap-0.5">
+                <p className="text-center text-[11px] leading-4 text-[#8C8885]">{person.name}</p>
+                <p className="w-full break-all text-center font-nunito text-[13px] leading-[18px] font-bold text-[#4A4543] tabular-nums">
+                  {person.total.toLocaleString()}원
+                </p>
+              </div>
+            ))}
             <div className="flex min-w-0 flex-col items-center gap-0.5">
               <p className="text-center text-[11px] leading-4 text-[#8C8885]">🎁</p>
               <SecretAmount
@@ -116,11 +124,11 @@ export function BudgetTab({ trip }: { trip: Trip }) {
           </div>
           <div className="flex w-full items-center justify-center pt-1">
             <p className="break-keep text-center font-nunito text-[13px] leading-5 font-bold text-[#F09040]">
-              {paid.owe > 0
-                ? `소희 → 준형 ${paid.owe.toLocaleString()}원`
-                : paid.owe < 0
-                  ? `준형 → 소희 ${Math.abs(paid.owe).toLocaleString()}원`
-                  : "아직 빚진 사람 없음 ✌️"}
+              {paid.people.length === 2 && paid.owe > 0
+                ? `${paid.people[0].name} → ${paid.people[1].name} ${paid.owe.toLocaleString()}원`
+                : paid.people.length === 2 && paid.owe < 0
+                  ? `${paid.people[1].name} → ${paid.people[0].name} ${Math.abs(paid.owe).toLocaleString()}원`
+                  : "아직 빚진 사람 없음"}
             </p>
           </div>
         </section>
@@ -202,6 +210,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
           currency={trip.baseCurrency}
           startDate={trip.startDate}
           endDate={trip.endDate}
+          payers={payerNames}
           hideTrigger
           open={addOpen}
           onOpenChange={setAddOpen}
@@ -223,6 +232,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
             currency={trip.baseCurrency}
             startDate={trip.startDate}
             endDate={trip.endDate}
+            payers={payerNames}
             initial={editing}
             open
             onOpenChange={(next) => {

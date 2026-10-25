@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { LayoutGroup, motion } from "motion/react";
 import { airportCodeFromName, cityLabelFromName } from "@/lib/airport";
 import { formatDday, formatDdayCaption, formatDuration } from "@/lib/date";
@@ -47,12 +47,16 @@ export function JejuHomeHero({
   trip,
   flights,
   stays,
+  footer,
 }: {
   trip: Trip;
   flights: Transport[];
   stays: Accommodation[];
+  footer?: ReactNode;
 }) {
-  const { data: weather, isPending: weatherPending, isError: weatherError } = useJejuWeather();
+  const { data: weather, isPending: weatherPending, isError: weatherError } = useJejuWeather(
+    trip.destinationCity,
+  );
   const [flightIdx, setFlightIdx] = useState(0);
   const [stayIdx, setStayIdx] = useState(0);
   const prevFlightRef = useRef(0);
@@ -192,7 +196,7 @@ export function JejuHomeHero({
               </span>
               <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
                 <p className="flex h-[17px] w-full items-center font-nunito text-[11px] leading-4 font-normal text-[#8E8E8E]">
-                  {Number(weatherDate.slice(5, 7))}월 {Number(weatherDate.slice(8, 10))}일 (오늘) · 제주
+                  {Number(weatherDate.slice(5, 7))}월 {Number(weatherDate.slice(8, 10))}일 (오늘) · {weather.region}
                 </p>
                 <p className="flex h-[30px] w-full min-w-0 items-baseline gap-1.5">
                   <span className="shrink-0 font-nunito text-[20px] leading-[30px] font-extrabold text-[#4A4543]">
@@ -214,6 +218,7 @@ export function JejuHomeHero({
             </div>
           </article>
         )}
+        {footer}
       </div>
       </div>
     </section>

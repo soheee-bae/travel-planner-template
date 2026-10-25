@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useChecklistCategories, useChecklistItems } from "@/features/checklists/hooks";
+import { useTrip } from "@/features/trips/hooks";
 import { ChecklistCategorySection } from "@/features/checklists/components/checklist-category";
 import { IllustrationIcon } from "@/components/ui/illustration-icon";
 import { FigmaChip, FigmaChipRow, FigmaPage, FigmaPageHeader, FigmaPageTitle } from "@/components/ui/figma";
@@ -40,6 +41,8 @@ function PrepProgressBar({ pct }: { pct: number }) {
 }
 
 export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boolean }) {
+  const { data: trip } = useTrip(tripId);
+  const city = trip?.destinationCity || "여행지";
   const { data: categories, isLoading: loadingCategories } = useChecklistCategories(tripId);
   const { data: items, isLoading: loadingItems } = useChecklistItems(tripId);
   const [filter, setFilter] = useState<PrepPageFilter>("전체");
@@ -99,7 +102,7 @@ export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boole
         <div className="flex h-[34px] w-full items-center justify-between pb-1">
           <p className="flex min-h-[21px] items-center gap-1.5 text-[14px] leading-[21px] font-bold text-[#1A1A1A]">
             <IllustrationIcon src={ILLUSTRATION.battery} className="size-5" />
-            제주력 {pct}% 충전 완료
+            {city} 준비 {pct}% 충전 완료
           </p>
           <p className="font-nunito text-[14px] leading-[21px] font-bold text-[#1A1A1A]">
             {checkedCount}/{totalCount}
@@ -166,7 +169,7 @@ export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boole
   return (
     <div className="flex flex-col bg-white">
       <FigmaPageHeader>
-        <FigmaPageTitle>제주에서 슬쩍 하고 싶은 것들</FigmaPageTitle>
+        <FigmaPageTitle>{`${city}에서 슬쩍 하고 싶은 것들`}</FigmaPageTitle>
       </FigmaPageHeader>
       <FigmaPage>{body}</FigmaPage>
     </div>

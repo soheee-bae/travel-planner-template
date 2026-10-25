@@ -127,8 +127,8 @@
 | 슬롯 | 지금 | 캔버스 | 화면 표시 | 용도 |
 | --- | --- | --- | ---: | --- |
 | assignee-common | 🤝 | A 1024 | 16×16 | 공통 |
-| assignee-sohee | 🌸 | A 1024 | 16×16 | 소희 |
-| assignee-junhyeong | 🎂 | A 1024 | 16×16 | 준형 |
+| assignee-a | 🌸 | A 1024 | 16×16 | Alex |
+| assignee-b | 🎂 | A 1024 | 16×16 | Sam |
 | memo | 📝 | A 1024 | 24×24 | 메모 서브탭/카드 |
 | footer-mascot | 👀 / ☃️ | C에서 크롭 또는 B 1536 | 24×24 | `EndMascot` “…다 봤어?” 아래. `mascot-tangerine` 재사용 가능 |
 

@@ -41,6 +41,7 @@ export function buildAutoExpenseFromPlace(
   place: Place,
   fallbackCurrency: string,
   fallbackDate: string,
+  paidBy = "",
 ): AutoExpenseDraft | null {
   if (place.estimatedCost === undefined) return null;
   return {
@@ -52,7 +53,7 @@ export function buildAutoExpenseFromPlace(
     date: fallbackDate,
     dayIndex: place.dayIndex,
     paymentMethod: "카드",
-    paidBy: "소희",
+    paidBy,
     placeId: place.id,
     isManual: false,
   };

@@ -64,7 +64,7 @@ describe("groupByCategory", () => {
 describe("withoutGiftExpenses", () => {
   it("paid_by 선물·같이 항목은 뺀다", () => {
     const expenses = [
-      makeExpense({ amount: 1000, paidBy: "소희" }),
+      makeExpense({ amount: 1000, paidBy: "Alex" }),
       makeExpense({ amount: 5000, paidBy: "선물" }),
       makeExpense({ amount: 2000, paidBy: "같이" }),
     ];
@@ -73,8 +73,8 @@ describe("withoutGiftExpenses", () => {
 
   it("is_blur 항목도 파이 합계에서 뺀다", () => {
     const expenses = [
-      makeExpense({ amount: 1000, paidBy: "소희" }),
-      makeExpense({ amount: 8000, paidBy: "준형", isBlur: true }),
+      makeExpense({ amount: 1000, paidBy: "Alex" }),
+      makeExpense({ amount: 8000, paidBy: "Sam", isBlur: true }),
     ];
     expect(withoutGiftExpenses(expenses).map((e) => e.amount)).toEqual([1000]);
   });
@@ -83,15 +83,20 @@ describe("withoutGiftExpenses", () => {
 describe("summarizeReceiptSettlement", () => {
   it("is_blur 항목은 선물로만 넣고 갚을 금액에서는 뺀다", () => {
     expect(
-      summarizeReceiptSettlement([
-        makeExpense({ amount: 10000, paidBy: "소희" }),
-        makeExpense({ amount: 4000, paidBy: "준형" }),
-        makeExpense({ amount: 20000, paidBy: "준형", isBlur: true }),
-        makeExpense({ amount: 3000, paidBy: "선물" }),
-      ]),
+      summarizeReceiptSettlement(
+        [
+          makeExpense({ amount: 10000, paidBy: "Alex" }),
+          makeExpense({ amount: 4000, paidBy: "Sam" }),
+          makeExpense({ amount: 20000, paidBy: "Sam", isBlur: true }),
+          makeExpense({ amount: 3000, paidBy: "선물" }),
+        ],
+        ["Alex", "Sam"],
+      ),
     ).toEqual({
-      me: 10000,
-      jun: 4000,
+      people: [
+        { name: "Alex", total: 10000 },
+        { name: "Sam", total: 4000 },
+      ],
       together: 23000,
       owe: -3000,
     });

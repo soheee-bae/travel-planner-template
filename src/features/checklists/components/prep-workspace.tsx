@@ -6,6 +6,7 @@ import { PrepTab } from "@/features/checklists/components/prep-tab";
 import { MemoTab } from "@/features/wishlist/components/memo-tab";
 import { FigmaPage, FigmaPageHeader, FigmaPageScroll, FigmaPageTitle } from "@/components/ui/figma";
 import { SegmentedSwap } from "@/components/ui/segmented-swap";
+import { useTrip } from "@/features/trips/hooks";
 import { useReducedMotion } from "@/hooks/use-motion-safe";
 import { cn } from "@/lib/utils";
 
@@ -29,11 +30,13 @@ export function PrepWorkspace({
     prevRef.current = sub;
   }
   const reduce = useReducedMotion();
+  const { data: trip } = useTrip(tripId);
+  const city = trip?.destinationCity || "여행지";
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
       <FigmaPageHeader>
-        <FigmaPageTitle>제주에서 슬쩍 하고 싶은 것들</FigmaPageTitle>
+        <FigmaPageTitle>{`${city}에서 슬쩍 하고 싶은 것들`}</FigmaPageTitle>
       </FigmaPageHeader>
       <FigmaPageScroll>
       <FigmaPage>

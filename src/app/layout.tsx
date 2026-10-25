@@ -31,7 +31,7 @@ const jua = Jua({
 
 export const metadata: Metadata = {
   title: " ... ",
-  description: "남자친구 생일 기념 제주 여행 플래너",
+  description: "여행 일정을 같이 짜는 플래너",
   applicationName: " ... ",
   appleWebApp: {
     capable: true,

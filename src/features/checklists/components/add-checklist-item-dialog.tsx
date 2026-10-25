@@ -93,7 +93,7 @@ export function AddChecklistItemDialog({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim()) {
-      setTitleError("제주도에서 뭐 하고 싶어?");
+      setTitleError("무엇을 하고 싶어?");
       return;
     }
 
@@ -167,7 +167,7 @@ export function AddChecklistItemDialog({
             </FigmaFieldLabel>
             <Input
               id="prep-item-name"
-              placeholder="예) 고등어회 와구와구 먹기"
+              placeholder="예) 현지 음식 먹기"
               aria-required="true"
               aria-invalid={titleError ? true : undefined}
               className={figmaInputClass}
@@ -187,7 +187,7 @@ export function AddChecklistItemDialog({
             </FigmaFieldLabel>
             <Textarea
               id="prep-item-body"
-              placeholder="위치(애월, 서귀포 등)나 지도 링크, 메모(웨이팅 필수 등)"
+              placeholder="지역이나 지도 링크, 메모"
               className={figmaTextareaClass}
               value={content}
               onChange={(e) => setContent(e.target.value)}

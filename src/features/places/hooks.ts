@@ -9,6 +9,7 @@ import { expensesKeys } from "@/features/expenses/queries";
 import { createPlace, deletePlace, updatePlace } from "@/features/places/api";
 import { placesKeys, placesQueryOptions } from "@/features/places/queries";
 import { fetchTrip } from "@/features/trips/api";
+import { fetchTripPeople } from "@/features/trips/people-api";
 import { randomUUID } from "@/lib/id";
 import {
   buildAutoExpenseFromPlace,
@@ -19,7 +20,13 @@ import { applyPlacePatch, type CreatePlaceInput, type Place, type UpdatePlaceInp
 
 async function syncAutoExpense(place: Place): Promise<void> {
   const trip = await fetchTrip(place.tripId);
-  const draft = buildAutoExpenseFromPlace(place, trip.baseCurrency, trip.startDate);
+  const people = await fetchTripPeople(place.tripId);
+  const draft = buildAutoExpenseFromPlace(
+    place,
+    trip.baseCurrency,
+    trip.startDate,
+    people[0]?.displayName ?? "",
+  );
   if (!draft) return;
   const expenses = await fetchExpenses(place.tripId);
   const linked = findLinkedExpense(expenses, place.id);

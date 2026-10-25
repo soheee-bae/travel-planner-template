@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCreateTrip } from "@/features/trips/hooks";
+import { createTripPeople } from "@/features/trips/people-api";
 import { createTripInputSchema, type CreateTripInput } from "@/mocks/fixtures/trips";
 import { formatDuration } from "@/lib/date";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,7 @@ export function CreateTripForm() {
   const router = useRouter();
   const createTrip = useCreateTrip();
   const [customCompanion, setCustomCompanion] = useState(false);
+  const [peopleNames, setPeopleNames] = useState("");
 
   const form = useForm<CreateTripInput>({
     resolver: zodResolver(createTripInputSchema),
@@ -49,7 +51,19 @@ export function CreateTripForm() {
   function onSubmit(values: CreateTripInput) {
     createTrip.mutate(
       { ...values, destinationCountry: "KR", baseCurrency: "KRW" },
-      { onSuccess: (trip) => router.push(`/trips/${trip.id}`) },
+      {
+        onSuccess: (trip) => {
+          const names = peopleNames
+            .split(/[,，]/)
+            .map((name) => name.trim())
+            .filter(Boolean);
+          void createTripPeople(trip.id, names)
+            .catch(() => undefined)
+            .finally(() => {
+              router.push(`/trips/${trip.id}`);
+            });
+        },
+      },
     );
   }
 
@@ -57,7 +71,7 @@ export function CreateTripForm() {
     <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="title">여행 이름</Label>
-        <Input id="title" placeholder="예: 제주도 여행" {...form.register("title")} />
+        <Input id="title" placeholder="예: 오사카 여행" {...form.register("title")} />
         {form.formState.errors.title && (
           <p className="text-[12px] leading-[18px] font-semibold text-[#E85D4C]">이름은 공백 제외 2~30자로 입력해 주세요.</p>
         )}
@@ -65,7 +79,7 @@ export function CreateTripForm() {
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="destinationCity">여행지</Label>
-        <Input id="destinationCity" placeholder="예: 제주도" {...form.register("destinationCity")} />
+        <Input id="destinationCity" placeholder="예: 오사카" {...form.register("destinationCity")} />
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -125,6 +139,16 @@ export function CreateTripForm() {
         {customCompanion && (
           <Input placeholder="예: 회사 동료들과" {...form.register("companions")} className="mt-1" />
         )}
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="people">동행 이름</Label>
+        <Input
+          id="people"
+          placeholder="예: Alex, Sam"
+          value={peopleNames}
+          onChange={(event) => setPeopleNames(event.target.value)}
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">

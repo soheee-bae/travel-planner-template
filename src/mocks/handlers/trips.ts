@@ -1,5 +1,6 @@
 import { http, HttpResponse } from "msw";
 import { randomUUID } from "@/lib/id";
+import { initialTripPeople, type TripPerson } from "@/features/trips/people";
 import {
   createTripInputSchema,
   initialTrips,
@@ -10,6 +11,7 @@ import {
 // 모듈 스코프 배열 — MSW 핸들러 안에서 POST/DELETE가 이 상태를 직접 변경한다.
 // 실제 DB가 붙기 전까지(Phase 10) React Query의 mutation 왕복을 검증하는 용도.
 let trips: Trip[] = [...initialTrips];
+let people: TripPerson[] = [...initialTripPeople];
 
 export const tripHandlers = [
   http.get("/api/trips", async () => {
@@ -55,6 +57,30 @@ export const tripHandlers = [
   http.delete("/api/trips/:id", async ({ params }) => {
     const { id } = params;
     trips = trips.filter((t) => t.id !== id);
+    people = people.filter((person) => person.tripId !== id);
     return new HttpResponse(null, { status: 204 });
+  }),
+
+  http.get("/api/trips/:id/people", async ({ params }) => {
+    return HttpResponse.json(people.filter((person) => person.tripId === params.id));
+  }),
+
+  http.post("/api/trips/:id/people", async ({ params, request }) => {
+    const body = (await request.json()) as { names?: unknown };
+    const names = Array.isArray(body.names) ? body.names.filter((name): name is string => typeof name === "string") : [];
+    const tripId = String(params.id);
+    const created: TripPerson[] = names
+      .map((name) => name.trim())
+      .filter((name, index, all) => name && all.indexOf(name) === index)
+      .filter((name) => !people.some((person) => person.tripId === tripId && person.displayName === name))
+      .map((displayName, index) => ({
+        id: randomUUID(),
+        tripId,
+        displayName,
+        emoji: "",
+        sortOrder: people.filter((person) => person.tripId === tripId).length + index,
+      }));
+    people = [...people, ...created];
+    return HttpResponse.json(people.filter((person) => person.tripId === tripId), { status: 201 });
   }),
 ];

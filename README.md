@@ -1,103 +1,108 @@
 # travel-planner
 
-모바일 퍼스트 여행 플래너 웹앱.
+여행 일정을 같이 짜는 웹앱입니다. 클론한 뒤에는 본인 Supabase 프로젝트를 만들고 아래 순서대로 연결합니다.
 
-가고 싶은 장소를 리스트에 자유롭게 모아두고, **지도를 보면서 가까운 곳끼리 같은 날에
-배치**해 효율적인 코스를 짜는 것이 핵심 워크플로우다. 계획적이면서 즉흥적인 여행
-방식을 그대로 지원한다.
+이 저장소에는 `.env.local`, 데이터베이스 비밀번호, API 키가 포함되어 있지 않습니다. 로그인도 없습니다. 공개 키로 해당 프로젝트의 데이터를 읽고 쓰므로, 프로젝트는 사용자마다 따로 만듭니다.
 
-## 현재 상태
+## 준비
 
-**V1은 로그인 없다.** `/` → 스플래시 → `/trips/trip_jeju` 홈.
-`.env.local`에 Supabase URL이 있으면 실 DB(anon RLS). 테스트/e2e는 MSW.
+- [Node.js 22](https://nodejs.org/) 이상 (`.nvmrc`와 같습니다)
+- pnpm 11
+- [Supabase](https://supabase.com) 계정
 
-## 시작하기
+Node.js 22에는 Corepack이 포함되어 있습니다.
 
 ```bash
+corepack enable
+corepack prepare pnpm@11.25.0 --activate
+```
+
+## 1. 클론
+
+```bash
+git clone https://github.com/soheee-bae/travel-planner.git
+cd travel-planner
 pnpm install
-pnpm dev              # 0.0.0.0:3000 — IPv4로 열어야 Cursor 미리보기/로컬 브라우저가 붙는다
-pnpm test             # 단위 테스트 (Vitest)
-pnpm test:e2e         # e2e 테스트 (Playwright, 모바일 프로파일)
-pnpm build && pnpm start
 ```
 
-Supabase 연결 없이도 모든 화면이 정상 동작한다. `.env.example`을 `.env.local`로
-복사해두면 되고, 채우지 않아도 된다.
+## 2. Supabase 프로젝트
 
-## Phase 10 — Supabase 연동 상태
+1. [Dashboard](https://supabase.com/dashboard)에서 **New project**를 선택합니다.
+2. 이름, 리전, **Database password**를 입력합니다. 이 비밀번호는 스키마를 적용할 때 다시 사용합니다. 분실한 경우 **Project Settings → Database**에서 재설정합니다.
+3. 프로젝트 준비가 끝나면 **Project Settings → API Keys**에서 아래 값을 복사합니다.
 
-**Cloud Agent는 실제 Supabase 계정/프로젝트를 만들 수 없고 Docker도 없다.** 그래서
-이 Phase의 목표는 "실제 DB에 연결"이 아니라 "키만 넣으면 바로 붙는 code-ready
-상태까지 준비"다. 현재 화면 동작(MSW mock)에는 영향이 없다.
-
-| 산출물 | 위치 | 상태 |
-| --- | --- | --- |
-| 마이그레이션 9개 | `supabase/migrations/` | `libpg-query`(실제 Postgres 파서)로 문법 검증 완료. **실 DB에 적용해본 적은 없음** |
-| 시드 | `supabase/reset-public-jeju.sql` | 호스트 SQL Editor 한 방: RLS 공개 + 기존 여행 삭제 + 제주 시드 |
-| 브라우저/서버 클라이언트 | `src/lib/supabase/{client,server}.ts` | `@supabase/ssr` 표준 패턴 |
-| 세션 갱신 | `src/proxy.ts` | Next.js 16 `proxy.ts`(구 middleware). **환경변수가 없으면 완전히 no-op** — 이 가드가 없으면 앱 전체가 깨진다는 것을 실제로 확인하고 넣었다 |
-| DB 타입 | (아직 없음) | `pnpm db:types`로 실제 프로젝트 연결 후 생성 |
-
-- **마이그레이션**: extensions/enums → trips → overview(accommodations/transports) →
-  places → expenses → checklists → wishlist → RLS → views. `src/mocks/fixtures/*.ts`의
-  Zod 스키마와 1:1로 대응한다.
-- **시드**: 제주·오사카·나고야 3개 여행 + 나고야 트립의 하위 데이터. 로컬 개발용
-  더미 사용자를 `auth.users`에 직접 삽입한다.
-- **클라이언트 코드**: 실제 프로젝트에 연결되어 있지 않다(환경변수 없으면 호출 시
-  런타임 에러).
-- **`src/proxy.ts`**: 세션 가드 없음.
-- CRUD: Supabase URL이 있으면 anon으로 실 DB. `NEXT_PUBLIC_ENABLE_MSW=true`면 mock.
-
-### 네가 해야 할 일
-
-1. Secrets URL은 `https://<ref>.supabase.co`만 (`/rest/v1/` 제거)
-2. 키는 JWT anon (`eyJ...`)
-3. SQL Editor에 `supabase/reset-public-jeju.sql` 전체 실행 (UID 불필요)
-4. `pnpm dev` → `http://localhost:3000`
-
-### 스코프 밖 (P10-06, P10-08~11)
-
-RPC(트랜잭션), mock → 실DB 전환, Realtime, Storage, Vercel 배포는 실제
-Supabase 프로젝트 없이는 진행할 수 없어 이번 Phase에 포함하지 않았다.
-
-## 문서 구조
-
-기준 문서는 **구현 계획서 v2**다. `docs/08`이 실행 단위 태스크, `docs/09`가 계획서
-v2와 v1 설계/전역 룰의 충돌 및 결정 사항이다.
-
-| 문서 | 내용 |
+| 값 | 설명 |
 | --- | --- |
-| [docs/08-implementation-tasks.md](docs/08-implementation-tasks.md) | 계획서 v2를 Phase 단위 티켓으로 분해 |
-| [docs/09-open-decisions.md](docs/09-open-decisions.md) | D1(Tailwind+shadcn)·D2(React Query+MSW)·D10(Notion 스타일) 등 확정된 결정 |
-| [docs/01](docs/01-architecture.md)~[07](docs/07-roadmap.md) | v1 설계 참고자료. 알고리즘·실측 디자인 토큰·데이터 모델 원칙은 계획서 v2에서도 재사용됨 |
+| Project URL | `https://<project-ref>.supabase.co` 입니다. `/rest/v1/`는 포함하지 않습니다. |
+| publishable 또는 anon 키 | `sb_publishable_...` 또는 `eyJ...` 입니다. |
 
-## 화면 구성
+`<project-ref>`는 URL의 서브도메인입니다. `https://abcdefgh.supabase.co`이면 `abcdefgh`입니다.
 
-```
-스플래시(오버레이) → 랜딩(여행 카드 리스트) → 여행 생성
-                      └─ 카드 선택 → 여행 디테일
-                                       ├─ 개요    숙소·교통편 CRUD, 요약
-                                       ├─ 플래너  mock 지도 + 바텀시트 + DnD + 자동 배치
-                                       ├─ 리스트  장소 CRUD, 카테고리 필터, 지도 링크 파싱
-                                       ├─ 비용    도넛 차트, 4종 그룹핑, 실시간 환율
-                                       ├─ 준비    체크리스트, 프로그레스 바
-                                       └─ 메모    위시리스트, DnD 순서 변경
+secret 키와 service role 키는 사용하지 않습니다. 브라우저에 포함되면 안 됩니다.
+
+## 3. `.env.local`
+
+프로젝트 루트에서 예제 파일을 복사한 뒤, 위에서 복사한 값으로 채웁니다.
+
+```bash
+cp .env.example .env.local
 ```
 
-## 스택
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<publishable 또는 anon 키>
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_ENABLE_MSW=false
 
-| 영역 | 선택 |
-| --- | --- |
-| 프레임워크 | Next.js 16 App Router |
-| 스타일 | Tailwind CSS v4 + shadcn/ui |
-| 애니메이션 | Framer Motion(제스처) + View Transitions(카드→상세 모프) |
-| 데이터 레이어 | React Query + MSW(mock, 활성) / Supabase(코드 준비, 미연결) |
-| 지도 | Mock(좌표 정규화 배치). Naver/Google 어댑터 경계는 `lib/map-provider.ts` |
-| 알고리즘 | k-means 클러스터링, Held-Karp/2-opt 경로 최적화 (`src/lib/*.ts`) |
-| DnD | dnd-kit |
-| 차트 | Recharts |
-| 폼 | react-hook-form + zod |
-| 환율 | Frankfurter (`api.frankfurter.dev`, 키 불필요) |
-| 지오코딩 | Nominatim (실제 외부 호출로 검증됨) |
-| 테스트 | Vitest(단위) + Playwright(e2e, 모바일 프로파일) |
-| 호스팅(예정) | Vercel |
+NOMINATIM_BASE_URL=https://nominatim.openstreetmap.org
+NOMINATIM_USER_AGENT=travel-planner/0.1 (you@your-domain.com)
+```
+
+`NEXT_PUBLIC_ENABLE_MSW`는 `false`로 둡니다. `true`이거나 URL이 비어 있으면 목 데이터가 표시됩니다.
+
+`NOMINATIM_USER_AGENT`의 메일 주소는 본인 주소로 바꿉니다. `example.com`이 포함되면 날씨 지오코딩이 거절될 수 있습니다.
+
+`.env.local`은 Git에 커밋하지 않습니다.
+
+## 4. 스키마 적용
+
+빈 프로젝트에 올릴 파일은 `supabase/migrations/20261025150000_init.sql` 하나입니다. 여행, 일정, 장소, 영수증, 체크리스트, 메모, 타임캡슐, 동행 이름 테이블을 만들고 anon 키로 읽고 쓸 수 있게 합니다. 여행 데이터는 넣지 않습니다.
+
+```bash
+pnpm exec supabase login
+pnpm exec supabase link --project-ref <project-ref>
+pnpm db:push
+```
+
+`login`은 브라우저에서 Supabase 로그인을 진행합니다. `link`와 `db:push`는 2번에서 저장한 데이터베이스 비밀번호를 입력받습니다.
+
+CLI 대신 Dashboard를 쓰는 경우, **SQL Editor**에서 `supabase/migrations/20261025150000_init.sql` 전체를 붙여 넣고 한 번 실행합니다. 이미 적용한 프로젝트에서 다시 실행하면 테이블이 있다는 오류가 납니다.
+
+`pnpm db:seed`와 `supabase/seed.sql`은 로컬 Docker 데이터베이스용입니다. 클라우드 프로젝트에는 사용하지 않습니다.
+
+## 5. 실행
+
+```bash
+pnpm dev
+```
+
+http://localhost:3000 을 엽니다. `.env.local`을 수정한 뒤에는 개발 서버를 다시 시작합니다. `NEXT_PUBLIC_` 값은 서버 시작 시 읽습니다.
+
+연결이 완료된 빈 데이터베이스는 여행 목록이 비어 있습니다. **여행 추가**에서 이름, 여행지, 날짜를 입력합니다. **동행 이름**에는 `Alex, Sam`처럼 쉼표로 구분해 입력한 뒤 **여행 만들기**를 누릅니다. 이 이름은 스플래시, 결제자, 정산에 사용됩니다.
+
+여행을 만들기 전에 샘플 여행이 보이면 URL이 비어 있거나 `NEXT_PUBLIC_ENABLE_MSW=true`인 상태입니다. `.env.local`을 확인한 뒤 서버를 다시 시작합니다.
+
+여행이 하나이면 그 여행 화면으로 바로 이동합니다.
+
+## 네이버 지도
+
+선택 사항입니다. 키가 없으면 임시 지도를 사용합니다.
+
+네이버 지도를 사용하려면 [네이버 클라우드 플랫폼](https://www.ncloud.com/)에서 Dynamic Map 키를 발급한 뒤 `.env.local`에 추가합니다.
+
+```bash
+NEXT_PUBLIC_NAVER_MAP_CLIENT_ID=
+NAVER_MAP_CLIENT_SECRET=
+```
+
+콘솔에서 `http://localhost:3000`을 허용한 다음 `pnpm dev`를 다시 시작합니다. 자동차 경로는 Client Secret이 있어야 동작합니다.

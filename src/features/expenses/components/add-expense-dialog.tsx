@@ -37,12 +37,11 @@ import { todayIsoSeoul } from "@/lib/date";
 import { getTripDays } from "@/lib/trip-days";
 import { z } from "zod";
 
-const PAYER_REQUIRED_MESSAGE = "고구마냐... 감자냐... 그것이 문제로다...";
+const PAYER_REQUIRED_MESSAGE = "누가 냈는지 골라 줘";
 
 function createExpenseFormSchema(requirePayer: boolean, hideAmount: boolean) {
-  const paidBySchema = requirePayer
-    ? z.enum(["소희", "준형"], { error: PAYER_REQUIRED_MESSAGE })
-    : z.enum(["소희", "준형"]).optional();
+  const paidBySchema = z.string().optional();
+  void requirePayer;
 
   return createExpenseInputSchema
     .omit({
@@ -64,15 +63,11 @@ function createExpenseFormSchema(requirePayer: boolean, hideAmount: boolean) {
 
 type FormValues = z.infer<ReturnType<typeof createExpenseFormSchema>>;
 
-const PAYERS = [
-  { value: "소희", label: "🍠 소희" },
-  { value: "준형", label: "🥔 준형" },
-] as const;
-
-function payerValue(paidBy?: string): "소희" | "준형" | undefined {
+function payerValue(paidBy: string | undefined, payers: string[]): string | undefined {
   const payer = paidBy?.trim();
-  if (payer === "준형") return "준형";
-  if (payer === "소희" || payer === "나") return "소희";
+  if (!payer) return undefined;
+  if (payers.includes(payer)) return payer;
+  if (payer === "나") return payers[0];
   return undefined;
 }
 
@@ -81,6 +76,7 @@ export function AddExpenseDialog({
   currency,
   startDate,
   endDate,
+  payers,
   initial,
   hideTrigger,
   open: openProp,
@@ -93,6 +89,7 @@ export function AddExpenseDialog({
   currency: string;
   startDate?: string;
   endDate?: string;
+  payers: string[];
   initial?: Expense;
   hideTrigger?: boolean;
   open?: boolean;
@@ -132,7 +129,7 @@ export function AddExpenseDialog({
           category: initial.category,
           amount: hideAmount ? undefined : initial.amount,
           currency: initial.currency,
-          paidBy: payerValue(initial.paidBy),
+          paidBy: payerValue(initial.paidBy, payers),
           dayIndex: initial.dayIndex,
         }
       : emptyValues(),
@@ -209,12 +206,12 @@ export function AddExpenseDialog({
   const paidBy = form.watch("paidBy");
   const { errors, isSubmitted } = form.formState;
   const showPayerError =
-    Boolean(errors.paidBy) || (requirePayer && isSubmitted && paidBy !== "소희" && paidBy !== "준형");
+    Boolean(errors.paidBy) || (requirePayer && isSubmitted && !payers.includes(paidBy ?? ""));
 
   function setMissingPayerError() {
     if (!requirePayer) return;
     const current = form.getValues("paidBy");
-    if (current === "소희" || current === "준형") return;
+    if (current && payers.includes(current)) return;
     form.setError("paidBy", { type: "required", message: PAYER_REQUIRED_MESSAGE });
   }
 
@@ -250,7 +247,7 @@ export function AddExpenseDialog({
             <FigmaFieldLabel htmlFor="exp-title">항목 이름</FigmaFieldLabel>
             <Input
               id="exp-title"
-              placeholder="예) 야식으로 털어온 동문시장 안주"
+              placeholder="예) 편의점 간식"
               aria-required="true"
               aria-invalid={errors.title ? true : undefined}
               className={figmaInputClass}
@@ -296,22 +293,26 @@ export function AddExpenseDialog({
                   aria-invalid={showPayerError ? true : undefined}
                   aria-describedby={showPayerError ? "exp-payer-error" : undefined}
                 >
-                  {PAYERS.map((p) => (
-                    <button
-                      key={p.value}
-                      type="button"
-                      aria-pressed={field.value === p.value}
-                      onClick={() => {
-                        field.onChange(p.value);
-                        void form.trigger("paidBy");
-                      }}
-                      className={`flex h-[41px] min-w-0 flex-1 items-center justify-center rounded-[14px] bg-white px-3 text-[14px] leading-[21px] font-bold whitespace-nowrap shadow-[0px_2px_12px_rgba(0,0,0,0.06)] ${
-                        field.value === p.value ? "text-[#FF9F43]" : "text-[#555555]"
-                      }`}
-                    >
-                      {p.label}
-                    </button>
-                  ))}
+                  {payers.length === 0 ? (
+                    <p className="text-[12px] leading-[18px] text-[#8E8E8E]">동행 이름을 추가하면 결제자를 고를 수 있어.</p>
+                  ) : (
+                    payers.map((name) => (
+                      <button
+                        key={name}
+                        type="button"
+                        aria-pressed={field.value === name}
+                        onClick={() => {
+                          field.onChange(name);
+                          void form.trigger("paidBy");
+                        }}
+                        className={`flex h-[41px] min-w-0 flex-1 items-center justify-center rounded-[14px] bg-white px-3 text-[14px] leading-[21px] font-bold whitespace-nowrap shadow-[0px_2px_12px_rgba(0,0,0,0.06)] ${
+                          field.value === name ? "text-[#FF9F43]" : "text-[#555555]"
+                        }`}
+                      >
+                        {name}
+                      </button>
+                    ))
+                  )}
                 </div>
               )}
             />

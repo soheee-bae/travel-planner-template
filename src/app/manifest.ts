@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: " ... ",
     short_name: " ... ",
-    description: "남자친구 생일 기념 제주 여행 플래너",
+    description: "여행 일정을 같이 짜는 플래너",
     start_url: "/",
     scope: "/",
     display: "standalone",
