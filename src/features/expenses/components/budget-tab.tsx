@@ -15,12 +15,8 @@ import { FigmaChip, FigmaChipRow, FigmaCtaButton, FigmaPage, FigmaPageHeader, Fi
 import { useConfirmDelete } from "@/components/ui/confirm-delete-dialog";
 import { BudgetPageSkeleton } from "@/components/ui/page-skeleton";
 import type { Trip } from "@/mocks/fixtures/trips";
-import {
-  EXPENSE_CATEGORIES,
-  type Expense,
-  type ExpenseCategory,
-} from "@/mocks/fixtures/expenses";
-import { getTripDays } from "@/lib/trip-days";
+import { type Expense } from "@/mocks/fixtures/expenses";
+import { resolveTripDays } from "@/lib/trip-days";
 import { useTripPeople } from "@/features/trips/people-hooks";
 
 export function BudgetTab({ trip }: { trip: Trip }) {
@@ -32,9 +28,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
   );
   const deleteExpense = useDeleteExpense(trip.id);
   const { request: askDelete, dialog: confirmDialog } = useConfirmDelete();
-  const [group, setGroup] = useState<"day" | "category">("day");
   const [dayFilter, setDayFilter] = useState<number | "all" | "prep">("all");
-  const [categoryFilter, setCategoryFilter] = useState<ExpenseCategory | null>(null);
   const [editing, setEditing] = useState<Expense | null>(null);
   const [addOpen, setAddOpen] = useState(false);
 
@@ -42,7 +36,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
   const total = useMemo(() => sumAmount(chartExpenses), [chartExpenses]);
   const categoryShares = useMemo(() => groupByCategory(chartExpenses), [chartExpenses]);
   const days = useMemo(
-    () => (trip.startDate && trip.endDate ? getTripDays(trip.startDate, trip.endDate) : []),
+    () => resolveTripDays(trip.startDate, trip.endDate),
     [trip.startDate, trip.endDate],
   );
 
@@ -53,17 +47,10 @@ export function BudgetTab({ trip }: { trip: Trip }) {
 
   const visible = useMemo(() => {
     const list = expenses ?? [];
-    if (group === "category") {
-      const selected = categoryFilter ?? (categoryShares[0]?.category as ExpenseCategory | undefined);
-      if (!selected) return [];
-      return list.filter((e) => e.category === selected);
-    }
     if (dayFilter === "all") return list;
     if (dayFilter === "prep") return list.filter((e) => e.dayIndex == null);
     return list.filter((e) => e.dayIndex === dayFilter);
-  }, [expenses, group, dayFilter, categoryFilter, categoryShares]);
-  const visibleTotal = useMemo(() => sumAmount(withoutGiftExpenses(visible)), [visible]);
-  const activeCategory = categoryFilter ?? (categoryShares[0]?.category as ExpenseCategory | undefined);
+  }, [expenses, dayFilter]);
 
   if (isLoading) return <BudgetPageSkeleton />;
   if (isError)
@@ -86,7 +73,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
           {categoryShares.length > 0 ? (
             <BudgetDonutChart data={categoryShares} total={total} />
           ) : (
-            <p className="text-[13px] leading-5 text-[#8E8E8E]">영수증이 깨끗해, 아직까진 무료 행복 중 🍊</p>
+            <p className="text-[13px] leading-5 text-[#8E8E8E]">영수증이 깨끗해, 아직까진 무료 행복 중 ☺️</p>
           )}
         </div>
 
@@ -133,64 +120,19 @@ export function BudgetTab({ trip }: { trip: Trip }) {
           </div>
         </section>
 
-        <FigmaChipRow>
-          <FigmaChip
-            tone="dark"
-            active={group === "day"}
-            onClick={() => {
-              setGroup("day");
-              setDayFilter("all");
-            }}
-          >
-            날짜별
+        <FigmaChipRow aria-label="일차">
+          <FigmaChip active={dayFilter === "all"} onClick={() => setDayFilter("all")}>
+            전체
           </FigmaChip>
-          <FigmaChip
-            tone="dark"
-            active={group === "category"}
-            onClick={() => {
-              setGroup("category");
-              setCategoryFilter(
-                (prev) =>
-                  prev ?? (categoryShares[0]?.category as ExpenseCategory | undefined) ?? null,
-              );
-            }}
-          >
-            카테고리별
+          <FigmaChip active={dayFilter === "prep"} onClick={() => setDayFilter("prep")}>
+            여행준비
           </FigmaChip>
+          {days.map((d) => (
+            <FigmaChip key={d.dayIndex} active={dayFilter === d.dayIndex} onClick={() => setDayFilter(d.dayIndex)}>
+              Day {d.dayIndex}
+            </FigmaChip>
+          ))}
         </FigmaChipRow>
-
-        {group === "day" ? (
-          <FigmaChipRow>
-            <FigmaChip active={dayFilter === "all"} onClick={() => setDayFilter("all")}>
-              전체
-            </FigmaChip>
-            <FigmaChip active={dayFilter === "prep"} onClick={() => setDayFilter("prep")}>
-              여행준비
-            </FigmaChip>
-            {days.map((d) => (
-              <FigmaChip key={d.dayIndex} active={dayFilter === d.dayIndex} onClick={() => setDayFilter(d.dayIndex)}>
-                Day {d.dayIndex}
-              </FigmaChip>
-            ))}
-          </FigmaChipRow>
-        ) : (
-          <div className="flex w-full flex-col gap-3">
-            <FigmaChipRow>
-              {EXPENSE_CATEGORIES.map((category) => (
-                <FigmaChip
-                  key={category}
-                  active={activeCategory === category}
-                  onClick={() => setCategoryFilter(category)}
-                >
-                  {category}
-                </FigmaChip>
-              ))}
-            </FigmaChipRow>
-            <p className="w-full text-right font-nunito text-[15px] leading-[22px] font-bold text-[#1A1A1A]">
-              총 {visibleTotal.toLocaleString()}원
-            </p>
-          </div>
-        )}
 
         <div className="flex w-full flex-col items-start gap-2.5">
           {visible.map((expense) => (
@@ -214,16 +156,9 @@ export function BudgetTab({ trip }: { trip: Trip }) {
           hideTrigger
           open={addOpen}
           onOpenChange={setAddOpen}
-          defaultDayIndex={
-            group === "day" ? (dayFilter === "all" ? 1 : dayFilter === "prep" ? null : dayFilter) : undefined
-          }
-          defaultCategory={group === "category" ? activeCategory : undefined}
+          defaultDayIndex={dayFilter === "all" ? 1 : dayFilter === "prep" ? null : dayFilter}
           onSaved={(saved) => {
-            if (group === "day") {
-              setDayFilter(saved.dayIndex == null ? "prep" : saved.dayIndex);
-              return;
-            }
-            setCategoryFilter(saved.category);
+            setDayFilter(saved.dayIndex == null ? "prep" : saved.dayIndex);
           }}
         />
         {editing && (
@@ -239,11 +174,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
               if (!next) setEditing(null);
             }}
             onSaved={(saved) => {
-              if (group === "day") {
-                setDayFilter(saved.dayIndex == null ? "prep" : saved.dayIndex);
-                return;
-              }
-              setCategoryFilter(saved.category);
+              setDayFilter(saved.dayIndex == null ? "prep" : saved.dayIndex);
             }}
           />
         )}

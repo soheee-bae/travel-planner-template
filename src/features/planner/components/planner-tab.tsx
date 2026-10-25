@@ -14,7 +14,7 @@ import { PlannerDayTabs } from "@/features/planner/components/planner-day-tabs";
 import { DayItineraryList } from "@/features/planner/components/day-itinerary-list";
 import { AddPlaceDialog } from "@/features/places/components/add-place-dialog";
 import { adjacentCoordPairs, useTravelLegs } from "@/features/planner/hooks";
-import { getTripDays } from "@/lib/trip-days";
+import { resolveTripDays } from "@/lib/trip-days";
 import type { Trip } from "@/mocks/fixtures/trips";
 import type { Place } from "@/mocks/fixtures/places";
 
@@ -33,7 +33,7 @@ export function PlannerTab({ trip, active = true }: { trip: Trip; active?: boole
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<Place | null>(null);
 
-  const days = getTripDays(trip.startDate, trip.endDate);
+  const days = resolveTripDays(trip.startDate, trip.endDate);
   const allPlaces = places ?? [];
 
   const dayItems = useMemo(() => placesOnDay(allPlaces, activeDay), [allPlaces, activeDay]);

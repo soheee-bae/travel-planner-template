@@ -22,10 +22,7 @@ const BUBBLE_GAP = 20;
 const CARD_OFFSET_Y = -11;
 /** 구간마다 베지에 중점을 살짝 다르게 잡아 점선이 기계적으로 안 보이게. */
 const CURVE_T = [0.4, 0.58, 0.46, 0.63] as const;
-
-/**
- * 1→2는 말풍선이 안 겹칠 만큼만 벌리고, 아래로 갈수록 S 진폭이 커진다.
- */
+/** 점선은 노트 개수와 상관없이 다섯 굽이를 유지한다. */
 const TRACK_HEIGHT = 680;
 const LAYOUT = [
   { nodeLeft: 84, nodeTop: 8, side: "right" },
@@ -39,11 +36,20 @@ function cardTopFor(nodeTop: number): number {
   return Math.max(0, nodeTop + CARD_OFFSET_Y);
 }
 
-function dottedPath(): string {
-  const points = LAYOUT.map((layout) => ({
+function layoutsFor(count: number) {
+  if (count <= 0) return [];
+  if (count >= LAYOUT.length) return [...LAYOUT];
+  if (count === 1) return [LAYOUT[0]];
+  const last = LAYOUT.length - 1;
+  return Array.from({ length: count }, (_, index) => LAYOUT[Math.round((index * last) / (count - 1))]);
+}
+
+function dottedPath(layouts: readonly (typeof LAYOUT)[number][]): string {
+  const points = layouts.map((layout) => ({
     x: layout.nodeLeft + NODE_SIZE / 2,
     y: layout.nodeTop + NODE_SIZE / 2,
   }));
+  if (points.length === 0) return "";
   let d = `M${points[0].x} ${points[0].y}`;
   for (let i = 1; i < points.length; i += 1) {
     const prev = points[i - 1];
@@ -82,6 +88,7 @@ export function TimeCapsuleDialog({
   const reduce = useReducedMotion();
   const enter = useMotionSafeDuration("enter");
   const exit = useMotionSafeDuration("exit");
+  const layouts = layoutsFor(capsules.length);
   const selected = capsules.find((item) => item.id === selectedId) ?? null;
   const selectedUnlocked = selected ? isCapsuleUnlocked(selected.unlockAt, nowMs) : false;
   const popup = selected ? capsulePopupView(selected) : null;
@@ -154,6 +161,8 @@ export function TimeCapsuleDialog({
           <p className="py-10 text-center text-[12px] leading-[18px] font-semibold text-[#E85D4C]">
             타임캡슐을 다시 불러와 줘.
           </p>
+        ) : capsules.length === 0 ? (
+          <p className="py-10 text-center text-[13px] leading-5 text-[#8E8E8E]">아직 숨겨둔 노트가 없어</p>
         ) : (
           <ol className="relative w-full shrink-0" style={{ height: TRACK_HEIGHT }}>
             <svg
@@ -163,7 +172,7 @@ export function TimeCapsuleDialog({
               aria-hidden
             >
               <path
-                d={dottedPath()}
+                d={dottedPath(LAYOUT)}
                 stroke="#EAE4D8"
                 strokeWidth="3"
                 strokeDasharray="8 8"
@@ -173,7 +182,7 @@ export function TimeCapsuleDialog({
             {capsules.map((item, index) => {
               const unlocked = isCapsuleUnlocked(item.unlockAt, nowMs);
               const unlockIcon = CAPSULE_UNLOCK_ICON[item.sortOrder];
-              const layout = LAYOUT[index] ?? LAYOUT[0];
+              const layout = layouts[index] ?? LAYOUT[0];
               const cardTop = cardTopFor(layout.nodeTop);
               const tailOnLeft = layout.side === "right";
               const tailTop = layout.nodeTop + NODE_SIZE / 2 - cardTop;

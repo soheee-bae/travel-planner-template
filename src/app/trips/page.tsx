@@ -2,20 +2,19 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { TripsLanding } from "@/features/trips/components/trips-landing";
 import { useTrips } from "@/features/trips/hooks";
+import { mainTrip } from "@/features/trips/main-trip";
 
-/** 여행이 하나면 그 여행으로 들어가고, 여러 개면 목록을 보여 준다. */
+/** /trips 목록은 두지 않는다. 여행이 있으면 상세로, 없으면 홈으로 보낸다. */
 export default function TripsPage() {
   const router = useRouter();
   const { data: trips, isLoading } = useTrips();
+  const trip = trips ? mainTrip(trips) : undefined;
 
   useEffect(() => {
-    if (trips?.length === 1) {
-      router.replace(`/trips/${trips[0].id}`);
-    }
-  }, [router, trips]);
+    if (isLoading) return;
+    router.replace(trip ? `/trips/${trip.id}` : "/");
+  }, [isLoading, router, trip]);
 
-  if (isLoading || trips?.length === 1) return null;
-  return <TripsLanding />;
+  return null;
 }

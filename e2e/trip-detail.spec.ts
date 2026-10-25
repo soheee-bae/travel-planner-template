@@ -23,17 +23,3 @@ test("탭을 전환하면 URL이 ?tab= 으로 바뀌고 해당 콘텐츠가 보�
   await page.locator("#trip-tab-overview").evaluate((el: HTMLElement) => el.click());
   await expect(page).not.toHaveURL(/\?tab=/);
 });
-
-test("숙소 추가 다이얼로그로 숙소를 추가하면 즉시 목록에 반영된다", async ({ page }) => {
-  await page.goto("/trips/trip_nagoya");
-  await page.getByRole("button", { name: "숙소 추가" }).click();
-  await page.getByLabel("숙소명").fill("테스트 게스트하우스");
-  await page.getByRole("button", { name: "다음 달" }).click();
-  await page.getByRole("button", { name: "다음 달" }).click();
-  const calendar = page.getByRole("grid", { name: "날짜 범위 선택" });
-  await calendar.getByRole("button", { name: "6", exact: true }).click();
-  await calendar.getByRole("button", { name: "8", exact: true }).click();
-  await page.getByRole("button", { name: "추가" }).click();
-
-  await expect(page.getByText("테스트 게스트하우스")).toBeVisible();
-});

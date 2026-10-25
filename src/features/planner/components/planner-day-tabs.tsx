@@ -1,7 +1,7 @@
 "use client";
 
 import { FigmaChip, FigmaChipRow } from "@/components/ui/figma";
-import { getTripDays } from "@/lib/trip-days";
+import { resolveTripDays } from "@/lib/trip-days";
 
 export function PlannerDayTabs({
   startDate,
@@ -14,7 +14,7 @@ export function PlannerDayTabs({
   active: number;
   onChange: (day: number) => void;
 }) {
-  const days = getTripDays(startDate, endDate);
+  const days = resolveTripDays(startDate, endDate);
 
   return (
     <FigmaChipRow role="tablist" aria-label="일차 선택">

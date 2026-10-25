@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
 
-test("/ 은 여행 목록으로 간다", async ({ page }) => {
+test("/ 은 다가오는 여행 상세로 간다", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveURL(/\/trips$/);
-  await expect(page.getByRole("heading", { name: /나의 여행/ })).toBeVisible();
+  await expect(page).toHaveURL(/\/trips\/trip_nagoya$/);
+  await expect(page.getByRole("heading", { level: 1, name: "나고야 여행 플래너" })).toBeVisible();
 });
 
 test("홈에 D-Day, 항공 티켓, 숙소가 보인다", async ({ page }) => {

@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useAccommodations, useTransports } from "@/features/overview/hooks";
-import { AddAccommodationDialog } from "@/features/overview/components/add-accommodation-dialog";
-import { AddTransportDialog } from "@/features/overview/components/add-transport-dialog";
 import { JejuHomeHero } from "@/features/overview/components/jeju-home-hero";
 import { TimeCapsuleDialog } from "@/features/overview/components/time-capsule-dialog";
 import { IllustrationIcon } from "@/components/ui/illustration-icon";
@@ -42,25 +40,7 @@ export function OverviewTab({ tripId }: { tripId: string }) {
 
   return (
     <div className="relative mx-auto flex h-full min-h-0 w-full min-w-0 flex-col bg-white">
-      <JejuHomeHero
-        trip={trip}
-        flights={flights}
-        stays={accommodations ?? []}
-        footer={
-          flights.length === 0 || (accommodations ?? []).length === 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {flights.length === 0 ? <AddTransportDialog tripId={tripId} /> : null}
-              {(accommodations ?? []).length === 0 ? (
-                <AddAccommodationDialog
-                  tripId={tripId}
-                  tripStartDate={trip.startDate}
-                  tripEndDate={trip.endDate}
-                />
-              ) : null}
-            </div>
-          ) : null
-        }
-      />
+      <JejuHomeHero trip={trip} flights={flights} stays={accommodations ?? []} />
       {shell ? createPortal(fab, shell) : null}
       <TimeCapsuleDialog tripId={tripId} open={capsuleOpen} onOpenChange={setCapsuleOpen} />
     </div>

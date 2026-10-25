@@ -1,9 +1,19 @@
-import { redirect } from "next/navigation";
+"use client";
 
-/**
- * 스플래시는 라우트가 아니라 오버레이다 (docs/09 D9). "/"는 랜딩(/trips)으로
- * 즉시 보낸다 — 뒤로가기가 빈 스플래시 화면으로 돌아가는 것을 막는다.
- */
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useTrips } from "@/features/trips/hooks";
+import { mainTrip } from "@/features/trips/main-trip";
+
+/** "/"는 여행이 있으면 그 상세로 바로 보낸다. */
 export default function RootPage() {
-  redirect("/trips");
+  const router = useRouter();
+  const { data: trips } = useTrips();
+  const trip = trips ? mainTrip(trips) : undefined;
+
+  useEffect(() => {
+    if (trip) router.replace(`/trips/${trip.id}`);
+  }, [router, trip]);
+
+  return null;
 }

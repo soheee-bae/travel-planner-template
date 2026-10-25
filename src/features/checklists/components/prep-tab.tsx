@@ -102,7 +102,7 @@ export function PrepTab({ tripId, embedded }: { tripId: string; embedded?: boole
         <div className="flex h-[34px] w-full items-center justify-between pb-1">
           <p className="flex min-h-[21px] items-center gap-1.5 text-[14px] leading-[21px] font-bold text-[#1A1A1A]">
             <IllustrationIcon src={ILLUSTRATION.battery} className="size-5" />
-            {city} 준비 {pct}% 충전 완료
+            OO력 {pct}% 충전 완료
           </p>
           <p className="font-nunito text-[14px] leading-[21px] font-bold text-[#1A1A1A]">
             {checkedCount}/{totalCount}

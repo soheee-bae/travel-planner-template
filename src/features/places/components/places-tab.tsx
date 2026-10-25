@@ -128,7 +128,7 @@ export function PlacesTab({ trip }: { trip: Trip }) {
 
         {filtered.length === 0 && (
           <p className="w-full py-6 text-center text-[13px] leading-5 text-[#8E8E8E]">
-            탐색 중... 맛있는 냄새 찾는 중 🍜
+            탐색 중... 🔍
           </p>
         )}
 

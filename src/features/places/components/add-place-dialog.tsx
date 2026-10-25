@@ -32,7 +32,7 @@ import {
   type PlaceCategory,
 } from "@/mocks/fixtures/places";
 import { formatDurationText, parseDurationText } from "@/lib/duration-text";
-import { getTripDays } from "@/lib/trip-days";
+import { resolveTripDays } from "@/lib/trip-days";
 import { nextOrderIndexForDay } from "@/lib/visit-order";
 
 const formSchema = z.object({
@@ -120,7 +120,7 @@ export function AddPlaceDialog({
   });
   const category = form.watch("category");
   const dayIndex = form.watch("dayIndex");
-  const days = startDate && endDate ? getTripDays(startDate, endDate) : [];
+  const days = resolveTripDays(startDate, endDate);
 
   useEffect(() => {
     if (!open || initial) return;

@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { kMeansCluster } from "@/lib/clustering";
-import { getTripDays } from "@/lib/trip-days";
+import { resolveTripDays } from "@/lib/trip-days";
 import { useUpdatePlace } from "@/features/places/hooks";
 import type { Place } from "@/mocks/fixtures/places";
 
@@ -37,7 +37,7 @@ export function AutoPlaceDialog({
 }) {
   const [open, setOpen] = useState(false);
   const updatePlace = useUpdatePlace(tripId);
-  const days = getTripDays(startDate, endDate);
+  const days = resolveTripDays(startDate, endDate);
 
   const unassignedWithCoords = useMemo(
     () => places.filter((p) => p.dayIndex == null).filter(hasCoords),

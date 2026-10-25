@@ -8,12 +8,11 @@ test("비용 탭에 총액, 도넛 차트, 나고야 시드 지출 5건이 보�
   await expect(page.getByLabel("카테고리별 비율")).toBeVisible();
 });
 
-test("그룹 전환(Day별→카테고리별)이 정상 동작한다", async ({ page }) => {
+test("여행준비와 Day 필터가 여행 일수만큼 항상 보인다", async ({ page }) => {
   await page.goto("/trips/trip_nagoya?tab=budget");
+  await expect(page.getByRole("button", { name: "여행준비" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Day 1" })).toBeVisible();
-  await page.getByRole("button", { name: "카테고리별" }).click();
-  await expect(page.getByRole("button", { name: /식비/ })).toBeVisible();
-  await expect(page.getByText(/^총 .+원$/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "카테고리별" })).toHaveCount(0);
 });
 
 test("결제자가 둘이면 더치페이 정산이 보인다", async ({ page }) => {

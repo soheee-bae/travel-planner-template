@@ -40,7 +40,7 @@ export function PlannerDayCarousel({
   if (places.length === 0) {
     return (
       <p className="px-5 py-4 text-center text-[13px] leading-5 text-[#8E8E8E]">
-        이 날은 아직 일정이 없어
+        이 날은 아직 일정이 없어요
       </p>
     );
   }

@@ -152,18 +152,18 @@ export function JejuHomeHero({
         {activeStay ? (
           <article className="relative isolate flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-[20px] bg-white shadow-[0px_2px_12px_rgba(0,0,0,0.06)]">
             <LayoutGroup id="home-stay-tabs">
-            <div className="box-border flex h-[45px] w-full items-start justify-center border-b border-[#EEEEEE] p-0">
+            <div className="box-border flex h-[45px] w-full items-stretch overflow-x-auto border-b border-[#EEEEEE] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {sortedStays.map((stay, index) => (
                 <button
                   key={stay.id}
                   type="button"
                   onClick={() => setStayIdx(index)}
                   className={cn(
-                    "relative box-border flex h-[45px] flex-1 flex-col items-center justify-center px-0 py-4 text-[13px] leading-5",
+                    "relative box-border flex h-[45px] w-1/2 shrink-0 flex-col items-center justify-center px-3 text-[13px] leading-5 whitespace-nowrap",
                     index === stayIdx ? "font-bold text-[#FF9F43]" : "font-medium text-[#5D5D5D]",
                   )}
                 >
-                  Day {index + 1}박 숙소
+                  숙소 {index + 1}
                   {index === stayIdx ? (
                     <motion.span
                       layoutId="home-stay-underline"
